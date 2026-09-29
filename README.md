@@ -46,8 +46,8 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   in its theme's color with a matching prop mirrored on both sides behind
   it (meadow, forest, ocean, lava, candy, snow, jungle, desert, space,
   magic, mythic). Eggs you haven't unlocked are plain black eggs with a
-  gold padlock on the front that says which rebirth opens them. The **Release Egg** (party pets, open for
-  everyone) waits at the far end under a party arch.
+  gold padlock on the front that says which rebirth opens them. A "MORE EGGS
+  SOON" arch closes the far end.
 - **Hatching**: walk up to an egg for a small popup on top of it: its pets in
   a 3-wide grid with the chance under each ("1 in 4", tiny ones as
   "0.00004%") and three buttons with the price: **E** buy 1, **F** buy 3 (up to 8 with the
@@ -85,6 +85,10 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Developer testing**: in Studio (or for user ids in `Config.DEV_MONEY`)
   you get 1Qd coins, 1B diamonds and free rebirths. Set
   `Config.DEV_MONEY.Enabled = false` before releasing.
+- **🎉 Release Egg** (limited event egg, open for everyone): stands in the
+  main area across the coin circle from the spawn, on a party platform
+  behind a "RELEASE" arch, so new players see it right away. Party pets and a
+  Huge Launch Dragon.
 - **Leaderboards** (three boards in the main area): most eggs hatched, most
   rebirths and the rarest pet ever hatched (by its odds). Global, refreshed
   every minute, with the players in the server shown live.

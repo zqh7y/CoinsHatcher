@@ -30,7 +30,8 @@ lockFolder.Parent = workspace
 -- "REBIRTH N" written on it. Only this player sees it. Returns its parts as
 -- { Part, Offset } so they bob with the egg, and its sign.
 local function makePadlock(shell, eggIndex)
-	local front = if Config.EGGS[eggIndex].Release then Vector3.new(0, 0, 1) else Vector3.new(-1, 0, 0)
+	local model = shell.Parent
+	local front = (model and model:GetAttribute("Front")) or Vector3.new(-1, 0, 0)
 	local radius = shell.Size.X / 2 * 0.85
 	local center = shell.Position + front * (radius + 0.3) + Vector3.new(0, -0.5, 0)
 	local cf = CFrame.lookAt(center, center + front)
@@ -256,13 +257,17 @@ RunService.RenderStepped:Connect(function()
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if not root or not humanoid or #eggs == 0 or (root.Position - eggs[1].Base.Position).Magnitude > 400 then
+	if not root or not humanoid or #eggs == 0 then
 		return
 	end
 	local t = os.clock()
 
 	-- eggs bob and sway
 	for _, egg in ipairs(eggs) do
+		-- only animate eggs near us (the Release egg is in the main area)
+		if (root.Position - egg.Base.Position).Magnitude > 350 then
+			continue
+		end
 		local bob = math.sin(t * 1.6 + egg.Phase) * 0.35
 		local sway = math.sin(t * 1.1 + egg.Phase) * 0.07
 		local cf = egg.Base * CFrame.new(0, bob, 0) * CFrame.Angles(0, 0, sway)

@@ -414,22 +414,27 @@ local function gatePortal(base, destination, label, colorA, colorB)
 	text.Parent = sign
 end
 
--- An arch of two candy poles and a beam with a sign on top (spans along X).
-local function gate(base, text, poleColor, beamColor)
+-- An arch of two candy poles and a beam with a sign on top. It spans along X,
+-- or, when `facing` is given, it's turned to face that point.
+local function gate(base, text, poleColor, beamColor, facing)
+	local frame = if facing
+		then CFrame.lookAt(base, Vector3.new(facing.X, base.Y, facing.Z))
+		else CFrame.new(base)
 	for _, x in ipairs({ -6, 6 }) do
-		candyPole(base + Vector3.new(x, 0, 0), 12, 1.6, poleColor, Color3.new(1, 1, 1))
+		local foot = frame:PointToWorldSpace(Vector3.new(x, 0, 0))
+		candyPole(foot, 12, 1.6, poleColor, Color3.new(1, 1, 1))
 		part({
 			Name = "GateCap",
 			Shape = Enum.PartType.Ball,
 			Size = Vector3.one * 2.6,
-			Position = base + Vector3.new(x, 13, 0),
+			Position = foot + Vector3.new(0, 13, 0),
 			Color = Color3.fromRGB(255, 220, 90),
 		})
 	end
 	local beam = part({
 		Name = "GateBeam",
 		Size = Vector3.new(14, 1.6, 1.6),
-		Position = base + Vector3.new(0, 11.5, 0),
+		CFrame = frame * CFrame.new(0, 11.5, 0),
 		Color = beamColor,
 	})
 	local sign = Instance.new("BillboardGui")
@@ -691,6 +696,7 @@ end
 -- Main area details --------------------------------------------------------------
 
 local SHOP_ANGLE, FOUNTAIN_ANGLE, SPAWN_ANGLE, BOARD_ANGLE = 180, 0, 90, 270
+local RELEASE_ANGLE = World.RELEASE_ANGLE -- the Release egg
 
 local function mainSpot(angleDegrees, dist, y)
 	local a = math.rad(angleDegrees)
@@ -699,7 +705,7 @@ end
 
 -- is this angle clear of the spawn, shop and fountain?
 local function clearAngle(angle, margin)
-	for _, taken in ipairs({ SHOP_ANGLE, FOUNTAIN_ANGLE, SPAWN_ANGLE, BOARD_ANGLE, table.unpack(World.LEADERBOARD_ANGLES) }) do
+	for _, taken in ipairs({ SHOP_ANGLE, FOUNTAIN_ANGLE, SPAWN_ANGLE, BOARD_ANGLE, RELEASE_ANGLE, table.unpack(World.LEADERBOARD_ANGLES) }) do
 		local diff = math.abs((angle - taken + 180) % 360 - 180)
 		if diff < margin then
 			return false
@@ -763,7 +769,11 @@ local function mainArea()
 	upgradeBoard(mainSpot(BOARD_ANGLE, 43))
 	stonePath(mainSpot(BOARD_ANGLE, zoneRadius + 2), mainSpot(BOARD_ANGLE, 38))
 
-	for _, angle in ipairs({ 45, 135, 225, 345 }) do -- (the leaderboards stand at 300-330)
+	-- the Release egg's party arch, facing the coins
+	local archSpot = mainSpot(RELEASE_ANGLE, World.RELEASE_DIST - 11)
+	gate(archSpot, "🎉 RELEASE 🎉", Color3.fromRGB(255, 200, 60), Color3.fromRGB(255, 110, 170), World.MAIN_CENTER)
+
+	for _, angle in ipairs({ 45, 135, 345 }) do -- (leaderboards at 300-330, Release egg at 225)
 		lamp(mainSpot(angle, 46))
 	end
 
@@ -928,8 +938,8 @@ local function hatchery()
 	end
 	lamp(hatcherySpot(GARDEN_X, HALL.FirstEggZ + HALL.EggSpacing / 2))
 
-	-- a party arch in front of the Release egg at the far end
-	gate(hatcherySpot(0, HALL.ReleaseZ + 12), "🎉 RELEASE 🎉", Color3.fromRGB(255, 200, 60), Color3.fromRGB(255, 110, 170))
+	-- the far end: a teaser arch for the eggs still to come
+	gate(hatcherySpot(0, HALL.ReleaseZ + 4), "🥚 MORE EGGS SOON 🥚", Color3.fromRGB(180, 150, 255), Color3.fromRGB(120, 200, 255))
 
 	-- a few soft sparkles floating in the air
 	local air = part({

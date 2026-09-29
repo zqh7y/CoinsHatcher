@@ -8,6 +8,10 @@ World.COIN_ZONE = 50 -- coins spawn in this circle in the middle (diameter)
 World.MAIN_SPAWN = Vector3.new(0, 0, 38) -- spawn pad, between the coins and the wall
 World.EGG_CENTER = Vector3.new(0, 0, 1000)
 World.LEADERBOARD_ANGLES = { 300, 315, 330 } -- degrees around the main area
+-- The Release (event) egg stands in the main area, across the coin circle
+-- from the spawn so new players see it right away.
+World.RELEASE_ANGLE = 225 -- degrees around the main area
+World.RELEASE_DIST = 40
 -- The hatchery is a long hall: you arrive at the gate (+Z end) and walk toward
 -- -Z. A walkway with the speed lane runs down the left half, the eggs stand
 -- on round platforms along the right side (+X), and the Release egg waits at

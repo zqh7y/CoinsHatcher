@@ -1,6 +1,7 @@
 -- The eggs in the hatchery. Walk up to one: the popup shows its pets, and
 -- E / F / T (or the popup's buttons) hatch 1, 3 or auto.
--- Egg N unlocks at rebirth N-1; the Release egg at the end is open for all.
+-- Egg N unlocks at rebirth N-1; the Release egg (open for all) stands in the
+-- main area.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -16,13 +17,20 @@ local Eggs = {}
 function Eggs.position(eggIndex)
 	local hall = World.HALL
 	if Config.EGGS[eggIndex].Release then
-		return World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, hall.ReleaseZ)
+		-- event eggs stand in the main area (see World.RELEASE_ANGLE)
+		local a = math.rad(World.RELEASE_ANGLE)
+		return World.MAIN_CENTER + Vector3.new(math.cos(a) * World.RELEASE_DIST, World.FLOOR_Y, math.sin(a) * World.RELEASE_DIST)
 	end
 	return World.EGG_CENTER + Vector3.new(hall.EggX, World.FLOOR_Y, hall.FirstEggZ - (eggIndex - 1) * hall.EggSpacing)
 end
 
 function Eggs.outward(eggIndex)
-	return if Config.EGGS[eggIndex].Release then Vector3.new(0, 0, -1) else Vector3.new(1, 0, 0)
+	if Config.EGGS[eggIndex].Release then
+		-- away from the middle of the main area
+		local a = math.rad(World.RELEASE_ANGLE)
+		return Vector3.new(math.cos(a), 0, math.sin(a))
+	end
+	return Vector3.new(1, 0, 0)
 end
 
 local remotes
@@ -286,6 +294,7 @@ local function setupEgg(eggIndex, parent)
 	model.PrimaryPart = shell
 	model:SetAttribute("EggIndex", eggIndex)
 	model:SetAttribute("RequiredRebirths", Config.eggRequiredRebirths(eggIndex))
+	model:SetAttribute("Front", -Eggs.outward(eggIndex)) -- the side facing the players
 
 	-- the egg's pattern and shine (the client bobs these along with the egg)
 	shell.Color = EggModel.shellColor(eggIndex)
