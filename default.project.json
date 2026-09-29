@@ -2,19 +2,16 @@
   "name": "PetSim",
   "tree": {
     "$className": "DataModel",
-
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/shared"
       }
     },
-
     "ServerScriptService": {
       "Server": {
         "$path": "src/server"
       }
     },
-
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "Client": {
@@ -22,7 +19,6 @@
         }
       }
     },
-
     "Workspace": {
       "$properties": {
         "FilteringEnabled": true
@@ -47,6 +43,85 @@
             20,
             512
           ]
+        }
+      },
+      "MainArea": {
+        "$className": "Folder",
+        "Floor": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [
+              260,
+              1,
+              260
+            ],
+            "Position": [
+              0,
+              0.5,
+              0
+            ],
+            "Color": [
+              0.41568627450980394,
+              0.6901960784313725,
+              0.2980392156862745
+            ],
+            "Material": "Grass",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        "Spawn": {
+          "$className": "SpawnLocation",
+          "$properties": {
+            "Anchored": true,
+            "Size": [
+              8,
+              1,
+              8
+            ],
+            "Position": [
+              0,
+              1.5,
+              0
+            ],
+            "Color": [
+              0.6392156862745098,
+              0.6352941176470588,
+              0.6470588235294118
+            ],
+            "Material": "Plastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Duration": 0
+          }
+        }
+      },
+      "EggArea": {
+        "$className": "Folder",
+        "Floor": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Size": [
+              120,
+              1,
+              70
+            ],
+            "Position": [
+              0,
+              0.5,
+              1000
+            ],
+            "Color": [
+              0.9019607843137255,
+              0.8627450980392157,
+              0.7843137254901961
+            ],
+            "Material": "Sand",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
         }
       }
     },
