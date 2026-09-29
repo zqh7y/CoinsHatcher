@@ -12,6 +12,7 @@ local Eggs = require(script.Eggs)
 local Shop = require(script.Shop)
 local Inventory = require(script.Inventory)
 local Gifts = require(script.Gifts)
+local Pickups = require(script.Pickups)
 
 -- Remotes the client talks to
 local remotes = Instance.new("Folder")
@@ -52,6 +53,7 @@ Eggs.start(remotes)
 Shop.start(remotes)
 Inventory.start(remotes)
 Gifts.start(remotes)
+Pickups.start(remotes)
 
 -- Keep the client's copy of the data (pets, equipped, rebirths) up to date
 PlayerData.Changed.Event:Connect(function(player)

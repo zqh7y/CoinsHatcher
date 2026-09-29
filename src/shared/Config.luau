@@ -489,10 +489,6 @@ Config.DIAMONDS_NEW_PET = 25 -- first time you hatch a pet
 Config.DIAMONDS_NEW_HUGE = 250 -- first time you hatch a huge
 Config.DIAMONDS_PER_REBIRTH = 100 -- times the new rebirth number
 
-function Config.giftDiamonds(giftIndex: number): number
-	return 10 * giftIndex
-end
-
 -- Potions: 2x for a while. Buying more adds time (up to BOOST_MAX_MINUTES).
 -- Their time only counts down while you're playing.
 Config.BOOSTS = {
@@ -501,6 +497,21 @@ Config.BOOSTS = {
 	{ Id = "Damage", Name = "2x Damage", Icon = "⚔️", Cost = 250, Minutes = 10 },
 }
 Config.BOOST_MAX_MINUTES = 60
+
+-- Boosts from playing -----------------------------------------------------------
+-- Combo: keep breaking things (no more than COMBO_TIMEOUT seconds apart);
+-- every COMBO_STEP breaks in a row gives a short free 2x boost.
+Config.COMBO_STEP = 25
+Config.COMBO_TIMEOUT = 4
+Config.COMBO_BOOST_SECONDS = 30
+Config.COMBO_BOOSTS = { "Coins", "Damage", "Luck" } -- given in this order
+
+-- Boost orbs: sometimes a broken breakable drops a glowing potion orb.
+-- Walk close to grab it for a free 2x boost.
+Config.ORB_CHANCE = { 0.015, 0.03, 0.08, 0.25 } -- per breakable kind
+Config.ORB_SECONDS = 45 -- boost length
+Config.ORB_LIFETIME = 25 -- seconds before an orb disappears
+Config.ORB_RANGE = 10 -- how close you need to get
 
 -- Perks: permanent, kept through rebirths.
 Config.PERKS = {
@@ -566,9 +577,23 @@ end
 -- Minutes of play (this session) needed for each gift.
 Config.GIFT_TIMES = { 1, 3, 5, 10, 15, 20 }
 
--- Gift coins grow with each gift and with your rebirths.
-function Config.giftReward(giftIndex: number, rebirths: number): number
-	return 1800 * 2 ^ (giftIndex - 1) * Config.SCALE ^ rebirths
+-- Mystery gifts: each gift rolls one prize from its pool; later gifts have
+-- better pools and the last one is a MEGA gift. A prize is a list of items:
+--   { "Diamonds", amount }       { "Coins", big chests worth }
+--   { "Potion", boost id, minutes }   { "AllPotions", minutes }
+--   { "Hatch", count }  (free pets from your best unlocked egg)
+Config.GIFT_POOLS = {
+	{ { { "Diamonds", 40 } }, { { "Potion", "Coins", 3 } }, { { "Coins", 3 } } },
+	{ { { "Diamonds", 75 } }, { { "Potion", "Luck", 5 } }, { { "Coins", 6 } }, { { "Hatch", 1 } } },
+	{ { { "Hatch", 1 } }, { { "Potion", "Damage", 5 } }, { { "Diamonds", 120 } }, { { "Coins", 10 } } },
+	{ { { "Hatch", 3 } }, { { "Potion", "Coins", 10 } }, { { "Diamonds", 200 } } },
+	{ { { "Hatch", 3 } }, { { "AllPotions", 5 } }, { { "Diamonds", 300 } } },
+	{ { { "Hatch", 3 }, { "Diamonds", 500 }, { "AllPotions", 10 } } }, -- MEGA
+}
+
+-- Coins for a "Coins" gift item: worth this many big chests at your rebirth.
+function Config.giftCoins(chests: number, rebirths: number): number
+	return Config.coinStats(rebirths, #Config.BREAKABLES).Value * chests
 end
 
 return Config

@@ -21,9 +21,12 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   area's breakables tougher and worth more (and changes its color).
 - **Shop** (stall in the main area): upgrade pet damage, luck, walk speed,
   pet speed, coin bonus, pet slots, and buy a hoverboard.
-- **📈 Upgrades** (anywhere, reset on rebirth): incremental upgrades for the
-  coin zone with lots of levels and Buy Max: coin value, chest value, more
-  things to break, chest luck, faster respawn, diamond finder, crit chance.
+- **📈 Upgrade board** (big board in the main area, reset on rebirth):
+  incremental upgrades for the coin zone with lots of levels and Buy Max:
+  coin value, chest value, more things to break, chest luck, faster respawn,
+  diamond finder, crit chance.
+- **Boosts from playing**: 🔥 combos (every 25 breaks in a row = a free 2x
+  boost) and 🧪 boost orbs that sometimes drop from breakables.
 - **Juice**: breakables pop in, flash on hit and burst into coins; coins and
   diamonds fly into rolling counters; confetti for purchases, new pets,
   gifts and rare hatches; a big celebration on rebirth.
@@ -37,7 +40,8 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Big numbers**: numbers start in the hundreds/thousands and grow ×4 per
   rebirth (shown as 1.5K, 4.5M...); pets land 3x critical hits.
 - **Boosts**: small icons in the bottom right show every active upgrade.
-- **Free gifts** (coins + diamonds) after 1, 3, 5, 10, 15 and 20 minutes of play.
+- **Mystery gifts** after 1, 3, 5, 10, 15 and 20 minutes of play: free pets
+  from your best egg, potions, diamonds or coins; the last one is a MEGA gift.
 - **Economy**:
   - 💰 **Coins** (reset on rebirth): from breakables and gifts; spent on eggs,
     shop upgrades and rebirths.
@@ -62,7 +66,8 @@ are in `src/shared/Config.luau`.
 - `src/server/Eggs.luau`: egg stands and hatching
 - `src/server/Shop.luau`: shop stall, upgrades, walk speed, hoverboard
 - `src/server/Inventory.luau`: equip, equip best, delete pets
-- `src/server/Gifts.luau`: playtime gifts
+- `src/server/Gifts.luau`: playtime mystery gifts
+- `src/server/Pickups.luau`: combos and boost orbs
 - `src/server/init.server.luau`: starts everything, handles teleport/rebirth/equip
 - `src/client/`: UI (buttons, pets, shop, index, rebirth, egg popup,
   hatch animation) and breakable effects

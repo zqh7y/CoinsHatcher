@@ -1,6 +1,6 @@
--- The 📈 Upgrades menu: incremental upgrades for the coin zone (coin value,
--- chest value, more stuff, ...). Buy anywhere, one level or Max. Reset on
--- rebirth. The button gets a badge when you can afford something.
+-- The upgrade board in the main area: incremental upgrades for the coin zone
+-- (coin value, chest value, more stuff, ...) drawn right on the board with
+-- a SurfaceGui. Click to buy one level or Max. Reset on rebirth.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -14,31 +14,6 @@ local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local player = Players.LocalPlayer
 
 local AreaUpgrades = {}
-
-local panel = Ui.panel("Upgrades", "📈", UDim2.fromOffset(660, 520), {
-	Color3.fromRGB(80, 200, 150),
-	Color3.fromRGB(40, 110, 140),
-})
-
-Ui.label(panel.Content, {
-	Text = "Make the coin zone pay more and more! (resets on rebirth)",
-	TextColor3 = Color3.fromRGB(220, 255, 235),
-	Size = UDim2.new(1, 0, 0, 24),
-})
-
-local list = Instance.new("ScrollingFrame")
-list.Position = UDim2.fromOffset(0, 32)
-list.Size = UDim2.new(1, 0, 1, -32)
-list.BackgroundTransparency = 1
-list.BorderSizePixel = 0
-list.ScrollBarThickness = 8
-list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-list.CanvasSize = UDim2.new()
-list.Parent = panel.Content
-local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 8)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.Parent = list
 
 -- "now → next" text for each upgrade at a level
 local EFFECT = {
@@ -65,8 +40,51 @@ local EFFECT = {
 	end,
 }
 
+-- The SurfaceGui lives in PlayerGui (so its buttons can be clicked) and is
+-- drawn on the board part the server built.
+local board = Instance.new("SurfaceGui")
+board.Name = "UpgradeBoard"
+board.Face = Enum.NormalId.Front
+board.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+board.PixelsPerStud = 40
+board.LightInfluence = 0
+board.ResetOnSpawn = false
+board.Parent = player:WaitForChild("PlayerGui")
+
+local background = Instance.new("Frame")
+background.Size = UDim2.fromScale(1, 1)
+background.BackgroundColor3 = Color3.new(1, 1, 1)
+background.Parent = board
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new(Color3.fromRGB(60, 170, 150), Color3.fromRGB(30, 80, 110))
+gradient.Rotation = 90
+gradient.Parent = background
+
+Ui.label(background, {
+	Text = "📈 UPGRADES",
+	Size = UDim2.new(1, 0, 0, 56),
+	Position = UDim2.fromOffset(0, 6),
+	TextColor3 = Color3.fromRGB(255, 240, 150),
+})
+Ui.label(background, {
+	Text = "Make the coin zone pay more and more! (resets on rebirth)",
+	Size = UDim2.new(1, 0, 0, 24),
+	Position = UDim2.fromOffset(0, 60),
+	TextColor3 = Color3.fromRGB(220, 255, 235),
+})
+
+local list = Instance.new("Frame")
+list.BackgroundTransparency = 1
+list.Position = UDim2.fromOffset(16, 92)
+list.Size = UDim2.new(1, -32, 1, -100)
+list.Parent = background
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 5)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = list
+
 local busy = false
-local rows = {} -- [id] = row frame, to flash after buying
+local rows = {} -- [id] = row frame, to bounce after buying
 
 local function buy(upgrade, max)
 	if busy then
@@ -76,11 +94,12 @@ local function buy(upgrade, max)
 	local ok, message = remotes.BuyUpgrade:InvokeServer(upgrade.Id, max)
 	if ok then
 		Fx.confetti(if max then 35 else 15)
+		Ui.toast(message, Ui.COLORS.Gold)
 		local row = rows[upgrade.Id]
 		if row then
 			local scale = row:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
 			scale.Parent = row
-			scale.Scale = 1.05
+			scale.Scale = 1.04
 			TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 		end
 	elseif message then
@@ -102,45 +121,39 @@ local function render()
 		local level = data.Upgrades[upgrade.Id] or 0
 		local maxed = level >= upgrade.Max
 		local cost = Config.upgradeCost(upgrade, level, data.Rebirths)
+		local canAfford = coins >= cost
 
 		local row = Instance.new("Frame")
-		row.Size = UDim2.new(1, -12, 0, 84)
-		row.BackgroundColor3 = Color3.fromRGB(60, 150, 140)
+		row.Size = UDim2.new(1, 0, 0, 58) -- 7 rows fit the 560px-tall board
+		row.BackgroundColor3 = if canAfford and not maxed then Color3.fromRGB(70, 175, 120) else Color3.fromRGB(45, 110, 120)
 		row.LayoutOrder = order
 		row.Parent = list
-		Ui.corner(row, 14)
+		Ui.corner(row, 12)
 		Ui.stroke(row, Color3.new(1, 1, 1), 2)
 		rows[upgrade.Id] = row
 
-		Ui.label(row, { Text = upgrade.Icon, Size = UDim2.fromOffset(54, 54), Position = UDim2.fromOffset(10, 14) })
+		Ui.label(row, { Text = upgrade.Icon, Size = UDim2.fromOffset(46, 46), Position = UDim2.fromOffset(8, 5) })
 		Ui.label(row, {
 			Text = ("%s  Lv %d/%d"):format(upgrade.Name, level, upgrade.Max),
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Size = UDim2.new(1, -300, 0, 28),
-			Position = UDim2.fromOffset(74, 6),
+			Size = UDim2.new(1, -330, 0, 26),
+			Position = UDim2.fromOffset(64, 3),
 		})
 		local effect = EFFECT[upgrade.Id]
 		Ui.label(row, {
 			Text = if maxed then effect(level) .. "  (max!)" else ("%s  →  %s"):format(effect(level), effect(level + 1)),
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextColor3 = Color3.fromRGB(255, 240, 150),
-			Size = UDim2.new(1, -300, 0, 22),
-			Position = UDim2.fromOffset(74, 36),
-		})
-		Ui.label(row, {
-			Text = upgrade.Info,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextColor3 = Color3.fromRGB(215, 245, 235),
-			Size = UDim2.new(1, -300, 0, 18),
-			Position = UDim2.fromOffset(74, 60),
+			Size = UDim2.new(1, -330, 0, 22),
+			Position = UDim2.fromOffset(64, 30),
 		})
 
 		-- level progress bar along the bottom
 		local bar = Instance.new("Frame")
 		bar.AnchorPoint = Vector2.new(0, 1)
-		bar.Position = UDim2.new(0, 12, 1, -4)
-		bar.Size = UDim2.new(1, -24, 0, 4)
-		bar.BackgroundColor3 = Color3.fromRGB(30, 80, 80)
+		bar.Position = UDim2.new(0, 10, 1, -3)
+		bar.Size = UDim2.new(1, -20, 0, 4)
+		bar.BackgroundColor3 = Color3.fromRGB(20, 60, 70)
 		bar.BorderSizePixel = 0
 		bar.Parent = row
 		Ui.corner(bar, 0.5)
@@ -151,19 +164,18 @@ local function render()
 		fill.Parent = bar
 		Ui.corner(fill, 0.5)
 
-		local canAfford = coins >= cost
 		local one = Ui.button(row, if maxed then "MAX" else "💰 " .. Config.formatNumber(cost), if maxed
 			then Ui.COLORS.PanelDark
 			elseif canAfford then Ui.COLORS.Green
-			else Color3.fromRGB(140, 150, 160), {
+			else Color3.fromRGB(120, 140, 150), {
 			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -86, 0.5, -2),
-			Size = UDim2.fromOffset(130, 48),
+			Position = UDim2.new(1, -96, 0.5, -2),
+			Size = UDim2.fromOffset(170, 44),
 		})
-		local max = Ui.button(row, "Max", if canAfford and not maxed then Ui.COLORS.Gold else Color3.fromRGB(140, 150, 160), {
+		local max = Ui.button(row, "Max", if canAfford and not maxed then Ui.COLORS.Gold else Color3.fromRGB(120, 140, 150), {
 			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -12, 0.5, -2),
-			Size = UDim2.fromOffset(66, 48),
+			Position = UDim2.new(1, -10, 0.5, -2),
+			Size = UDim2.fromOffset(78, 44),
 			Visible = not maxed,
 		})
 		one.Activated:Connect(function()
@@ -177,66 +189,21 @@ local function render()
 	end
 end
 
--- anything affordable right now?
-local function affordable()
-	local data = State.Data
-	if not data then
-		return false
-	end
-	local coins = player:GetAttribute("Coins") or 0
-	for _, upgrade in ipairs(Config.AREA_UPGRADES) do
-		local level = data.Upgrades[upgrade.Id] or 0
-		if level < upgrade.Max and coins >= Config.upgradeCost(upgrade, level, data.Rebirths) then
-			return true
-		end
-	end
-	return false
-end
-
--- Hooks up the button's "!" badge, which wiggles when you can buy something.
-function AreaUpgrades.attach(button)
-	local badge = Ui.label(button, {
-		Text = "!",
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(1, -6, 0, 6),
-		Size = UDim2.fromOffset(26, 26),
-		BackgroundTransparency = 0,
-		BackgroundColor3 = Ui.COLORS.Green,
-		ZIndex = 3,
-		Visible = false,
-	})
-	Ui.corner(badge, 0.5)
-	task.spawn(function()
-		while true do
-			local show = affordable()
-			badge.Visible = show
-			if show then
-				badge.Rotation = if badge.Rotation == 0 then 15 else 0
-			end
-			task.wait(0.5)
-		end
-	end)
-end
-
-panel.OnOpen.Event:Connect(render)
-State.Changed.Event:Connect(function()
-	if panel.isOpen() then
-		render()
-	end
+task.spawn(function()
+	board.Adornee = workspace:WaitForChild("MainArea"):WaitForChild("UpgradeBoard")
+	render()
 end)
+
+State.Changed.Event:Connect(render)
 local pending = false
 player:GetAttributeChangedSignal("Coins"):Connect(function()
-	if panel.isOpen() and not pending then
+	if not pending then
 		pending = true
 		task.delay(0.4, function()
 			pending = false
-			if panel.isOpen() then
-				render()
-			end
+			render()
 		end)
 	end
 end)
-
-AreaUpgrades.toggle = panel.toggle
 
 return AreaUpgrades

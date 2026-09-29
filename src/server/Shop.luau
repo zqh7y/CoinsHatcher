@@ -16,12 +16,12 @@ Shop.POSITION = World.MAIN_CENTER + Vector3.new(-38, World.FLOOR_Y, 0)
 
 local riding = {} -- [player] = true while on the hoverboard
 
-local function part(model, origin, offset, size, color)
+local function part(model, origin, offset, size, color, material)
 	return World.part({
 		Size = size,
 		CFrame = origin * offset,
 		Color = color,
-		Material = Enum.Material.SmoothPlastic,
+		Material = material or Enum.Material.SmoothPlastic,
 		Parent = model,
 	})
 end
@@ -32,12 +32,12 @@ local function buildStall()
 	model.Name = "Shop"
 
 	-- counter
-	local counter = part(model, origin, CFrame.new(0, 1.5, -1), Vector3.new(10, 3, 3), Color3.fromRGB(200, 140, 90))
-	part(model, origin, CFrame.new(0, 3.2, -1), Vector3.new(10.6, 0.4, 3.6), Color3.fromRGB(255, 245, 225))
+	local counter = part(model, origin, CFrame.new(0, 1.5, -1), Vector3.new(10, 3, 3), Color3.fromRGB(170, 115, 70), Enum.Material.WoodPlanks)
+	part(model, origin, CFrame.new(0, 3.2, -1), Vector3.new(10.6, 0.4, 3.6), Color3.fromRGB(120, 80, 50), Enum.Material.Wood)
 	-- posts
 	for _, x in ipairs({ -4.8, 4.8 }) do
 		for _, z in ipairs({ -2.6, 3 }) do
-			part(model, origin, CFrame.new(x, 4.5, z), Vector3.new(0.8, 9, 0.8), Color3.fromRGB(255, 250, 240))
+			part(model, origin, CFrame.new(x, 4.5, z), Vector3.new(0.8, 9, 0.8), Color3.fromRGB(140, 95, 60), Enum.Material.Wood)
 		end
 	end
 	-- striped awning
@@ -46,12 +46,12 @@ local function buildStall()
 	for i = 1, stripes do
 		local x = -5.4 + width * (i - 0.5)
 		local color = if i % 2 == 0 then Color3.new(1, 1, 1) else Color3.fromRGB(255, 110, 130)
-		part(model, origin, CFrame.new(x, 9.3, 0.2) * CFrame.Angles(-0.15, 0, 0), Vector3.new(width, 0.4, 7.2), color)
+		part(model, origin, CFrame.new(x, 9.3, 0.2) * CFrame.Angles(-0.15, 0, 0), Vector3.new(width, 0.4, 7.2), color, Enum.Material.Fabric)
 	end
 	-- goodies on the counter
 	local boxColors = { Color3.fromRGB(120, 200, 255), Color3.fromRGB(255, 200, 70), Color3.fromRGB(180, 130, 255) }
 	for i, x in ipairs({ -3.5, 3.2, 1.6 }) do
-		part(model, origin, CFrame.new(x, 3.95, -1.2) * CFrame.Angles(0, i, 0), Vector3.new(1.1, 1.1, 1.1), boxColors[i])
+		part(model, origin, CFrame.new(x, 3.95, -1.2) * CFrame.Angles(0, i, 0), Vector3.new(1.1, 1.1, 1.1), boxColors[i], Enum.Material.Cardboard)
 	end
 
 	-- a shopkeeper cat behind the counter

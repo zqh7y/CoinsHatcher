@@ -1,14 +1,13 @@
--- Playtime gifts menu: a free gift unlocks after 1, 3, 5, 10, 15 and 20
--- minutes of play. Gifts bounce, fill a progress bar, glow when ready and
--- burst open with their coins. The gift button gets a red badge when one is
--- ready.
+-- Playtime gifts menu: a mystery gift unlocks after 1, 3, 5, 10, 15 and 20
+-- minutes of play (free pets, potions, diamonds or coins; the last is a MEGA
+-- gift). Gifts bounce, fill a progress bar, glow when ready and burst open to
+-- show the prize. The gift button gets a red badge when one is ready.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
-local State = require(script.Parent.State)
 local Fx = require(script.Parent.Fx)
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
@@ -61,15 +60,17 @@ local function readyCount()
 	return n
 end
 
+local prizes = {} -- [giftIndex] = what it gave, shown after opening
+
 local function openAnimation(tile, message)
-	-- shake, then pop into the reward
+	-- shake harder and harder, then pop into the prize
 	local icon = tile.Icon
-	for i = 1, 8 do
-		icon.Rotation = if i % 2 == 0 then 18 else -18
+	for i = 1, 14 do
+		icon.Rotation = (if i % 2 == 0 then 1 else -1) * (6 + i * 1.5)
 		task.wait(0.05)
 	end
 	icon.Rotation = 0
-	icon.Text = "💰"
+	icon.Text = "🎉"
 	local scale = icon:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
 	scale.Parent = icon
 	scale.Scale = 0.3
@@ -103,7 +104,8 @@ for i in ipairs(Config.GIFT_TIMES) do
 	local reward = Ui.label(tile, {
 		Text = "",
 		TextColor3 = Color3.fromRGB(255, 240, 160),
-		Size = UDim2.new(1, -10, 0, 24),
+		TextWrapped = true,
+		Size = UDim2.new(1, -10, 0, 26),
 		Position = UDim2.fromOffset(5, 68),
 	})
 
@@ -132,9 +134,10 @@ for i in ipairs(Config.GIFT_TIMES) do
 			return
 		end
 		busy = true
-		local ok, message = remotes.ClaimGift:InvokeServer(i)
+		local ok, message, prize = remotes.ClaimGift:InvokeServer(i)
 		if ok then
 			claimed[i] = true
+			prizes[i] = prize
 			openAnimation(tiles[i], message)
 		elseif message then
 			Ui.toast(message, Ui.COLORS.Red)
@@ -145,9 +148,12 @@ for i in ipairs(Config.GIFT_TIMES) do
 end
 
 local function refresh()
-	local rebirths = State.Data and State.Data.Rebirths or 0
 	for i, tile in ipairs(tiles) do
-		tile.Reward.Text = ("💰 %s  💎 %d"):format(Config.formatNumber(Config.giftReward(i, rebirths)), Config.giftDiamonds(i))
+		local mega = i == #Config.GIFT_TIMES
+		tile.Reward.Text = prizes[i] or (if mega then "⭐ MEGA GIFT ⭐" else "❓ Mystery prize")
+		if not claimed[i] then
+			tile.Icon.Text = if mega then "🎁" else "❓"
+		end
 		local total = Config.GIFT_TIMES[i] * 60
 		local left = secondsLeft(i)
 		tile.Fill.Size = UDim2.fromScale(1 - left / total, 1)

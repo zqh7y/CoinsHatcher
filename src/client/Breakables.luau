@@ -247,6 +247,24 @@ for _, folder in ipairs(coinsFolder:GetChildren()) do
 	onCoinFolder(folder)
 end
 
+-- boost orbs are per player too: hide everyone else's
+local function onPickupFolder(folder)
+	if folder.Name == myId then
+		return
+	end
+	for _, obj in ipairs(folder:GetDescendants()) do
+		hide(obj)
+	end
+	folder.DescendantAdded:Connect(hide)
+end
+task.spawn(function()
+	local pickups = workspace:WaitForChild("Pickups")
+	pickups.ChildAdded:Connect(onPickupFolder)
+	for _, folder in ipairs(pickups:GetChildren()) do
+		onPickupFolder(folder)
+	end
+end)
+
 -- Breakables only move while they're being hit: a quick wobble.
 RunService.RenderStepped:Connect(function()
 	local t = os.clock()

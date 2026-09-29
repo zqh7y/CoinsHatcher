@@ -15,7 +15,7 @@ local Rebirth = require(script.Rebirth)
 local Hatch = require(script.Hatch)
 local Gifts = require(script.Gifts)
 local Fx = require(script.Fx)
-local AreaUpgrades = require(script.AreaUpgrades)
+require(script.AreaUpgrades)
 require(script.Shop)
 require(script.EggPreview)
 require(script.Breakables)
@@ -90,12 +90,46 @@ task.spawn(function()
 	updateRebirths()
 end)
 
+-- Combo counter (top middle): shows while you keep breaking things -------------
+
+local combo = Ui.label(Ui.gui, {
+	AnchorPoint = Vector2.new(0.5, 0),
+	Position = UDim2.new(0.5, 0, 0, 12),
+	Size = UDim2.fromOffset(260, 46),
+	TextColor3 = Color3.fromRGB(255, 170, 60),
+	TextStrokeTransparency = 0,
+	Visible = false,
+})
+local comboNext = Ui.label(combo, {
+	AnchorPoint = Vector2.new(0.5, 0),
+	Position = UDim2.new(0.5, 0, 1, 0),
+	Size = UDim2.fromOffset(260, 20),
+	TextColor3 = Color3.fromRGB(255, 235, 200),
+})
+local comboScale = Instance.new("UIScale")
+comboScale.Parent = combo
+
+player:GetAttributeChangedSignal("Combo"):Connect(function()
+	local count = player:GetAttribute("Combo") or 0
+	combo.Visible = count >= 3
+	if count < 3 then
+		return
+	end
+	combo.Text = "🔥 Combo x" .. count
+	-- hotter colors as the combo grows
+	combo.TextColor3 = Color3.fromRGB(255, 200, 80):Lerp(Color3.fromRGB(255, 60, 60), math.min(count / 100, 1))
+	local toNext = Config.COMBO_STEP - count % Config.COMBO_STEP
+	comboNext.Text = ("%d more for a free boost!"):format(toNext)
+	comboScale.Scale = 1.25
+	TweenService:Create(comboScale, TweenInfo.new(0.2, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+end)
+
 -- Icon buttons (left side) ------------------------------------------------------
 
 local side = Instance.new("Frame")
 side.AnchorPoint = Vector2.new(0, 0.5)
 side.Position = UDim2.new(0, 12, 0.6, 0)
-side.Size = UDim2.fromOffset(170, 350)
+side.Size = UDim2.fromOffset(170, 260)
 side.BackgroundTransparency = 1
 side.Parent = Ui.gui
 
@@ -112,7 +146,6 @@ local buttons = {
 		local atEggs = root and (root.Position - EGG_CENTER).Magnitude < 150
 		remotes.Teleport:FireServer(if atEggs then "Main" else "Eggs")
 	end },
-	{ "📈", "Upgrades", Color3.fromRGB(90, 200, 150), AreaUpgrades.toggle },
 	{ "🐾", "Pets", Color3.fromRGB(80, 160, 240), Inventory.toggle },
 	{ "📖", "Index", Color3.fromRGB(240, 110, 150), Index.toggle },
 	{ "⭐", "Rebirth", Color3.fromRGB(170, 100, 230), Rebirth.toggle },
@@ -133,8 +166,6 @@ for order, def in ipairs(buttons) do
 		button.Visible = false -- shows up once you buy the hoverboard
 	elseif def[2] == "Gifts" then
 		Gifts.attach(button)
-	elseif def[2] == "Upgrades" then
-		AreaUpgrades.attach(button)
 	end
 end
 
@@ -162,7 +193,7 @@ remotes.Hatched.OnClientEvent:Connect(Hatch.play)
 -- Server-wide shout-outs for rare hatches, so everyone can see the flex
 local banner = Ui.label(Ui.gui, {
 	AnchorPoint = Vector2.new(0.5, 0),
-	Position = UDim2.new(0.5, 0, 0, 124),
+	Position = UDim2.new(0.5, 0, 0, 146),
 	Size = UDim2.fromOffset(640, 44),
 	BackgroundTransparency = 0.15,
 	BackgroundColor3 = Color3.fromRGB(60, 30, 110),

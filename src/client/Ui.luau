@@ -271,7 +271,7 @@ end
 
 local toast = Ui.label(Ui.gui, {
 	AnchorPoint = Vector2.new(0.5, 0),
-	Position = UDim2.new(0.5, 0, 0, 70),
+	Position = UDim2.new(0.5, 0, 0, 92),
 	Size = UDim2.fromOffset(520, 46),
 	BackgroundTransparency = 0.1,
 	BackgroundColor3 = Ui.COLORS.PanelDark,

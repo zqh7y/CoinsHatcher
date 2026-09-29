@@ -32,40 +32,14 @@ local function notify(player, message, color, celebrate)
 	remotes.Notify:FireClient(player, message, color, celebrate)
 end
 
--- Hatches `count` eggs (1 or 3) at once.
-local function hatch(player, eggIndex, count)
+-- Rolls `count` pets from an egg and gives them to the player: diamonds for
+-- new discoveries, auto-equip into free slots, the hatch animation and a
+-- server-wide shout-out for rare ones. No cost or distance checks here.
+local function giveHatch(player, eggIndex, count)
 	local data = PlayerData.get(player)
-	local model = eggModels[eggIndex]
-	if not data or not model then
+	if not data then
 		return
 	end
-	local now = os.clock()
-	if lastHatch[player] and now - lastHatch[player] < HATCH_COOLDOWN then
-		return
-	end
-	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not root or (root.Position - model:GetPivot().Position).Magnitude > MAX_DISTANCE then
-		return
-	end
-
-	local required = Config.eggRequiredRebirths(eggIndex)
-	if data.Rebirths < required then
-		notify(player, "🔒 Rebirth " .. required .. " needed to open this egg!", RED)
-		return
-	end
-	if #data.Pets + count > Config.maxPets(data) then
-		notify(player, "🎒 Your pet inventory is full! Delete or combine some pets.", RED)
-		return
-	end
-	local cost = Config.eggCost(eggIndex) * count
-	if data.Coins < cost then
-		notify(player, "💰 You need " .. Config.formatNumber(cost) .. " coins!", RED)
-		return
-	end
-
-	lastHatch[player] = now
-	PlayerData.addCoins(player, -cost)
-
 	local names = {}
 	for _ = 1, count do
 		table.insert(names, Config.rollHatch(eggIndex, data))
@@ -104,11 +78,57 @@ local function hatch(player, eggIndex, count)
 
 	-- let the whole server know about rare hatches
 	for _, petName in ipairs(names) do
-		local rarity = Config.PETS[petName].Rarity
-		if rarity == "Legendary" or rarity == "Huge" then
+		if Config.isRare(petName) then
 			remotes.Announce:FireAllClients(player.DisplayName, petName)
 		end
 	end
+end
+
+-- Free pets (from gifts) out of the best egg the player has unlocked.
+-- Returns false if their inventory is too full.
+function Eggs.freeHatch(player, count)
+	local data = PlayerData.get(player)
+	if not data or #data.Pets + count > Config.maxPets(data) then
+		return false
+	end
+	giveHatch(player, math.min(data.Rebirths + 1, Config.EGG_COUNT), count)
+	return true
+end
+
+-- Hatches `count` eggs (1 or 3) at once, paying with coins.
+local function hatch(player, eggIndex, count)
+	local data = PlayerData.get(player)
+	local model = eggModels[eggIndex]
+	if not data or not model then
+		return
+	end
+	local now = os.clock()
+	if lastHatch[player] and now - lastHatch[player] < HATCH_COOLDOWN then
+		return
+	end
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not root or (root.Position - model:GetPivot().Position).Magnitude > MAX_DISTANCE then
+		return
+	end
+
+	local required = Config.eggRequiredRebirths(eggIndex)
+	if data.Rebirths < required then
+		notify(player, "🔒 Rebirth " .. required .. " needed to open this egg!", RED)
+		return
+	end
+	if #data.Pets + count > Config.maxPets(data) then
+		notify(player, "🎒 Your pet inventory is full! Delete some pets.", RED)
+		return
+	end
+	local cost = Config.eggCost(eggIndex) * count
+	if data.Coins < cost then
+		notify(player, "💰 You need " .. Config.formatNumber(cost) .. " coins!", RED)
+		return
+	end
+
+	lastHatch[player] = now
+	PlayerData.addCoins(player, -cost)
+	giveHatch(player, eggIndex, count)
 end
 
 -- Creates the pedestal + egg for an egg that isn't in the project file.

@@ -11,6 +11,9 @@ local World = require(script.Parent.World)
 
 local Coins = {}
 
+-- Fires (player, position, kind) whenever one of the player's breakables breaks.
+Coins.Broken = Instance.new("BindableEvent")
+
 local folder = Instance.new("Folder")
 folder.Name = "Coins"
 folder.Parent = workspace
@@ -296,6 +299,7 @@ function Coins.damage(player, model, amount, crit)
 	if diamonds then
 		PlayerData.addDiamonds(player, diamonds)
 	end
+	Coins.Broken:Fire(player, model:GetPivot().Position, model:GetAttribute("Kind") or 1)
 	model:Destroy()
 	task.delay(Config.respawnTime(data), spawnCoin, player)
 	return true
