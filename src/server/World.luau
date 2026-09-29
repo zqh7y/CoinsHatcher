@@ -8,7 +8,10 @@ World.COIN_ZONE = 50 -- coins spawn in this circle in the middle (diameter)
 World.MAIN_SPAWN = Vector3.new(0, 0, 38) -- spawn pad, between the coins and the wall
 World.EGG_CENTER = Vector3.new(0, 0, 1000)
 World.LEADERBOARD_ANGLES = { 300, 315, 330 } -- degrees around the main area
-World.EGG_RADIUS = 52 -- the round hatchery's wall
+-- The hatchery is a long 30 x 200 strip: you arrive at the +Z end and walk
+-- toward -Z with the eggs on your right (+X).
+World.EGG_HALF_X = 15
+World.EGG_HALF_Z = 100
 World.FLOOR_Y = 1 -- top of both floors
 
 local function part(props)
@@ -37,6 +40,19 @@ end
 
 -- A tall ring of invisible walls on top of an area's fence, so nobody can
 -- jump over it and leave the area.
+local function invisibleWall(ring, cframe, size)
+	part({
+		Name = "InvisibleWall",
+		Size = size,
+		CFrame = cframe,
+		Transparency = 1,
+		CastShadow = false,
+		Parent = ring,
+	})
+end
+
+local WALL_HEIGHT = 150
+
 local function invisibleRing(parent, center, radius)
 	if parent:FindFirstChild("InvisibleWalls") then
 		return
@@ -44,19 +60,26 @@ local function invisibleRing(parent, center, radius)
 	local ring = Instance.new("Folder")
 	ring.Name = "InvisibleWalls"
 	local pieces = 32
-	local height = 150
 	local length = 2 * math.pi * radius / pieces + 1 -- a bit of overlap, no gaps
 	for i = 0, pieces - 1 do
 		local a = (i + 0.5) / pieces * math.pi * 2
-		local pos = center + Vector3.new(math.cos(a) * radius, World.FLOOR_Y + height / 2, math.sin(a) * radius)
-		part({
-			Name = "InvisibleWall",
-			Size = Vector3.new(2, height, length),
-			CFrame = CFrame.lookAt(pos, Vector3.new(center.X, pos.Y, center.Z)) * CFrame.Angles(0, math.rad(90), 0),
-			Transparency = 1,
-			CastShadow = false,
-			Parent = ring,
-		})
+		local pos = center + Vector3.new(math.cos(a) * radius, World.FLOOR_Y + WALL_HEIGHT / 2, math.sin(a) * radius)
+		invisibleWall(ring, CFrame.lookAt(pos, Vector3.new(center.X, pos.Y, center.Z)) * CFrame.Angles(0, math.rad(90), 0), Vector3.new(2, WALL_HEIGHT, length))
+	end
+	ring.Parent = parent
+end
+
+-- The same for a rectangle (the hatchery).
+local function invisibleBox(parent, center, halfX, halfZ)
+	if parent:FindFirstChild("InvisibleWalls") then
+		return
+	end
+	local ring = Instance.new("Folder")
+	ring.Name = "InvisibleWalls"
+	local y = World.FLOOR_Y + WALL_HEIGHT / 2
+	for _, side in ipairs({ -1, 1 }) do
+		invisibleWall(ring, CFrame.new(center + Vector3.new(side * halfX, y, 0)), Vector3.new(2, WALL_HEIGHT, halfZ * 2 + 2))
+		invisibleWall(ring, CFrame.new(center + Vector3.new(0, y, side * halfZ)), Vector3.new(halfX * 2 + 2, WALL_HEIGHT, 2))
 	end
 	ring.Parent = parent
 end
@@ -96,24 +119,22 @@ function World.build()
 	if not eggs:FindFirstChild("Floor") then
 		part({
 			Name = "Floor",
-			Shape = Enum.PartType.Cylinder,
-			Size = Vector3.new(1, World.EGG_RADIUS * 2 + 2, World.EGG_RADIUS * 2 + 2),
-			CFrame = CFrame.new(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0))
-				* CFrame.Angles(0, 0, math.rad(90)),
-			Color = Color3.fromRGB(235, 220, 255),
+			Size = Vector3.new(World.EGG_HALF_X * 2 + 2, 1, World.EGG_HALF_Z * 2 + 2),
+			Position = World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0),
+			Color = Color3.fromRGB(235, 225, 250),
 			Material = Enum.Material.SmoothPlastic,
 			Parent = eggs,
 		})
 	end
 
 	invisibleRing(main, World.MAIN_CENTER, World.MAIN_RADIUS)
-	invisibleRing(eggs, World.EGG_CENTER, World.EGG_RADIUS)
+	invisibleBox(eggs, World.EGG_CENTER, World.EGG_HALF_X, World.EGG_HALF_Z)
 end
 
 -- Where a player lands when they teleport to an area.
 function World.spawnCFrame(area: string): CFrame
 	local center = if area == "Eggs"
-		then World.EGG_CENTER + Vector3.new(0, 0, 40) -- by the gate, facing the middle
+		then World.EGG_CENTER + Vector3.new(-3, 0, World.EGG_HALF_Z - 12) -- in front of the gate, facing the eggs
 		else World.MAIN_CENTER + World.MAIN_SPAWN
 	return CFrame.new(center + Vector3.new(0, World.FLOOR_Y + 3, 0))
 end

@@ -25,6 +25,7 @@ local STYLES = {
 	Space = { Pattern = "stars", Accent = Color3.fromRGB(255, 240, 150), Neon = true, Shell = Color3.fromRGB(55, 40, 110) },
 	Magic = { Pattern = "bands", Accent = Color3.fromRGB(255, 190, 255), Neon = true },
 	Mythic = { Pattern = "bands", Accent = Color3.fromRGB(255, 215, 80), Gem = true },
+	Party = { Pattern = "sprinkles", Gem = true, Shell = Color3.fromRGB(255, 205, 70), Band = Color3.fromRGB(255, 90, 150) },
 }
 
 local SPRINKLES = {
@@ -137,15 +138,46 @@ function EggModel.decorate(shell, eggIndex, parent)
 		end
 	end
 
+	-- a ribbon around the middle (the Release egg's gift wrap)
+	if style.Band then
+		local width = 2 * a + 0.15 * k
+		add({
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(0.5 * k, width, width),
+			CFrame = center * UP,
+			Color = style.Band,
+			Material = Enum.Material.SmoothPlastic,
+		})
+	end
+
 	if style.Gem then
 		local top = center * CFrame.new(0, c + 0.3 * k, 0) * CFrame.Angles(math.rad(45), 0, math.rad(45))
 		add({ Size = Vector3.one * 0.9 * k, CFrame = top, Color = Color3.fromRGB(120, 230, 255), Material = Enum.Material.Neon })
 	end
 
-	-- painted shine: a soft white highlight near the top
+	-- painted shine: a soft white highlight near the top, and a small one
+	-- under it
 	local highlight = onSurface(Vector3.new(-0.45, 0.8, -0.5), Vector3.new(1.1, 1.6, 0.2) * k, WHITE, nil, Vector3.new(1, 1, 0.3), 0.4)
 	highlight.Material = Enum.Material.SmoothPlastic
 	highlight.Transparency = 0.35
+	local dot = onSurface(Vector3.new(-0.62, 0.25, -0.62), Vector3.new(0.45, 0.45, 0.15) * k, WHITE, nil, Vector3.new(1, 1, 0.3))
+	dot.Material = Enum.Material.SmoothPlastic
+	dot.Transparency = 0.45
+
+	-- a soft glowing aura around the egg in its color
+	local aura = add({
+		Name = "Aura",
+		Shape = Enum.PartType.Block,
+		Size = shell.Size * 1.12,
+		CFrame = center,
+		Color = egg.Color,
+		Material = Enum.Material.ForceField,
+		Transparency = 0.2,
+	})
+	local auraMesh = Instance.new("SpecialMesh")
+	auraMesh.MeshType = Enum.MeshType.Sphere
+	auraMesh.Scale = EggModel.SHAPE
+	auraMesh.Parent = aura
 end
 
 -- A complete decorated egg (for previews): a Model whose PrimaryPart is the shell.

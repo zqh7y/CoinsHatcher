@@ -1,6 +1,6 @@
--- Egg stands in the egg area. Walk up and press E (or use the popup buttons)
--- to hatch 1 or 3 eggs.
--- Egg N unlocks at rebirth N-1.
+-- The eggs in the hatchery. Walk up to one: the popup shows its pets, and
+-- E / F / T (or the popup's buttons) hatch 1, 3 or auto.
+-- Egg N unlocks at rebirth N-1; the Release egg at the end is open for all.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -11,22 +11,31 @@ local Shrines = require(script.Parent.Shrines)
 
 local Eggs = {}
 
--- Eggs stand in a ring around the hatchery: 12 slots of 30 degrees with the
--- slot at the gate left open. Egg 1 is just left of the gate and they go
--- around to the last egg on its right.
-local RING_RADIUS = 34
+-- The hatchery is a long strip: the eggs stand along its right side (+X),
+-- one every 15 studs from the gate end, and the Release egg sits across the
+-- far end.
+local EGG_X = 7.5
+local FIRST_Z = World.EGG_HALF_Z - 25
+local SPACING = 15
 
--- Floor position of egg N (same layout as default.project.json).
+-- Floor position of egg N, and the direction its shrine faces away from the
+-- walkway.
 function Eggs.position(eggIndex)
-	local angle = math.rad(90 + 30 * eggIndex)
-	return World.EGG_CENTER + Vector3.new(math.cos(angle) * RING_RADIUS, World.FLOOR_Y, math.sin(angle) * RING_RADIUS)
+	if Config.EGGS[eggIndex].Release then
+		return World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, -World.EGG_HALF_Z + 12)
+	end
+	return World.EGG_CENTER + Vector3.new(EGG_X, World.FLOOR_Y, FIRST_Z - (eggIndex - 1) * SPACING)
+end
+
+function Eggs.outward(eggIndex)
+	return if Config.EGGS[eggIndex].Release then Vector3.new(0, 0, -1) else Vector3.new(1, 0, 0)
 end
 
 local remotes
 local eggModels = {} -- [eggIndex] = model, to check the player is close enough
 local lastHatch = {} -- [player] = time, so hatching can't be spammed
 local HATCH_COOLDOWN = 0.8
-local MAX_DISTANCE = 20 -- how close you must be to hatch
+local MAX_DISTANCE = 22 -- how close you must be to hatch
 
 local RED = Color3.fromRGB(255, 90, 90)
 
@@ -93,15 +102,14 @@ function Eggs.freeHatch(player, count)
 	if not data or #data.Pets + count > Config.maxPets(data) then
 		return false
 	end
-	giveHatch(player, math.min(data.Rebirths + 1, Config.EGG_COUNT), count)
+	giveHatch(player, math.min(data.Rebirths + 1, Config.REBIRTH_EGGS), count)
 	return true
 end
 
 -- Hatches `count` eggs (1 or 3) at once, paying with coins.
 local function hatch(player, eggIndex, count)
 	local data = PlayerData.get(player)
-	local model = eggModels[eggIndex]
-	if not data or not model then
+	if not data or not eggModels[eggIndex] then
 		return
 	end
 	local now = os.clock()
@@ -109,7 +117,7 @@ local function hatch(player, eggIndex, count)
 		return
 	end
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not root or (root.Position - model:GetPivot().Position).Magnitude > MAX_DISTANCE then
+	if not root or (root.Position - Eggs.position(eggIndex)).Magnitude > MAX_DISTANCE then
 		return
 	end
 
@@ -133,11 +141,15 @@ local function hatch(player, eggIndex, count)
 	giveHatch(player, eggIndex, count)
 end
 
--- Creates the pedestal + egg for an egg that isn't in the project file.
+-- Builds an egg stand: a tiered pedestal with a gold rim and a glowing ring,
+-- little gem posts, the decorated egg floating on top, a soft light beam and
+-- sparkles. Parts named Glow / Top / Egg are used by the client.
 local function createEggModel(eggIndex, parent)
 	local egg = Config.EGGS[eggIndex]
 	local base = Eggs.position(eggIndex)
 	local soft = egg.Color:Lerp(Color3.new(1, 1, 1), 0.55)
+	local gold = Color3.fromRGB(255, 205, 70)
+	local big = egg.Release -- the Release egg gets a bigger stand
 
 	local model = Instance.new("Model")
 	model.Name = egg.Name
@@ -153,25 +165,51 @@ local function createEggModel(eggIndex, parent)
 			Parent = model,
 		})
 	end
-	cylinder("Pedestal", 1.2, 10, 0.6, soft)
-	cylinder("Glow", 0.3, 10.5, 0.7, egg.Color, Enum.Material.Neon)
-	cylinder("Top", 1, 7.5, 1.7, Color3.fromRGB(255, 250, 245))
+	local w = if big then 1.25 else 1
+	cylinder("Pedestal", 0.8, 9 * w, 0.4, soft)
+	cylinder("Rim", 0.25, 9.3 * w, 0.85, gold)
+	cylinder("Glow", 0.3, 8.2 * w, 1.1, egg.Color, Enum.Material.Neon)
+	cylinder("Middle", 0.8, 7.4 * w, 1.6, Color3.fromRGB(255, 250, 245))
+	cylinder("Top", 0.5, 6 * w, 2.25, soft)
+	cylinder("TopRim", 0.15, 6.2 * w, 2.55, gold)
 
+	-- four little gem posts around the pedestal
+	for k = 0, 3 do
+		local a = k * math.pi / 2 + math.pi / 4
+		local pos = base + Vector3.new(math.cos(a) * 4.1 * w, 0, math.sin(a) * 4.1 * w)
+		World.part({
+			Name = "GemPost",
+			Size = Vector3.new(0.6, 2.4, 0.6),
+			Position = pos + Vector3.new(0, 1.2, 0),
+			Color = Color3.fromRGB(255, 250, 240),
+			Parent = model,
+		})
+		World.part({
+			Name = "Gem",
+			Size = Vector3.one * 0.8,
+			CFrame = CFrame.new(pos + Vector3.new(0, 2.8, 0)) * CFrame.Angles(math.rad(45), 0, math.rad(45)),
+			Color = egg.Color,
+			Material = Enum.Material.Neon,
+			CastShadow = false,
+			Parent = model,
+		})
+	end
+
+	local eggSize = if big then 7.5 else 6
 	local shell = World.part({
 		Name = "Egg",
 		Shape = Enum.PartType.Ball,
-		Size = Vector3.new(6, 6, 6),
-		Position = base + Vector3.new(0, 5.65, 0),
+		Size = Vector3.one * eggSize,
+		Position = base + Vector3.new(0, 2.7 + eggSize * 0.58 + 0.4, 0),
 		Color = egg.Color,
 		Material = Enum.Material.SmoothPlastic,
 		Reflectance = 0.2,
+		CanCollide = false,
 		Parent = model,
 	})
-
-	-- make it egg-shaped
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.Sphere
-	mesh.Scale = Vector3.new(0.85, 1.15, 0.85)
+	mesh.Scale = EggModel.SHAPE
 	mesh.Parent = shell
 
 	local light = Instance.new("PointLight")
@@ -180,12 +218,40 @@ local function createEggModel(eggIndex, parent)
 	light.Brightness = 1.5
 	light.Parent = shell
 
+	-- a soft beam of light going up from the pedestal
+	World.part({
+		Name = "Beam",
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(14, 5 * w, 5 * w),
+		CFrame = CFrame.new(base + Vector3.new(0, 2.6 + 7, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+		Color = egg.Color:Lerp(Color3.new(1, 1, 1), 0.4),
+		Material = Enum.Material.Neon,
+		Transparency = 0.92,
+		CanCollide = false,
+		CanQuery = false,
+		CastShadow = false,
+		Parent = model,
+	})
+
+	local sparkles = Instance.new("ParticleEmitter")
+	sparkles.Shape = Enum.ParticleEmitterShape.Sphere
+	sparkles.Rate = 4
+	sparkles.Lifetime = NumberRange.new(1.2, 2)
+	sparkles.Speed = NumberRange.new(0.6, 1.4)
+	sparkles.LightEmission = 1
+	sparkles.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0),
+		NumberSequenceKeypoint.new(0.4, 0.35),
+		NumberSequenceKeypoint.new(1, 0),
+	})
+	sparkles.Color = ColorSequence.new(egg.Color:Lerp(Color3.new(1, 1, 1), 0.3), Color3.new(1, 1, 1))
+	sparkles.Parent = shell
+
 	model.Parent = parent
 	return model
 end
 
--- Eggs are placed in default.project.json (so you can move them in Studio).
--- This adds the sign and hatch prompt, and creates any egg that's missing.
+-- Builds each egg with its pattern, shrine and attributes.
 local function setupEgg(eggIndex, parent)
 	local egg = Config.EGGS[eggIndex]
 	local model = parent:FindFirstChild(egg.Name) or createEggModel(eggIndex, parent)
@@ -205,8 +271,8 @@ local function setupEgg(eggIndex, parent)
 	look.Parent = model
 	EggModel.decorate(shell, eggIndex, look)
 
-	-- themed shrine around the pedestal, name plaque and lock dome
-	Shrines.build(model, eggIndex, Eggs.position(eggIndex))
+	-- themed decorations around the stand
+	Shrines.build(model, eggIndex, Eggs.position(eggIndex), Eggs.outward(eggIndex))
 
 	eggModels[eggIndex] = model
 end
@@ -225,7 +291,7 @@ function Eggs.start(remoteFolder)
 		setupEgg(eggIndex, eggsFolder)
 	end
 
-	-- the egg popup's Hatch 1 / Hatch 3 / Auto buttons
+	-- E / F / T and the popup's buttons (auto sends 1 or 3 over and over)
 	remotes.Hatch.OnServerEvent:Connect(function(player, eggIndex, count)
 		if typeof(eggIndex) ~= "number" or (count ~= 1 and count ~= 3) then
 			return

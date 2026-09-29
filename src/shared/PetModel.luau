@@ -180,7 +180,39 @@ function PetModel.build(petName: string, options)
 			fire.Color = Color3.fromRGB(255, 140, 40)
 			fire.SecondaryColor = Color3.fromRGB(255, 230, 90)
 			fire.Parent = body
+		elseif extra == "halo" then
+			local halo = add(0, 2.1, 0, Vector3.new(0.12, 1.5, 1.5), Color3.fromRGB(255, 235, 120), Enum.PartType.Cylinder, CFrame.Angles(0, 0, math.rad(90)))
+			halo.Material = Enum.Material.Neon
+			add(0, 2.1, 0, Vector3.new(0.14, 1, 1), Color3.fromRGB(255, 250, 225), Enum.PartType.Cylinder, CFrame.Angles(0, 0, math.rad(90)))
+		elseif extra == "partyhat" then
+			-- a striped cone hat (stacked shrinking discs) with a pom-pom
+			local hatColors = { Color3.fromRGB(255, 90, 140), Color3.fromRGB(255, 220, 70), Color3.fromRGB(90, 190, 255) }
+			for k = 0, 4 do
+				local w = 1 - k * 0.18
+				add(0.25, 1.25 + k * 0.22, -0.15, Vector3.new(0.22, w, w), hatColors[k % 3 + 1], Enum.PartType.Cylinder, CFrame.Angles(0, 0, math.rad(90)))
+			end
+			add(0.25, 2.4, -0.15, Vector3.one * 0.38, WHITE, BALL)
+		elseif extra == "bowtie" then
+			both(function(side)
+				add(side * 0.3, -0.75, -1.12, Vector3.new(0.45, 0.4, 0.1), Color3.fromRGB(230, 40, 90), nil, CFrame.Angles(0, 0, side * 0.3))
+			end)
+			add(0, -0.75, -1.15, Vector3.new(0.2, 0.2, 0.1), Color3.fromRGB(255, 120, 160))
+		elseif extra == "balloon" then
+			add(1.3, 1.1, 0.4, Vector3.new(0.06, 2.2, 0.06), WHITE)
+			add(1.3, 2.8, 0.4, Vector3.new(1.2, 1.4, 1.2), Color3.fromRGB(255, 80, 120), BALL)
 		end
+	end
+
+	-- mythical pets wear a golden crown
+	if info.Rarity == "Mythical" then
+		local gold = Color3.fromRGB(255, 205, 60)
+		add(0, 1.25, 0, Vector3.new(1.3, 0.3, 1.3), gold)
+		for k = 0, 3 do
+			local a = k * math.pi / 2 + math.pi / 4
+			add(math.cos(a) * 0.5, 1.55, math.sin(a) * 0.5, Vector3.new(0.3, 0.45, 0.3), gold, nil, CFrame.Angles(0, -a, 0))
+		end
+		local gem = add(0, 1.3, -0.66, Vector3.new(0.3, 0.3, 0.1), Color3.fromRGB(255, 70, 120))
+		gem.Material = Enum.Material.Neon
 	end
 
 	-- feet
@@ -192,7 +224,7 @@ function PetModel.build(petName: string, options)
 		end
 	end
 
-	if info.Rarity == "Legendary" or info.Rarity == "Huge" or info.Mutation then
+	if info.Rarity == "Legendary" or info.Rarity == "Mythical" or info.Rarity == "Huge" or info.Mutation then
 		local sparkles = Instance.new("Sparkles")
 		sparkles.SparkleColor = info.Color
 		sparkles.Parent = body

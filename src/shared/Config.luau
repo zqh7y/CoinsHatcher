@@ -81,30 +81,50 @@ Config.PET_HIT_INTERVAL = 0.6 -- seconds between hits; each hit deals the pet's 
 Config.CRIT_CHANCE = 0.1 -- 10% of hits are critical hits...
 Config.CRIT_MULT = 3 -- ...that deal 3x damage
 
--- Rarities in order. Chance is a weight, Power multiplies the egg's base power.
+-- Rarities in order. Chance is a weight (Legendary and Mythical shrink in
+-- better eggs, see Config.rarityWeights), Power multiplies the egg's base
+-- power and LuckPower is how strongly luck helps (luck ^ LuckPower).
 Config.RARITIES = {
-	{ Name = "Common", Chance = 60, Power = 1, Color = Color3.fromRGB(200, 200, 200) },
-	{ Name = "Uncommon", Chance = 28, Power = 2, Color = Color3.fromRGB(90, 200, 90) },
-	{ Name = "Rare", Chance = 10, Power = 4, Color = Color3.fromRGB(80, 140, 255) },
-	{ Name = "Legendary", Chance = 2, Power = 10, Color = Color3.fromRGB(255, 190, 40) },
+	{ Name = "Common", Chance = 60, Power = 1, LuckPower = 0, Color = Color3.fromRGB(200, 200, 200) },
+	{ Name = "Uncommon", Chance = 28, Power = 2, LuckPower = 0, Color = Color3.fromRGB(90, 200, 90) },
+	{ Name = "Rare", Chance = 10, Power = 4, LuckPower = 0.5, Color = Color3.fromRGB(80, 140, 255) },
+	{ Name = "Legendary", Chance = 2, Power = 10, LuckPower = 0.5, Color = Color3.fromRGB(255, 190, 40) },
+	{ Name = "Mythical", Chance = 0.1, Power = 30, LuckPower = 0.35, Color = Color3.fromRGB(255, 70, 120) },
 }
 
--- Eggs: egg N unlocks at rebirth N-1. Each egg has one pet per rarity,
--- listed in the same order as RARITIES. Theme picks the egg's shrine in the
--- hatchery (see src/server/Shrines.luau).
+-- Eggs: egg N unlocks at rebirth N-1 (unless Required says otherwise). Each
+-- egg has one pet per rarity, listed in the same order as RARITIES; the
+-- Mythical one is always really hard to get, and harder in better eggs.
+-- HugeOdds (1 in N, before luck) gives the egg a Huge pet; only some eggs
+-- have one. Tier sets the power and price level (defaults to the egg's
+-- number). Theme picks the egg's shrine in the hatchery.
 Config.EGGS = {
-	{ Name = "Basic Egg", Theme = "Meadow", Color = Color3.fromRGB(245, 240, 225), Pets = { "Dog", "Cat", "Bunny", "Bear" } },
-	{ Name = "Forest Egg", Theme = "Forest", Color = Color3.fromRGB(90, 150, 70), Pets = { "Fox", "Deer", "Owl", "Wolf" } },
-	{ Name = "Ocean Egg", Theme = "Ocean", Color = Color3.fromRGB(60, 140, 210), Pets = { "Fish", "Crab", "Turtle", "Shark" } },
-	{ Name = "Lava Egg", Theme = "Lava", Color = Color3.fromRGB(220, 80, 30), Pets = { "Salamander", "Magma Golem", "Phoenix", "Dragon" } },
-	{ Name = "Candy Egg", Theme = "Candy", Color = Color3.fromRGB(255, 150, 200), Pets = { "Gummy Bear", "Candy Cat", "Jelly Bunny", "Unicorn" } },
-	{ Name = "Snow Egg", Theme = "Snow", Color = Color3.fromRGB(200, 230, 255), Pets = { "Penguin", "Snow Fox", "Polar Bear", "Yeti" } },
-	{ Name = "Jungle Egg", Theme = "Jungle", Color = Color3.fromRGB(60, 170, 80), Pets = { "Monkey", "Parrot", "Tiger", "Lion" } },
-	{ Name = "Desert Egg", Theme = "Desert", Color = Color3.fromRGB(240, 200, 120), Pets = { "Fennec", "Camel", "Scorpion", "Sphinx Cat" } },
-	{ Name = "Space Egg", Theme = "Space", Color = Color3.fromRGB(80, 60, 160), Pets = { "Alien", "Robot Dog", "Star Bunny", "Cosmic Whale" } },
-	{ Name = "Magic Egg", Theme = "Magic", Color = Color3.fromRGB(180, 110, 255), Pets = { "Pixie", "Wizard Cat", "Crystal Bunny", "Griffin" } },
-	{ Name = "Mythic Egg", Theme = "Mythic", Color = Color3.fromRGB(255, 215, 80), Pets = { "Kitsune", "Pegasus", "Hydra", "Mythic Dragon" } },
+	{ Name = "Basic Egg", Theme = "Meadow", Color = Color3.fromRGB(245, 240, 225), Pets = { "Dog", "Cat", "Bunny", "Bear", "Angel Puppy" } },
+	{ Name = "Forest Egg", Theme = "Forest", Color = Color3.fromRGB(90, 150, 70), Pets = { "Fox", "Deer", "Owl", "Wolf", "Spirit Stag" } },
+	{ Name = "Ocean Egg", Theme = "Ocean", Color = Color3.fromRGB(60, 140, 210), Pets = { "Fish", "Crab", "Turtle", "Shark", "Leviathan" }, HugeOdds = 200000 },
+	{ Name = "Lava Egg", Theme = "Lava", Color = Color3.fromRGB(220, 80, 30), Pets = { "Salamander", "Magma Golem", "Phoenix", "Dragon", "Inferno Wyrm" } },
+	{ Name = "Candy Egg", Theme = "Candy", Color = Color3.fromRGB(255, 150, 200), Pets = { "Gummy Bear", "Candy Cat", "Jelly Bunny", "Unicorn", "Lollipop Dragon" } },
+	{ Name = "Snow Egg", Theme = "Snow", Color = Color3.fromRGB(200, 230, 255), Pets = { "Penguin", "Snow Fox", "Polar Bear", "Yeti", "Frost Phoenix" }, HugeOdds = 500000 },
+	{ Name = "Jungle Egg", Theme = "Jungle", Color = Color3.fromRGB(60, 170, 80), Pets = { "Monkey", "Parrot", "Tiger", "Lion", "Jaguar King" } },
+	{ Name = "Desert Egg", Theme = "Desert", Color = Color3.fromRGB(240, 200, 120), Pets = { "Fennec", "Camel", "Scorpion", "Sphinx Cat", "Pharaoh Cat" } },
+	{ Name = "Space Egg", Theme = "Space", Color = Color3.fromRGB(80, 60, 160), Pets = { "Alien", "Robot Dog", "Star Bunny", "Cosmic Whale", "Nebula Dragon" }, HugeOdds = 1000000 },
+	{ Name = "Magic Egg", Theme = "Magic", Color = Color3.fromRGB(180, 110, 255), Pets = { "Pixie", "Wizard Cat", "Crystal Bunny", "Griffin", "Arcane Owl" } },
+	{ Name = "Mythic Egg", Theme = "Mythic", Color = Color3.fromRGB(255, 215, 80), Pets = { "Kitsune", "Pegasus", "Hydra", "Mythic Dragon", "Divine Dragon" }, HugeOdds = 2500000 },
+	-- the limited Release event egg at the end of the hatchery: open for
+	-- everyone, party pets and a Huge
+	{
+		Name = "Release Egg",
+		Theme = "Party",
+		Color = Color3.fromRGB(255, 200, 60),
+		Pets = { "Party Dog", "Confetti Cat", "Balloon Bunny", "Firework Fox", "Launch Dragon" },
+		HugeOdds = 300000,
+		Required = 0,
+		Tier = 3,
+		Cost = 50000,
+		Release = true,
+	},
 }
+Config.REBIRTH_EGGS = 11 -- the eggs unlocked one per rebirth (the rest are event eggs)
 
 -- Body color of each pet (the name tag uses the rarity color)
 Config.PET_COLORS = {
@@ -152,6 +172,24 @@ Config.PET_COLORS = {
 	Pegasus = Color3.fromRGB(245, 245, 255),
 	Hydra = Color3.fromRGB(70, 170, 150),
 	["Mythic Dragon"] = Color3.fromRGB(255, 200, 60),
+	-- mythical pets
+	["Angel Puppy"] = Color3.fromRGB(255, 250, 240),
+	["Spirit Stag"] = Color3.fromRGB(170, 240, 230),
+	Leviathan = Color3.fromRGB(40, 90, 170),
+	["Inferno Wyrm"] = Color3.fromRGB(200, 40, 30),
+	["Lollipop Dragon"] = Color3.fromRGB(255, 120, 200),
+	["Frost Phoenix"] = Color3.fromRGB(150, 220, 255),
+	["Jaguar King"] = Color3.fromRGB(230, 170, 60),
+	["Pharaoh Cat"] = Color3.fromRGB(60, 60, 80),
+	["Nebula Dragon"] = Color3.fromRGB(120, 60, 200),
+	["Arcane Owl"] = Color3.fromRGB(90, 70, 190),
+	["Divine Dragon"] = Color3.fromRGB(255, 245, 210),
+	-- release event pets
+	["Party Dog"] = Color3.fromRGB(255, 205, 140),
+	["Confetti Cat"] = Color3.fromRGB(255, 140, 190),
+	["Balloon Bunny"] = Color3.fromRGB(130, 200, 255),
+	["Firework Fox"] = Color3.fromRGB(255, 110, 60),
+	["Launch Dragon"] = Color3.fromRGB(255, 200, 60),
 }
 
 -- What each pet looks like. Pets are little cubes with a face plus:
@@ -204,26 +242,68 @@ Config.PET_LOOKS = {
 	Pegasus = { Ears = "pointy", Tail = "fluffy", Extras = { "wings" } },
 	Hydra = { Tail = "long", Extras = { "horns", "fire" } },
 	["Mythic Dragon"] = { Tail = "long", Extras = { "horns", "wings", "fire" } },
+	-- mythical pets (they also get a crown)
+	["Angel Puppy"] = { Ears = "floppy", Tail = "short", Extras = { "wings", "halo" } },
+	["Spirit Stag"] = { Ears = "pointy", Tail = "short", Extras = { "antlers", "halo" } },
+	Leviathan = { Tail = "fin", Extras = { "topfin", "horns", "nofeet" } },
+	["Inferno Wyrm"] = { Tail = "long", Extras = { "horns", "wings", "fire" } },
+	["Lollipop Dragon"] = { Tail = "long", Extras = { "horns", "wings" } },
+	["Frost Phoenix"] = { Tail = "long", Extras = { "beak", "wings" } },
+	["Jaguar King"] = { Ears = "round", Tail = "long" },
+	["Pharaoh Cat"] = { Ears = "pointy", Tail = "long", Extras = { "wings" } },
+	["Nebula Dragon"] = { Tail = "long", Extras = { "horns", "wings" } },
+	["Arcane Owl"] = { Ears = "pointy", Extras = { "beak", "wings", "halo" } },
+	["Divine Dragon"] = { Tail = "long", Extras = { "horns", "wings", "fire", "halo" } },
+	-- release event pets: party hats and bow ties
+	["Party Dog"] = { Ears = "floppy", Tail = "short", Extras = { "partyhat" } },
+	["Confetti Cat"] = { Ears = "pointy", Tail = "long", Extras = { "partyhat", "bowtie" } },
+	["Balloon Bunny"] = { Ears = "long", Tail = "fluffy", Extras = { "partyhat", "balloon" } },
+	["Firework Fox"] = { Ears = "pointy", Tail = "fluffy", Extras = { "partyhat", "bowtie", "fire" } },
+	["Launch Dragon"] = { Tail = "long", Extras = { "horns", "wings", "partyhat", "bowtie" } },
 }
 
-Config.EGG_COUNT = math.min(#Config.EGGS, Config.MAX_REBIRTHS + 1)
+Config.EGG_COUNT = #Config.EGGS
+
+-- An egg's level for power and price (the Release egg borrows one).
+function Config.eggTier(eggIndex: number): number
+	return Config.EGGS[eggIndex].Tier or eggIndex
+end
 
 function Config.eggCost(eggIndex: number): number
-	return 1000 * Config.SCALE ^ (eggIndex - 1)
+	return Config.EGGS[eggIndex].Cost or 1000 * Config.SCALE ^ (Config.eggTier(eggIndex) - 1)
 end
 
 function Config.eggRequiredRebirths(eggIndex: number): number
-	return eggIndex - 1
+	return Config.EGGS[eggIndex].Required or eggIndex - 1
 end
 
 -- Pet power = damage per hit. Stronger pets break coins faster.
 function Config.petPower(eggIndex: number, rarityIndex: number): number
-	return 40 * Config.SCALE ^ (eggIndex - 1) * Config.RARITIES[rarityIndex].Power
+	return 40 * Config.SCALE ^ (Config.eggTier(eggIndex) - 1) * Config.RARITIES[rarityIndex].Power
 end
 
--- Huge pets: every egg has a super rare giant version of its legendary pet.
-Config.HUGE_CHANCE = 0.5 -- percent per hatch, before luck
-Config.HUGE_POWER = 3 -- times the legendary's power
+-- Rarity weights of an egg before luck: Legendary and Mythical get rarer in
+-- better eggs (Mythical goes from 1 in 1,000 in the Basic Egg to about 1 in
+-- 6M in the Mythic Egg).
+function Config.rarityWeights(eggIndex: number): { number }
+	local tier = Config.eggTier(eggIndex)
+	local weights = {}
+	for i, rarity in ipairs(Config.RARITIES) do
+		local w = rarity.Chance
+		if rarity.Name == "Legendary" then
+			w *= 0.87 ^ (tier - 1)
+		elseif rarity.Name == "Mythical" then
+			w *= 0.42 ^ (tier - 1)
+		end
+		weights[i] = w
+	end
+	return weights
+end
+
+-- Huge pets: some eggs have a giant version of their legendary pet with a
+-- really low chance (egg.HugeOdds). Luck only helps a little (luck ^ 0.25).
+Config.HUGE_LUCK_POWER = 0.25
+Config.HUGE_POWER = 6 -- times the legendary's power
 Config.HUGE_SCALE = 2 -- times bigger
 Config.HUGE_COLOR = Color3.fromRGB(255, 90, 200)
 
@@ -244,9 +324,14 @@ for eggIndex, egg in ipairs(Config.EGGS) do
 		}
 	end
 
-	local base = egg.Pets[#egg.Pets]
-	egg.Huge = "Huge " .. base
-	Config.PETS[egg.Huge] = {
+	-- every egg's legendary has a Huge version (so older saves keep working),
+	-- but only eggs with HugeOdds can hatch it
+	local base = egg.Pets[4]
+	local hugeName = "Huge " .. base
+	if egg.HugeOdds then
+		egg.Huge = hugeName
+	end
+	Config.PETS[hugeName] = {
 		Egg = eggIndex,
 		Rarity = "Huge",
 		Power = Config.PETS[base].Power * Config.HUGE_POWER,
@@ -306,24 +391,24 @@ function Config.rollWeighted(list): number
 	return 1
 end
 
--- The chance (in %) of each pet in an egg, including the player's luck
--- (data can be nil for the base odds). Returns a list of { Pet, Chance }
--- with the huge pet last.
 -- Chance (in %) of something rare after luck. Luck counts like extra tries
--- (square-rooted), so even x100 luck keeps huges and mutations special.
+-- (square-rooted), so even x100 luck keeps mutations special.
 local function withLuck(chance: number, luck: number): number
 	return (1 - (1 - chance / 100) ^ math.sqrt(luck)) * 100
 end
 
+-- The chance (in %) of each pet in an egg, including the player's luck
+-- (data can be nil for the base odds). Returns a list of { Pet, Chance }
+-- with the huge pet last (if the egg has one).
 function Config.eggChances(eggIndex: number, data)
 	local luck = Config.totalLuck(data)
 	local egg = Config.EGGS[eggIndex]
-	local hugeChance = withLuck(Config.HUGE_CHANCE, luck)
+	local hugeChance = if egg.HugeOdds then math.min(100 / egg.HugeOdds * luck ^ Config.HUGE_LUCK_POWER, 1) else 0
 
-	-- luck makes Rare and better pets more likely
-	local weights, total = {}, 0
+	-- luck makes Rare and better pets more likely (less and less for rarer ones)
+	local weights, total = Config.rarityWeights(eggIndex), 0
 	for i, rarity in ipairs(Config.RARITIES) do
-		weights[i] = rarity.Chance * (if i >= 3 then luck else 1)
+		weights[i] *= luck ^ rarity.LuckPower
 		total += weights[i]
 	end
 
@@ -331,8 +416,24 @@ function Config.eggChances(eggIndex: number, data)
 	for i, petName in ipairs(egg.Pets) do
 		table.insert(list, { Pet = petName, Chance = weights[i] / total * (100 - hugeChance) })
 	end
-	table.insert(list, { Pet = egg.Huge, Chance = hugeChance })
+	if egg.Huge then
+		table.insert(list, { Pet = egg.Huge, Chance = hugeChance })
+	end
 	return list
+end
+
+-- A chance (in %) the way kids read it: "1 in 4", "1 in 25K", and for the
+-- really tiny ones the percent ("0.00004%").
+function Config.chanceLabel(chance: number): string
+	if chance <= 0 then
+		return "0%"
+	end
+	local oneIn = 100 / chance
+	if oneIn < 100000 then
+		return "1 in " .. Config.formatNumber(math.max(1, math.floor(oneIn + 0.5)))
+	end
+	local digits = math.max(2, -math.floor(math.log10(chance)) + 1)
+	return (("%." .. digits .. "f"):format(chance):gsub("0+$", "")) .. "%"
 end
 
 -- Mutation chances (in %) with the player's luck applied.
@@ -399,7 +500,24 @@ end
 function Config.isRare(petName: string): boolean
 	local info = Config.PETS[petName]
 	return info ~= nil
-		and (info.Rarity == "Legendary" or info.Rarity == "Huge" or info.Mutation == "Rainbow" or info.Mutation == "Galaxy")
+		and (
+			info.Rarity == "Legendary"
+			or info.Rarity == "Mythical"
+			or info.Rarity == "Huge"
+			or info.Mutation == "Rainbow"
+			or info.Mutation == "Galaxy"
+		)
+end
+
+-- Is this hatch so rare it gets the special hatch animation? (Mythical,
+-- Huge, or anything 1 in 10,000 or rarer.)
+function Config.isEpic(petName: string): boolean
+	local info = Config.PETS[petName]
+	if not info then
+		return false
+	end
+	local odds = Config.odds(petName)
+	return info.Rarity == "Mythical" or info.Rarity == "Huge" or (odds ~= nil and odds >= 10000)
 end
 
 -- Shop upgrades ----------------------------------------------------------------

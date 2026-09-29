@@ -1,7 +1,6 @@
 -- Egg shrines: every egg in the hatchery gets its own little themed world
 -- (Config.EGGS[i].Theme): a colored pad under the pedestal plus matching
--- props around it, a name plaque in front and a glass dome that the client
--- shows while the egg is still locked.
+-- props around it.
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -16,7 +15,7 @@ local CYL = Enum.PartType.Cylinder
 local UP = CFrame.Angles(0, 0, math.rad(90)) -- stands a cylinder up
 
 -- Everything for one shrine is built relative to `space`: a CFrame at the
--- pedestal's floor center where -Z points AWAY from the hatchery's middle.
+-- pedestal's floor center where -Z points AWAY from the walkway.
 -- spot(x, out, y): x = sideways, out = how far outward, y = height.
 local function shrineBuilder(model, space)
 	local b = {}
@@ -301,6 +300,41 @@ THEMES.Mythic = function(b)
 	})
 end
 
+THEMES.Party = function(b)
+	-- balloons on strings, gift boxes and confetti
+	local balloonColors = {
+		Color3.fromRGB(255, 90, 130),
+		Color3.fromRGB(255, 210, 60),
+		Color3.fromRGB(90, 190, 255),
+		Color3.fromRGB(150, 110, 255),
+		Color3.fromRGB(90, 220, 140),
+	}
+	for i, spot in ipairs({ { -6.5, 2 }, { -4.5, 5.5 }, { 0, 7 }, { 4.5, 5.5 }, { 6.5, 2 } }) do
+		local height = 6 + (i % 2) * 1.5
+		b.column(spot[1], spot[2], height, 0.08, Color3.new(1, 1, 1))
+		b.blob(spot[1], spot[2], height + 1, 1.8, Vector3.new(0.9, 1.15, 0.9), balloonColors[i])
+	end
+	for i, spot in ipairs({ { -6.5, -3.5 }, { 6.5, -3.5 }, { -3, 7.5 } }) do
+		local size = 1.6 + (i % 2) * 0.5
+		b.part({ Size = Vector3.one * size, CFrame = b.spot(spot[1], spot[2], size / 2) * CFrame.Angles(0, i, 0), Color = balloonColors[i + 1] })
+		b.part({ Size = Vector3.new(size + 0.1, size + 0.1, 0.35), CFrame = b.spot(spot[1], spot[2], size / 2) * CFrame.Angles(0, i, 0), Color = Color3.new(1, 1, 1) })
+	end
+	b.particles(9, {
+		Rate = 14,
+		Lifetime = NumberRange.new(2.5, 3.5),
+		Speed = NumberRange.new(0.5, 1),
+		EmissionDirection = Enum.NormalId.Bottom,
+		RotSpeed = NumberRange.new(-200, 200),
+		Size = NumberSequence.new(0.3),
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, balloonColors[1]),
+			ColorSequenceKeypoint.new(0.33, balloonColors[2]),
+			ColorSequenceKeypoint.new(0.66, balloonColors[3]),
+			ColorSequenceKeypoint.new(1, balloonColors[4]),
+		}),
+	})
+end
+
 -- Pad colors under each shrine
 local PAD = {
 	Meadow = Color3.fromRGB(190, 235, 170),
@@ -314,57 +348,13 @@ local PAD = {
 	Space = Color3.fromRGB(60, 55, 110),
 	Magic = Color3.fromRGB(205, 180, 255),
 	Mythic = Color3.fromRGB(255, 235, 170),
+	Party = Color3.fromRGB(255, 225, 150),
 }
 
--- The name plaque in front of the egg. Its labels are named Title / Cost /
--- Lock; the client shows or hides "Lock" for each player.
-local function plaque(b, egg, eggIndex, space)
-	local pos = b.spot(0, -6.8, 0).Position
-	local cf = CFrame.lookAt(pos, World.EGG_CENTER + Vector3.new(0, pos.Y, 0)) * CFrame.new(0, 1.6, 0) * CFrame.Angles(math.rad(-20), 0, 0)
-	local board = b.part({ Name = "Plaque", Size = Vector3.new(6.5, 2.6, 0.3), CFrame = cf, Color = Color3.new(1, 1, 1), CanCollide = true })
-	b.part({ Name = "PlaqueLeg", Size = Vector3.new(0.4, 1.4, 0.4), CFrame = CFrame.new(pos + Vector3.new(0, 0.7, 0)), Color = egg.Color })
-
-	local gui = Instance.new("SurfaceGui")
-	gui.Name = "Sign"
-	gui.Face = Enum.NormalId.Front
-	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	gui.PixelsPerStud = 50
-	gui.LightInfluence = 0
-	gui.Parent = board
-
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.fromScale(1, 1)
-	frame.BackgroundColor3 = Color3.new(1, 1, 1)
-	frame.Parent = gui
-	local gradient = Instance.new("UIGradient")
-	gradient.Color = ColorSequence.new(egg.Color:Lerp(Color3.new(1, 1, 1), 0.35), egg.Color:Lerp(Color3.fromRGB(40, 20, 70), 0.35))
-	gradient.Rotation = 90
-	gradient.Parent = frame
-
-	local function line(name, text, color, y, height)
-		local label = Instance.new("TextLabel")
-		label.Name = name
-		label.Position = UDim2.fromScale(0.05, y)
-		label.Size = UDim2.fromScale(0.9, height)
-		label.BackgroundTransparency = 1
-		label.Text = text
-		label.TextColor3 = color
-		label.TextStrokeTransparency = 0.3
-		label.Font = Enum.Font.FredokaOne
-		label.TextScaled = true
-		label.Parent = frame
-		return label
-	end
-	line("Title", egg.Name, Color3.new(1, 1, 1), 0.06, 0.42)
-	line("Cost", "💰 " .. Config.formatNumber(Config.eggCost(eggIndex)), Color3.fromRGB(255, 235, 120), 0.5, 0.4)
-	local lock = line("Lock", "🔒 Rebirth " .. Config.eggRequiredRebirths(eggIndex), Color3.fromRGB(255, 120, 120), 0.5, 0.4)
-	lock.Visible = false
-end
-
--- Builds the shrine for egg `eggIndex` into its model.
-function Shrines.build(model, eggIndex, floorPosition)
+-- Builds the shrine for egg `eggIndex` into its model. `outward` points away
+-- from the walkway (the shrine's back).
+function Shrines.build(model, eggIndex, floorPosition, outward)
 	local egg = Config.EGGS[eggIndex]
-	local outward = (floorPosition - World.EGG_CENTER) * Vector3.new(1, 0, 1)
 	local space = CFrame.lookAt(floorPosition, floorPosition + outward.Unit)
 	local b = shrineBuilder(model, space)
 
@@ -372,7 +362,7 @@ function Shrines.build(model, eggIndex, floorPosition)
 	b.part({
 		Name = "Pad",
 		Shape = CYL,
-		Size = Vector3.new(0.12, 15, 15),
+		Size = Vector3.new(0.12, 14, 14),
 		CFrame = b.spot(0, 0, 0.1) * UP,
 		Color = PAD[egg.Theme] or egg.Color:Lerp(Color3.new(1, 1, 1), 0.6),
 	})
@@ -380,22 +370,6 @@ function Shrines.build(model, eggIndex, floorPosition)
 	local theme = THEMES[egg.Theme]
 	if theme then
 		theme(b)
-	end
-	plaque(b, egg, eggIndex, space)
-
-	-- frosted dome over the egg; the client shows it while the egg is locked
-	local shell = model:FindFirstChild("Egg")
-	if shell then
-		b.part({
-			Name = "LockDome",
-			Shape = BALL,
-			Size = Vector3.one * 9.5,
-			CFrame = CFrame.new(shell.Position),
-			Color = Color3.fromRGB(225, 225, 245),
-			Material = Enum.Material.Glass,
-			Transparency = 1,
-			CastShadow = false,
-		})
 	end
 end
 

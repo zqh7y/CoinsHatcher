@@ -35,7 +35,9 @@ local function render()
 	local found, total = 0, 0
 	for eggIndex, egg in ipairs(Config.EGGS) do
 		local pets = table.clone(egg.Pets)
-		table.insert(pets, egg.Huge)
+		if egg.Huge then
+			table.insert(pets, egg.Huge)
+		end
 
 		local eggFound = 0
 		for _, petName in ipairs(pets) do
@@ -54,13 +56,13 @@ local function render()
 		})
 
 		local row = Instance.new("Frame")
-		row.Size = UDim2.new(1, -12, 0, 160)
+		row.Size = UDim2.new(1, -12, 0, 140)
 		row.BackgroundTransparency = 1
 		row.LayoutOrder = eggIndex * 2
 		row.Parent = list
 		local grid = Instance.new("UIGridLayout")
-		grid.CellSize = UDim2.fromOffset(122, 156)
-		grid.CellPadding = UDim2.fromOffset(8, 0)
+		grid.CellSize = UDim2.fromOffset(100, 136) -- up to 6 pets per egg fit in a row
+		grid.CellPadding = UDim2.fromOffset(6, 0)
 		grid.SortOrder = Enum.SortOrder.LayoutOrder
 		grid.Parent = row
 

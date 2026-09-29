@@ -14,7 +14,7 @@ local folder
 -- The main area is round; the egg area is a rectangle.
 local AREAS = {
 	{ Center = World.MAIN_CENTER, Radius = World.MAIN_RADIUS },
-	{ Center = World.EGG_CENTER, Radius = World.EGG_RADIUS },
+	{ Center = World.EGG_CENTER, HalfX = World.EGG_HALF_X, HalfZ = World.EGG_HALF_Z },
 }
 
 local NEAR_HILL_COLORS = {
@@ -755,136 +755,112 @@ local function outside(area, index)
 		mushroom(spotNearWall(area, 3, 22, 0), rng:NextNumber(0.9, 2))
 	end
 	local angle = if index == 1 then math.rad(215) else math.rad(330)
-	local dist = area.Radius + 32
+	local dist = (area.Radius or area.HalfX) + 32
 	windmill(area.Center + Vector3.new(math.cos(angle) * dist, 0, math.sin(angle) * dist), area.Center)
 end
 
 -- Hatchery decorations -------------------------------------------------------
 
-
--- a spot inside the hatchery; angle 90 is the gate side (+Z)
-local function hatcherySpot(angleDegrees, dist, y)
-	local a = math.rad(angleDegrees)
-	return World.EGG_CENTER + Vector3.new(math.cos(a) * dist, y or World.FLOOR_Y, math.sin(a) * dist)
+-- a spot in the hatchery: x across (+X = the egg side), z along (+Z = gate end)
+local function hatcherySpot(x, z, y)
+	return World.EGG_CENTER + Vector3.new(x, y or World.FLOOR_Y, z)
 end
 
--- The hatchery's centerpiece: a giant glowing crystal egg floating over a
--- tiered pedestal, with little eggs orbiting it.
-local function crystalEgg(base)
-	local function tier(height, width, y, color, material)
+-- The speed lane down the middle: a glowing strip with arrows. Standing on it
+-- makes you run much faster (the client checks the part named "SpeedLane").
+local LANE_X, LANE_WIDTH = -4, 6
+local LANE_FROM, LANE_TO = World.EGG_HALF_Z - 16, -World.EGG_HALF_Z + 28
+
+local function speedLane()
+	local eggArea = workspace:WaitForChild("EggArea")
+	local length = LANE_FROM - LANE_TO
+	local center = hatcherySpot(LANE_X, (LANE_FROM + LANE_TO) / 2)
+	part({
+		Name = "SpeedLane",
+		Size = Vector3.new(LANE_WIDTH, 0.2, length),
+		Position = center + Vector3.new(0, 0.1, 0),
+		Color = Color3.fromRGB(90, 200, 255),
+		CanCollide = false,
+		CastShadow = false,
+		Parent = eggArea,
+	})
+	-- white side rails
+	for _, side in ipairs({ -1, 1 }) do
 		part({
-			Name = "CenterTier",
-			Shape = Enum.PartType.Cylinder,
-			Size = Vector3.new(height, width, width),
-			CFrame = CFrame.new(base + Vector3.new(0, y, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-			Color = color,
-			Material = material,
-		})
-	end
-	tier(1, 11, 0.5, Color3.fromRGB(215, 195, 255))
-	tier(0.3, 11.6, 1.05, Color3.fromRGB(255, 160, 215), Enum.Material.Neon)
-	tier(1, 8, 1.6, Color3.fromRGB(255, 250, 245))
-	tier(0.8, 5, 2.5, Color3.fromRGB(255, 225, 240))
-
-	local center = base + Vector3.new(0, 8.5, 0)
-	local shell = part({
-		Name = "CrystalEgg",
-		Shape = Enum.PartType.Ball,
-		Size = Vector3.one * 7,
-		Position = center,
-		Color = Color3.fromRGB(255, 195, 235),
-		Material = Enum.Material.Glass,
-		Transparency = 0.3,
-		CanCollide = false,
-		CastShadow = false,
-	})
-	local core = part({
-		Name = "CrystalCore",
-		Shape = Enum.PartType.Ball,
-		Size = Vector3.one * 3.4,
-		Position = center,
-		Color = Color3.fromRGB(255, 150, 215),
-		Material = Enum.Material.Neon,
-		CanCollide = false,
-		CastShadow = false,
-	})
-	for _, p in ipairs({ shell, core }) do
-		local mesh = Instance.new("SpecialMesh")
-		mesh.MeshType = Enum.MeshType.Sphere
-		mesh.Scale = Vector3.new(0.85, 1.15, 0.85)
-		mesh.Parent = p
-		CollectionService:AddTag(p, "Bob") -- the client floats them
-	end
-	local light = Instance.new("PointLight")
-	light.Color = Color3.fromRGB(255, 180, 230)
-	light.Range = 22
-	light.Brightness = 1.5
-	light.Parent = core
-	local sparkles = Instance.new("Sparkles")
-	sparkles.SparkleColor = Color3.fromRGB(255, 220, 245)
-	sparkles.Parent = core
-
-	-- mini eggs orbiting around it (spun by the client)
-	local orbit = Instance.new("Model")
-	orbit.Name = "EggOrbit"
-	local hubCFrame = CFrame.new(center) * CFrame.Angles(-math.pi / 2, 0, 0) -- local Z points up
-	local hub = part({ Name = "Hub", Size = Vector3.one * 0.2, CFrame = hubCFrame, Transparency = 1, CanCollide = false, Parent = orbit })
-	for i = 1, 6 do
-		local a = i / 6 * math.pi * 2
-		local mini = part({
-			Name = "MiniEgg",
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * 1.4,
-			CFrame = hubCFrame * CFrame.new(math.cos(a) * 5.5, math.sin(a) * 5.5, math.sin(a * 2) * 0.6),
-			Color = PASTELS[(i - 1) % #PASTELS + 1],
+			Name = "LaneRail",
+			Size = Vector3.new(0.5, 0.35, length),
+			Position = center + Vector3.new(side * (LANE_WIDTH / 2 + 0.25), 0.17, 0),
+			Color = Color3.new(1, 1, 1),
 			CanCollide = false,
-			Parent = orbit,
 		})
-		local mesh = Instance.new("SpecialMesh")
-		mesh.MeshType = Enum.MeshType.Sphere
-		mesh.Scale = Vector3.new(0.85, 1.15, 0.85)
-		mesh.Parent = mini
 	end
-	orbit.PrimaryPart = hub
-	orbit:SetAttribute("SpinSpeed", 0.5)
-	orbit.Parent = folder
-	CollectionService:AddTag(orbit, "Spin")
+	-- arrows (two slanted bars each) pointing down the hall; the client makes
+	-- them light up in a wave
+	local arrows = Instance.new("Folder")
+	arrows.Name = "LaneArrows"
+	arrows.Parent = eggArea
+	local count = math.floor(length / 5)
+	for i = 0, count - 1 do
+		local z = LANE_FROM - 2.5 - i * 5
+		for _, side in ipairs({ -1, 1 }) do
+			local arrow = part({
+				Name = "Arrow",
+				Size = Vector3.new(2.6, 0.08, 0.6),
+				CFrame = CFrame.new(hatcherySpot(LANE_X + side * 0.9, z + 0.6, World.FLOOR_Y + 0.24)) * CFrame.Angles(0, -side * math.rad(35), 0),
+				Color = Color3.new(1, 1, 1),
+				Material = Enum.Material.Neon,
+				CanCollide = false,
+				CastShadow = false,
+				Parent = arrows,
+			})
+			arrow:SetAttribute("Step", i)
+		end
+	end
 end
 
 local function hatchery()
-	-- candy gate over the arrival spot with a sign
-	gate(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 47), "🥚 HATCHERY 🥚", Color3.fromRGB(255, 120, 160), Color3.fromRGB(200, 170, 255))
+	-- candy gate at the entrance, with the portal home in it
+	local gateBase = hatcherySpot(0, World.EGG_HALF_Z - 6)
+	gate(gateBase, "🥚 HATCHERY 🥚", Color3.fromRGB(255, 120, 160), Color3.fromRGB(200, 170, 255))
+	gatePortal(gateBase, "Main", "🏠 Home", Color3.fromRGB(255, 130, 200), Color3.fromRGB(255, 220, 120))
 
-	gatePortal(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 47), "Main", "🏠 Home", Color3.fromRGB(255, 130, 200), Color3.fromRGB(255, 220, 120))
+	speedLane()
 
-	-- the crystal egg in the middle, and a path to it from the gate
-	crystalEgg(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 0))
-	stonePath(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 45), World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 13))
+	-- a party arch in front of the Release egg at the far end
+	gate(hatcherySpot(0, -World.EGG_HALF_Z + 18.5), "🎉 RELEASE 🎉", Color3.fromRGB(255, 200, 60), Color3.fromRGB(255, 110, 170))
 
-	-- neat round hedges evenly spaced along the fence (gate kept clear)
-	for angle = 0, 345, 15 do
-		if math.abs(angle - 90) > 20 then
-			local base = hatcherySpot(angle, 48.5)
-			part({
-				Name = "Hedge",
-				Shape = Enum.PartType.Ball,
-				Size = Vector3.one * 3.6,
-				Position = base + Vector3.new(0, 1.6, 0),
-				Color = Color3.fromRGB(100, 185, 95),
-				CanCollide = false,
-			})
-		end
+	-- round hedges and lamps along the left wall, flowers in between
+	for z = -World.EGG_HALF_Z + 6, World.EGG_HALF_Z - 12, 8 do
+		part({
+			Name = "Hedge",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * 3.4,
+			Position = hatcherySpot(-12.6, z, World.FLOOR_Y + 1.4),
+			Color = Color3.fromRGB(100, 185, 95),
+			CanCollide = false,
+		})
+		flower(hatcherySpot(-11.2, z + 4))
+	end
+	for z = -World.EGG_HALF_Z + 30, World.EGG_HALF_Z - 20, 30 do
+		lamp(hatcherySpot(-10, z))
 	end
 
-	-- lamps between the shrines, just outside the walkway
-	for _, angle in ipairs({ 45, 135, 225, 315 }) do
-		lamp(hatcherySpot(angle, 44))
+	-- soft stripes across the floor of the walkway
+	for z = -World.EGG_HALF_Z + 4, World.EGG_HALF_Z - 4, 10 do
+		part({
+			Name = "FloorStripe",
+			Size = Vector3.new(14, 0.05, 5),
+			Position = hatcherySpot(-7, z, World.FLOOR_Y + 0.02),
+			Color = Color3.fromRGB(245, 238, 255),
+			CanCollide = false,
+			CastShadow = false,
+		})
 	end
 
 	-- a few soft sparkles floating in the air
 	local air = part({
 		Name = "SparkleAir",
-		Size = Vector3.new(90, 10, 90),
+		Size = Vector3.new(World.EGG_HALF_X * 2 - 2, 10, World.EGG_HALF_Z * 2 - 4),
 		Position = World.EGG_CENTER + Vector3.new(0, 9, 0),
 		Transparency = 1,
 		CanCollide = false,
@@ -895,7 +871,7 @@ local function hatchery()
 	local sparkles = Instance.new("ParticleEmitter")
 	sparkles.Shape = Enum.ParticleEmitterShape.Box
 	sparkles.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
-	sparkles.Rate = 6
+	sparkles.Rate = 8
 	sparkles.Lifetime = NumberRange.new(3, 5)
 	sparkles.Speed = NumberRange.new(0.5, 1.2)
 	sparkles.SpreadAngle = Vector2.new(180, 180)

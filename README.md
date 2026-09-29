@@ -38,15 +38,25 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Juice**: breakables pop in, flash on hit and burst into coins; coins and
   diamonds fly into rolling counters; confetti for purchases, new pets,
   gifts and rare hatches; a big celebration on rebirth.
-- **Hatchery** (round egg area): a clean plaza with a walkway ring, a
-  floating crystal egg with orbiting mini eggs in the middle, and a themed
-  **shrine** for every egg (meadow, forest, ocean, lava, candy, snow,
-  jungle, desert, space, magic, mythic) with a name plaque. Locked eggs sit
-  under a frosted dome. Walk up to an egg to see what's inside.
-  Each rebirth unlocks a new egg. Every egg has a super rare **Huge** pet.
-- **Hatching**: Hatch 1, Hatch 3 or Auto from the egg popup. Any pet can
-  come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy; not huges) for extra power. Every
-  pet shows its odds ("1 in 5K") and rare hatches are announced to the server.
+- **Hatchery** (a long 30 x 200 hall): you arrive at the gate and walk down
+  the hall. A glowing **speed lane** runs down the middle (you run much
+  faster on it). The eggs stand along the right side, one every 15 studs,
+  each on a detailed stand with its own themed **shrine** (meadow, forest,
+  ocean, lava, candy, snow, jungle, desert, space, magic, mythic). Eggs you
+  haven't unlocked are plain black eggs with just "Rebirth N" over them.
+  The **Release Egg** (party pets, open for everyone) waits at the far end
+  under a party arch.
+- **Hatching**: walk up to an egg for a small popup on top of it: its pets in
+  a 3-wide grid with the chance under each ("1 in 4", tiny ones as
+  "0.00004%") and three buttons with the price: **E** buy 1, **F** buy 3,
+  **T** auto. Every egg has 5 pets (Common to **Mythical**); the Mythical one
+  is always really hard and gets harder in better eggs (1 in 1,000 in the
+  Basic Egg, about 1 in 6M in the Mythic Egg). Only some eggs have a **Huge**
+  (Ocean, Snow, Space, Mythic and Release), with very low odds even with
+  max luck. Any pet can come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy;
+  not huges). Hatching plays an animation with light rays; Mythical, Huge
+  and 1-in-10K+ pets get a special one. Rare hatches are announced to the
+  server.
 - **Big numbers**: numbers start in the hundreds/thousands and grow ×4 per
   rebirth (shown as 1.5K, 4.5M...); pets land 3x critical hits.
 - **Boosts**: small pills in the bottom right show active potions, perks and
@@ -72,7 +82,7 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   rebirths and the rarest pet ever hatched (by its odds). Global, refreshed
   every minute, with the players in the server shown live.
 - **Rebirth**: big reward cards (x4 coin value / +300%, diamonds, the new
-  egg, 100% pets kept) and a coin progress bar. Resets coins and the upgrade board; keeps pets, index, diamonds and perks. 10 rebirths, each unlocking a new egg (11 eggs).
+  egg, 100% pets kept) and a coin progress bar. Resets coins and the upgrade board; keeps pets, index, diamonds and perks. 10 rebirths, each unlocking a new egg (11 eggs, plus the Release Egg).
 
 All numbers (costs, coin health, pet power, chances, upgrades, pet looks)
 are in `src/shared/Config.luau`.

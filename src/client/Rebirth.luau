@@ -200,7 +200,7 @@ local function render()
 	local egg = Config.EGGS[nextEgg]
 	eggCard.Big.Text = if egg then (egg.Name:gsub(" Egg", "")) else "?"
 	eggCard.Chip.Text = "UNLOCK"
-	if shownEgg ~= nextEgg and nextEgg <= Config.EGG_COUNT then
+	if shownEgg ~= nextEgg and nextEgg <= Config.REBIRTH_EGGS then
 		shownEgg = nextEgg
 		if stopSpin then
 			stopSpin()

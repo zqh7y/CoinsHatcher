@@ -459,26 +459,6 @@ local function updateWorld()
 		local shade = patch:GetAttribute("Shade") or 0
 		patch.Color = floorColor:Lerp(if shade < 0 then Color3.new(0, 0, 0) else Color3.new(1, 1, 1), math.abs(shade))
 	end
-
-	-- show a lock on eggs we haven't unlocked yet
-	local eggArea = workspace:FindFirstChild("EggArea")
-	local eggs = eggArea and eggArea:FindFirstChild("Eggs")
-	if eggs then
-		for _, egg in ipairs(eggs:GetChildren()) do
-			local lock = egg:FindFirstChild("Lock", true)
-			local cost = egg:FindFirstChild("Cost", true)
-			local required = egg:GetAttribute("RequiredRebirths")
-			if lock and required then
-				local locked = data.Rebirths < required
-				lock.Visible = locked
-				-- the plaque shows the price once it's unlocked
-				if cost then
-					cost.Visible = not locked
-				end
-			end
-		end
-	end
-
 end
 
 State.Changed.Event:Connect(updateWorld)
@@ -491,8 +471,3 @@ task.spawn(function()
 	end
 end)
 
--- eggs are built by the server and may replicate after we start
-task.spawn(function()
-	workspace:WaitForChild("EggArea"):WaitForChild("Eggs").DescendantAdded:Connect(updateWorld)
-	updateWorld()
-end)
