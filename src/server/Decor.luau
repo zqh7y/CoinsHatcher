@@ -29,10 +29,10 @@ local FAR_HILL_COLORS = {
 	Color3.fromRGB(135, 195, 125),
 }
 local TREE_COLORS = {
-	Color3.fromRGB(110, 200, 90),
-	Color3.fromRGB(90, 185, 100),
+	Color3.fromRGB(100, 200, 80),
+	Color3.fromRGB(80, 185, 90),
+	Color3.fromRGB(120, 210, 70),
 	Color3.fromRGB(255, 170, 205), -- pink blossom
-	Color3.fromRGB(255, 205, 120), -- orange
 }
 local FLOWER_COLORS = {
 	Color3.fromRGB(255, 110, 150),
@@ -105,25 +105,63 @@ local function hillRing(areaIndex, count, minSize, maxSize, gap, colors)
 	end
 end
 
+-- A chunky cartoon tree like in pet simulator games: a thick trunk and a big
+-- bubbly crown of overlapping leaf balls.
 local function tree(pos)
-	local height = rng:NextNumber(5, 9)
-	local canopy = rng:NextNumber(6, 9)
+	local height = rng:NextNumber(6, 9)
+	local leaf = pick(TREE_COLORS)
 	part({
 		Name = "Trunk",
 		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(height, 1.4, 1.4),
+		Size = Vector3.new(height, 2, 2),
 		CFrame = CFrame.new(pos + Vector3.new(0, height / 2, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-		Color = Color3.fromRGB(170, 115, 75),
+		Color = Color3.fromRGB(150, 95, 60),
 		CanCollide = false,
 	})
-	part({
-		Name = "Leaves",
-		Shape = Enum.PartType.Ball,
-		Size = Vector3.one * canopy,
-		Position = pos + Vector3.new(0, height + canopy * 0.3, 0),
-		Color = pick(TREE_COLORS),
+	local crown = pos + Vector3.new(0, height + 2, 0)
+	local size = rng:NextNumber(7, 9)
+	for _, offset in ipairs({ Vector3.new(0, 1.2, 0), Vector3.new(-2.4, -0.6, 0.8), Vector3.new(2.3, -0.4, -0.6), Vector3.new(0.4, -0.8, 2.4) }) do
+		part({
+			Name = "Leaves",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * size * rng:NextNumber(0.75, 1),
+			Position = crown + offset,
+			Color = leaf:Lerp(Color3.new(1, 1, 1), rng:NextNumber(0, 0.12)),
+			CanCollide = false,
+		})
+	end
+end
+
+-- Textured grass: darker/lighter patches and little grass tufts on the main
+-- area floor. Tagged "FloorPatch" with a Shade (-1..1) so the client can tint
+-- them to match the floor color of each rebirth.
+local function floorPatch(pos, size, shade)
+	local patch = part({
+		Name = "GrassPatch",
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(0.06, size, size * rng:NextNumber(0.6, 1)),
+		CFrame = CFrame.new(pos + Vector3.new(0, 0.03, 0)) * CFrame.Angles(0, rng:NextNumber(0, 6.28), 0) * CFrame.Angles(0, 0, math.rad(90)),
+		Color = Color3.fromRGB(110, 200, 85),
+		CastShadow = false,
 		CanCollide = false,
 	})
+	patch:SetAttribute("Shade", shade)
+	CollectionService:AddTag(patch, "FloorPatch")
+end
+
+local function grassTuft(pos)
+	for k = -1, 1 do
+		local blade = part({
+			Name = "GrassTuft",
+			Size = Vector3.new(0.3, rng:NextNumber(0.9, 1.4), 0.3),
+			CFrame = CFrame.new(pos + Vector3.new(k * 0.25, 0.5, 0)) * CFrame.Angles(0, rng:NextNumber(0, 6.28), math.rad(k * 20)),
+			Color = Color3.fromRGB(90, 170, 70),
+			CastShadow = false,
+			CanCollide = false,
+		})
+		blade:SetAttribute("Shade", -0.25)
+		CollectionService:AddTag(blade, "FloorPatch")
+	end
 end
 
 local function flower(pos)
@@ -799,6 +837,36 @@ local function hatchery()
 	sparkles.Parent = air
 end
 
+local function texturedGrass()
+	local zoneRadius = World.COIN_ZONE / 2
+	for _ = 1, 45 do
+		local a = rng:NextNumber(0, math.pi * 2)
+		local d = rng:NextNumber(zoneRadius + 3, World.MAIN_RADIUS - 5)
+		floorPatch(World.MAIN_CENTER + Vector3.new(math.cos(a) * d, World.FLOOR_Y, math.sin(a) * d), rng:NextNumber(3, 8), if rng:NextNumber() < 0.6 then -0.12 else 0.12)
+	end
+	for _ = 1, 70 do
+		local a = rng:NextNumber(0, math.pi * 2)
+		local d = rng:NextNumber(zoneRadius + 2, World.MAIN_RADIUS - 3)
+		grassTuft(World.MAIN_CENTER + Vector3.new(math.cos(a) * d, World.FLOOR_Y, math.sin(a) * d))
+	end
+	-- a few on the ground outside the fences too (fixed green)
+	for _, area in ipairs(AREAS) do
+		for _ = 1, 40 do
+			local spot = spotNearWall(area, 3, 30, 0)
+			for k = -1, 1 do
+				part({
+					Name = "GrassTuft",
+					Size = Vector3.new(0.3, rng:NextNumber(0.9, 1.4), 0.3),
+					CFrame = CFrame.new(spot + Vector3.new(k * 0.25, 0.5, 0)) * CFrame.Angles(0, rng:NextNumber(0, 6.28), math.rad(k * 20)),
+					Color = Color3.fromRGB(75, 165, 60),
+					CastShadow = false,
+					CanCollide = false,
+				})
+			end
+		end
+	end
+end
+
 function Decor.build()
 	folder = Instance.new("Folder")
 	folder.Name = "Decor"
@@ -809,6 +877,7 @@ function Decor.build()
 	hillRing(1, 18, 90, 150, 50, NEAR_HILL_COLORS)
 	hillRing(1, 18, 180, 320, 150, FAR_HILL_COLORS)
 	mainArea()
+	texturedGrass()
 	hatchery()
 
 	hillRing(2, 20, 40, 90, 10, NEAR_HILL_COLORS)

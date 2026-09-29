@@ -163,6 +163,7 @@ local function createEggModel(eggIndex, parent)
 		Position = base + Vector3.new(0, 5.65, 0),
 		Color = egg.Color,
 		Material = Enum.Material.SmoothPlastic,
+		Reflectance = 0.2,
 		Parent = model,
 	})
 

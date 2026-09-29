@@ -1,5 +1,6 @@
 -- Client entry point: the coin counter, the icon buttons on the left, and
 -- keeping the world in sync with our data. Each menu lives in its own module.
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -238,6 +239,12 @@ local function updateWorld()
 	if coinZone then
 		coinZone.Color = Config.areaColor(data.Rebirths):Lerp(Color3.new(1, 1, 1), 0.35)
 	end
+	-- grass patches and tufts follow the floor color (darker/lighter shades)
+	local floorColor = Config.areaColor(data.Rebirths)
+	for _, patch in ipairs(CollectionService:GetTagged("FloorPatch")) do
+		local shade = patch:GetAttribute("Shade") or 0
+		patch.Color = floorColor:Lerp(if shade < 0 then Color3.new(0, 0, 0) else Color3.new(1, 1, 1), math.abs(shade))
+	end
 
 	-- show a lock on eggs we haven't unlocked yet
 	local eggArea = workspace:FindFirstChild("EggArea")
@@ -262,6 +269,7 @@ local function updateWorld()
 end
 
 State.Changed.Event:Connect(updateWorld)
+CollectionService:GetInstanceAddedSignal("FloorPatch"):Connect(updateWorld)
 remotes.DataChanged.OnClientEvent:Connect(State.set)
 task.spawn(function()
 	local initial = remotes.GetData:InvokeServer()

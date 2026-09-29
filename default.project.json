@@ -29,9 +29,9 @@
         "$properties": {
           "Anchored": true,
           "Color": [
-            0.43137,
-            0.76471,
-            0.33333
+            0.37647,
+            0.77255,
+            0.31373
           ],
           "Locked": true,
           "Position": [
@@ -2686,7 +2686,8 @@
                   0.96078,
                   0.94118,
                   0.88235
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -2875,7 +2876,8 @@
                   0.35294,
                   0.58824,
                   0.27451
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -3064,7 +3066,8 @@
                   0.23529,
                   0.54902,
                   0.82353
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -3253,7 +3256,8 @@
                   0.86275,
                   0.31373,
                   0.11765
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -3442,7 +3446,8 @@
                   1.0,
                   0.58824,
                   0.78431
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -3631,7 +3636,8 @@
                   0.78431,
                   0.90196,
                   1.0
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -3820,7 +3826,8 @@
                   0.23529,
                   0.66667,
                   0.31373
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -4009,7 +4016,8 @@
                   0.94118,
                   0.78431,
                   0.47059
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -4198,7 +4206,8 @@
                   0.31373,
                   0.23529,
                   0.62745
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -4387,7 +4396,8 @@
                   0.70588,
                   0.43137,
                   1.0
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -4576,7 +4586,8 @@
                   1.0,
                   0.84314,
                   0.31373
-                ]
+                ],
+                "Reflectance": 0.2
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -4609,35 +4620,36 @@
     "Lighting": {
       "$properties": {
         "Ambient": [
-          0.47059,
-          0.47059,
-          0.5098
+          0.52941,
+          0.52941,
+          0.58824
         ],
         "OutdoorAmbient": [
-          0.62745,
-          0.62745,
-          0.66667
+          0.68627,
+          0.68627,
+          0.7451
         ],
-        "Brightness": 3,
-        "ClockTime": 14,
+        "Brightness": 3.2,
+        "ClockTime": 13.5,
         "GlobalShadows": true,
         "Outlines": false,
         "Technology": "ShadowMap",
-        "EnvironmentDiffuseScale": 1,
-        "EnvironmentSpecularScale": 0.5
+        "EnvironmentDiffuseScale": 0.8,
+        "EnvironmentSpecularScale": 1,
+        "ShadowSoftness": 0.35
       },
       "Sky": {
         "$className": "Sky",
         "$properties": {
-          "SunAngularSize": 14,
+          "SunAngularSize": 16,
           "MoonAngularSize": 8
         }
       },
       "Atmosphere": {
         "$className": "Atmosphere",
         "$properties": {
-          "Density": 0.32,
-          "Offset": 0.2,
+          "Density": 0.25,
+          "Offset": 0.1,
           "Color": [
             0.78431,
             0.88235,
@@ -4649,23 +4661,35 @@
             1.0
           ],
           "Glare": 0,
-          "Haze": 1.2
+          "Haze": 0.8
         }
       },
       "ColorCorrection": {
         "$className": "ColorCorrectionEffect",
         "$properties": {
-          "Saturation": 0.25,
-          "Contrast": 0.05,
-          "Brightness": 0.02
+          "Saturation": 0.3,
+          "Contrast": 0.12,
+          "Brightness": 0.03,
+          "TintColor": [
+            1.0,
+            0.98824,
+            0.96078
+          ]
         }
       },
       "Bloom": {
         "$className": "BloomEffect",
         "$properties": {
-          "Intensity": 0.35,
-          "Size": 24,
+          "Intensity": 0.5,
+          "Size": 28,
           "Threshold": 0.95
+        }
+      },
+      "SunRays": {
+        "$className": "SunRaysEffect",
+        "$properties": {
+          "Intensity": 0.05,
+          "Spread": 0.5
         }
       }
     },

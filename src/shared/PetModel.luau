@@ -64,6 +64,8 @@ function PetModel.build(petName: string, options)
 	body.Name = "Body"
 	body.Size = Vector3.one * PetModel.SIZE * s
 	body.Color, body.Material = paint(color)
+	-- a little gloss, like shiny plastic toys
+	body.Reflectance = if body.Material == Enum.Material.SmoothPlastic then 0.08 else 0
 	body.TopSurface = Enum.SurfaceType.Smooth
 	body.BottomSurface = Enum.SurfaceType.Smooth
 	body.Anchored = true
@@ -80,6 +82,7 @@ function PetModel.build(petName: string, options)
 		p.Shape = shape or Enum.PartType.Block
 		p.Size = size * s
 		p.Color, p.Material = paint(partColor)
+		p.Reflectance = if p.Material == Enum.Material.SmoothPlastic then 0.06 else 0
 		p.TopSurface = Enum.SurfaceType.Smooth
 		p.BottomSurface = Enum.SurfaceType.Smooth
 		p.CanCollide = false

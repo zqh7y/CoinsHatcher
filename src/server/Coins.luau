@@ -48,6 +48,8 @@ local function piece(model, origin, offset, size, color, shape)
 	p.CFrame = origin * offset
 	p.Color = color
 	p.Material = Enum.Material.SmoothPlastic
+	-- gold is shiny, like polished coins
+	p.Reflectance = if color == GOLD or color == GOLD_DARK then 0.3 else 0.05
 	p.TopSurface = Enum.SurfaceType.Smooth
 	p.BottomSurface = Enum.SurfaceType.Smooth
 	p.Anchored = true
