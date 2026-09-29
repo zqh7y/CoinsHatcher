@@ -53,15 +53,14 @@ local function hatch(player, eggIndex)
 	remotes.Hatched:FireClient(player, petName)
 end
 
-local function buildEgg(eggIndex, parent)
+-- Creates the pedestal + egg for an egg that isn't in the project file.
+local function createEggModel(eggIndex, parent)
 	local egg = Config.EGGS[eggIndex]
 	local x = (eggIndex - (Config.EGG_COUNT + 1) / 2) * SPACING
 	local base = World.EGG_CENTER + Vector3.new(x, World.FLOOR_Y, -15)
 
 	local model = Instance.new("Model")
 	model.Name = egg.Name
-	model:SetAttribute("EggIndex", eggIndex)
-	model:SetAttribute("RequiredRebirths", Config.eggRequiredRebirths(eggIndex))
 
 	local pedestal = Instance.new("Part")
 	pedestal.Name = "Pedestal"
@@ -87,6 +86,24 @@ local function buildEgg(eggIndex, parent)
 	mesh.MeshType = Enum.MeshType.Sphere
 	mesh.Scale = Vector3.new(0.85, 1.15, 0.85)
 	mesh.Parent = shell
+
+	model.Parent = parent
+	return model
+end
+
+-- Eggs are placed in default.project.json (so you can move them in Studio).
+-- This adds the sign and hatch prompt, and creates any egg that's missing.
+local function setupEgg(eggIndex, parent)
+	local egg = Config.EGGS[eggIndex]
+	local model = parent:FindFirstChild(egg.Name) or createEggModel(eggIndex, parent)
+	local shell = model:FindFirstChild("Egg")
+	if not shell then
+		warn(egg.Name .. " needs a part named Egg inside it")
+		return
+	end
+	model.PrimaryPart = shell
+	model:SetAttribute("EggIndex", eggIndex)
+	model:SetAttribute("RequiredRebirths", Config.eggRequiredRebirths(eggIndex))
 
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "Sign"
@@ -134,19 +151,20 @@ local function buildEgg(eggIndex, parent)
 		hatch(player, eggIndex)
 	end)
 
-	model.PrimaryPart = shell
-	model.Parent = parent
 end
 
 function Eggs.start(remoteFolder)
 	remotes = remoteFolder
 
-	local eggsFolder = Instance.new("Folder")
-	eggsFolder.Name = "Eggs"
-	eggsFolder.Parent = workspace.EggArea
+	local eggsFolder = workspace.EggArea:FindFirstChild("Eggs")
+	if not eggsFolder then
+		eggsFolder = Instance.new("Folder")
+		eggsFolder.Name = "Eggs"
+		eggsFolder.Parent = workspace.EggArea
+	end
 
 	for eggIndex = 1, Config.EGG_COUNT do
-		buildEgg(eggIndex, eggsFolder)
+		setupEgg(eggIndex, eggsFolder)
 	end
 end
 

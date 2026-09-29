@@ -95,6 +95,105 @@
             "BottomSurface": "Smooth",
             "Duration": 0
           }
+        },
+        "Walls": {
+          "$className": "Folder",
+          "North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [
+                264,
+                12,
+                2
+              ],
+              "Position": [
+                0,
+                7.0,
+                -131
+              ],
+              "Color": [
+                0.47058823529411764,
+                0.3333333333333333,
+                0.23529411764705882
+              ],
+              "Material": "WoodPlanks",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [
+                264,
+                12,
+                2
+              ],
+              "Position": [
+                0,
+                7.0,
+                131
+              ],
+              "Color": [
+                0.47058823529411764,
+                0.3333333333333333,
+                0.23529411764705882
+              ],
+              "Material": "WoodPlanks",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [
+                2,
+                12,
+                260
+              ],
+              "Position": [
+                131,
+                7.0,
+                0
+              ],
+              "Color": [
+                0.47058823529411764,
+                0.3333333333333333,
+                0.23529411764705882
+              ],
+              "Material": "WoodPlanks",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [
+                2,
+                12,
+                260
+              ],
+              "Position": [
+                -131,
+                7.0,
+                0
+              ],
+              "Color": [
+                0.47058823529411764,
+                0.3333333333333333,
+                0.23529411764705882
+              ],
+              "Material": "WoodPlanks",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          }
         }
       },
       "EggArea": {
@@ -121,6 +220,444 @@
             "Material": "Sand",
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth"
+          }
+        },
+        "Walls": {
+          "$className": "Folder",
+          "North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [
+                124,
+                12,
+                2
+              ],
+              "Position": [
+                0,
+                7.0,
+                964
+              ],
+              "Color": [
+                0.47058823529411764,
+                0.3333333333333333,
+                0.23529411764705882
+              ],
+              "Material": "WoodPlanks",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [
+                124,
+                12,
+                2
+              ],
+              "Position": [
+                0,
+                7.0,
+                1036
+              ],
+              "Color": [
+                0.47058823529411764,
+                0.3333333333333333,
+                0.23529411764705882
+              ],
+              "Material": "WoodPlanks",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [
+                2,
+                12,
+                70
+              ],
+              "Position": [
+                61,
+                7.0,
+                1000
+              ],
+              "Color": [
+                0.47058823529411764,
+                0.3333333333333333,
+                0.23529411764705882
+              ],
+              "Material": "WoodPlanks",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          },
+          "West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Size": [
+                2,
+                12,
+                70
+              ],
+              "Position": [
+                -61,
+                7.0,
+                1000
+              ],
+              "Color": [
+                0.47058823529411764,
+                0.3333333333333333,
+                0.23529411764705882
+              ],
+              "Material": "WoodPlanks",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth"
+            }
+          }
+        },
+        "Eggs": {
+          "$className": "Folder",
+          "Basic Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Shape": "Cylinder",
+                "Size": [
+                  2,
+                  9,
+                  9
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -33.0,
+                      2,
+                      985
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.35294117647058826,
+                  0.35294117647058826,
+                  0.39215686274509803
+                ],
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  -33.0,
+                  6,
+                  985
+                ],
+                "Color": [
+                  0.9607843137254902,
+                  0.9411764705882353,
+                  0.8823529411764706
+                ],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              }
+            }
+          },
+          "Forest Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Shape": "Cylinder",
+                "Size": [
+                  2,
+                  9,
+                  9
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -11.0,
+                      2,
+                      985
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.35294117647058826,
+                  0.35294117647058826,
+                  0.39215686274509803
+                ],
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  -11.0,
+                  6,
+                  985
+                ],
+                "Color": [
+                  0.35294117647058826,
+                  0.5882352941176471,
+                  0.27450980392156865
+                ],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              }
+            }
+          },
+          "Ocean Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Shape": "Cylinder",
+                "Size": [
+                  2,
+                  9,
+                  9
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      11.0,
+                      2,
+                      985
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.35294117647058826,
+                  0.35294117647058826,
+                  0.39215686274509803
+                ],
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  11.0,
+                  6,
+                  985
+                ],
+                "Color": [
+                  0.23529411764705882,
+                  0.5490196078431373,
+                  0.8235294117647058
+                ],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              }
+            }
+          },
+          "Lava Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Shape": "Cylinder",
+                "Size": [
+                  2,
+                  9,
+                  9
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      33.0,
+                      2,
+                      985
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.35294117647058826,
+                  0.35294117647058826,
+                  0.39215686274509803
+                ],
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  33.0,
+                  6,
+                  985
+                ],
+                "Color": [
+                  0.8627450980392157,
+                  0.3137254901960784,
+                  0.11764705882352941
+                ],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              }
+            }
           }
         }
       }

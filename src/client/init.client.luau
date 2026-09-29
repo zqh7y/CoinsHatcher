@@ -326,7 +326,7 @@ end)
 
 -- eggs are built by the server and may replicate after we start
 task.spawn(function()
-	workspace:WaitForChild("EggArea"):WaitForChild("Eggs").ChildAdded:Connect(updateWorld)
+	workspace:WaitForChild("EggArea"):WaitForChild("Eggs").DescendantAdded:Connect(updateWorld)
 	updateWorld()
 end)
 
