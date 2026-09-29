@@ -1,5 +1,7 @@
 -- The pets menu: huge pets first in their own row of big tiles, then a clean
--- grid of square pet icons, 4 per row. Tap a pet to equip or unequip it. Filter tabs, Equip Best, and a delete mode (tap pets
+-- grid of square pet icons, 4 per row. Copies of the same pet are stacked
+-- into one icon with how many you have ("x20"); equipped pets and huges get
+-- their own icons. Tap a pet to equip or unequip it. Filter tabs, Equip Best, and a delete mode (tap pets
 -- to pick them, then delete).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -205,33 +207,53 @@ render = function()
 		Config.formatNumber(teamPower * Config.totalDamage(data))
 	)
 
-	-- equipped first, then strongest first
-	local order = {}
+	-- One tile per equipped pet and per huge; every other kind of pet is
+	-- stacked into one tile with how many you have ("x20").
+	-- tiles = { { Name, Indexes, Equipped } }
+	local tiles = {}
+	local stacks = {} -- [pet name] = tile
 	for index, petName in ipairs(data.Pets) do
 		local info = Config.PETS[petName]
-		if info and matches(info, table.find(data.Equipped, index) ~= nil) then
-			table.insert(order, index)
+		local equipped = table.find(data.Equipped, index) ~= nil
+		if info and matches(info, equipped) then
+			if equipped or info.Rarity == "Huge" then
+				table.insert(tiles, { Name = petName, Indexes = { index }, Equipped = equipped })
+			elseif stacks[petName] then
+				table.insert(stacks[petName].Indexes, index)
+			else
+				stacks[petName] = { Name = petName, Indexes = { index }, Equipped = false }
+				table.insert(tiles, stacks[petName])
+			end
 		end
 	end
-	table.sort(order, function(a, b)
-		local ea = table.find(data.Equipped, a) ~= nil
-		local eb = table.find(data.Equipped, b) ~= nil
-		if ea ~= eb then
-			return ea
+	-- equipped first, then strongest first
+	table.sort(tiles, function(a, b)
+		if a.Equipped ~= b.Equipped then
+			return a.Equipped
 		end
-		return Config.PETS[data.Pets[a]].Power > Config.PETS[data.Pets[b]].Power
+		local pa, pb = Config.PETS[a.Name].Power, Config.PETS[b.Name].Power
+		if pa ~= pb then
+			return pa > pb
+		end
+		return a.Name < b.Name
 	end)
 
-	if #order == 0 then
+	if #tiles == 0 then
 		Ui.label(list, { Text = "No pets here yet", TextColor3 = Ui.COLORS.SubText, LayoutOrder = 1 })
 	end
 	hugeList.Visible = false
 
-	for rank, index in ipairs(order) do
-		local petName = data.Pets[index]
+	for rank, tile in ipairs(tiles) do
+		local petName = tile.Name
 		local info = Config.PETS[petName]
-		local equipped = table.find(data.Equipped, index) ~= nil
-		local picked = selected[index] == true
+		local count = #tile.Indexes
+		-- a stack counts as picked when all of it is picked
+		local picked = true
+		for _, index in ipairs(tile.Indexes) do
+			if not selected[index] then
+				picked = false
+			end
+		end
 
 		-- tap the pet itself: equip/unequip (or pick it in delete mode)
 		local huge = info.Rarity == "Huge"
@@ -243,21 +265,43 @@ render = function()
 			Button = true,
 			Detail = "⚔ " .. Config.formatNumber(info.Power),
 			LayoutOrder = rank,
-			Equipped = equipped,
+			Equipped = tile.Equipped,
 			Picked = picked,
 		})
+		-- how many of this pet you have
+		if count > 1 then
+			local amount = Ui.label(card, {
+				Text = "x" .. count,
+				TextColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 0,
+				BackgroundColor3 = Ui.COLORS.Accent,
+				AnchorPoint = Vector2.new(1, 0),
+				Position = UDim2.new(1, -5, 0, if picked then 30 else 5), -- under the ✕ when picked
+				Size = UDim2.fromOffset(42, 22),
+				ZIndex = 6,
+			})
+			Ui.corner(amount, 0.5)
+			local pad = Instance.new("UIPadding")
+			pad.PaddingTop = UDim.new(0, 3)
+			pad.PaddingBottom = UDim.new(0, 3)
+			pad.Parent = amount
+		end
 		card.Activated:Connect(function()
 			if deleting then
-				if equipped then
+				if tile.Equipped then
 					Ui.toast("Equipped pets can't be deleted", Ui.COLORS.Red)
 				else
-					selected[index] = if picked then nil else true
+					-- a stack is picked (or unpicked) all at once
+					for _, index in ipairs(tile.Indexes) do
+						selected[index] = if picked then nil else true
+					end
 					deleteConfirm.Text = "Delete " .. countSelected()
 					render()
 				end
 				return
 			end
-			local ok, message = remotes.SetEquipped:InvokeServer(index, not equipped)
+			-- a stack equips one of its pets; an equipped pet unequips
+			local ok, message = remotes.SetEquipped:InvokeServer(tile.Indexes[1], not tile.Equipped)
 			if not ok and message then
 				Ui.toast(message, Ui.COLORS.Red)
 			end

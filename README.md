@@ -55,6 +55,10 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Juice**: breakables pop in, flash on hit and burst into coins; coins and
   diamonds fly into rolling counters; confetti for purchases, new pets,
   gifts and rare hatches; a big celebration on rebirth.
+- **Pets menu**: huges in big tiles on top, then your pets; copies of the
+  same pet are stacked into one icon with how many you have ("x20").
+  Equipped pets have their own icons. Tap a stack to equip one of them; in
+  delete mode, tapping a stack picks all of it.
 - **Hatchery** (a long 44 x 310 hall): you arrive at the gate, which lines
   up with a light walkway down the left half. A glowing **speed lane** runs
   down the walkway (you run much faster on it). On the left, a tidy garden
