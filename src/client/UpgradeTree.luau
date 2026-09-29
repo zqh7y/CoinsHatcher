@@ -28,7 +28,8 @@ local player = Players.LocalPlayer
 
 local UpgradeTree = {}
 
-local SPACING = 112 -- between bubbles along a branch
+local SPACING = 116 -- between bubbles along a branch
+local WAVE = 42 -- how far each bubble steps to the side (branches zig-zag)
 local NODE = 70 -- bubble size
 local ROOT = 120
 local PAD = 220 -- empty space around the tree
@@ -47,9 +48,11 @@ for _, upgrade in ipairs(Config.UPGRADES) do
 	end
 	local a = math.rad(upgrade.Angle or 0)
 	local dir = Vector2.new(math.cos(a), math.sin(a))
+	local side = Vector2.new(-dir.Y, dir.X) * WAVE * (upgrade.Zig or 1)
 	positions[upgrade.Id] = {}
 	for level = 1, upgrade.Max do
-		local p = start + dir * SPACING * level
+		-- every bubble steps to the other side, so the branch winds along
+		local p = start + dir * SPACING * level + (if level % 2 == 1 then side else -side)
 		positions[upgrade.Id][level] = p
 		minX, minY = math.min(minX, p.X), math.min(minY, p.Y)
 		maxX, maxY = math.max(maxX, p.X), math.max(maxY, p.Y)
@@ -60,7 +63,8 @@ local CANVAS = Vector2.new(maxX - minX + PAD * 2, maxY - minY + PAD * 2)
 
 -- The panel ------------------------------------------------------------------------
 
-local panel = Ui.panel("Upgrades", nil, UDim2.fromOffset(980, 680), { GREEN })
+-- sticky: a missed click next to the tree doesn't close it (only the ✕ does)
+local panel = Ui.panel("Upgrades", nil, UDim2.fromOffset(980, 680), { GREEN }, { Sticky = true })
 
 Ui.label(panel.Frame, {
 	Text = "Kept forever · scroll to zoom · right-click and drag to move",

@@ -600,15 +600,16 @@ end
 -- They're shown as an upgrade TREE (the Upgrades button at the bottom of the
 -- screen): every upgrade is a branch growing out of the middle in its own
 -- direction (Angle in degrees on screen: 0 = right, 90 = down), one circle
--- per level. Some branches only open once another branch reaches a level
+-- per level. Branches wind from side to side (Zig = -1 starts the other
+-- way). Some branches only open once another branch reaches a level
 -- (Requires = { upgrade id, level }) and then grow out of that circle.
 Config.UPGRADES = {
 	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 15, BaseCost = 3000, Span = 10, Info = "Coins x10 at max", Angle = 0, Color = Color3.fromRGB(255, 185, 40) },
 	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 2500, Span = 10, Info = "Luck x1.6 every level (x100 at max)", Angle = -90, Color = Color3.fromRGB(60, 200, 110) },
 	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 1000, Span = 5, Info = "+2 walk speed", Angle = 180, Color = Color3.fromRGB(90, 170, 255) },
 	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 2000, Span = 8, Info = "+15% pet run speed", Angle = 90, Color = Color3.fromRGB(80, 210, 220) },
-	{ Id = "HatchSpeed", Name = "Hatch Speed", Icon = "⏩", Max = 5, BaseCost = 2000, Span = 6, Info = "Eggs open faster (x2 at max)", Angle = -140, Requires = { "Luck", 3 }, Color = Color3.fromRGB(255, 120, 170) },
-	{ Id = "HatchAmount", Name = "Hatch Amount", Icon = "🥚", Max = 5, BaseCost = 5000, Span = 8, Info = "Open more eggs at once (up to 8)", Angle = -40, Requires = { "Luck", 6 }, Color = Color3.fromRGB(170, 110, 255) },
+	{ Id = "HatchSpeed", Name = "Hatch Speed", Icon = "⏩", Max = 5, BaseCost = 2000, Span = 6, Info = "Eggs open faster (x2 at max)", Angle = -165, Zig = -1, Requires = { "Luck", 3 }, Color = Color3.fromRGB(255, 120, 170) },
+	{ Id = "HatchAmount", Name = "Hatch Amount", Icon = "🥚", Max = 5, BaseCost = 5000, Span = 8, Info = "Open more eggs at once (up to 8)", Angle = -15, Requires = { "Luck", 6 }, Color = Color3.fromRGB(170, 110, 255) },
 	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 5, BaseCost = 10000, Span = 9, Info = "+1 pet you can equip", Angle = 140, Requires = { "PetSpeed", 3 }, Color = Color3.fromRGB(255, 140, 70) },
 	{ Id = "AutoBuy", Name = "Auto Buy", Icon = "🤖", Max = 1, BaseCost = 20000, Span = 0, Info = "The upgrade board buys its cheapest upgrade for you (turn it on/off on the board)", Angle = 70, Requires = { "CoinBonus", 2 }, Color = Color3.fromRGB(110, 140, 255) },
 }

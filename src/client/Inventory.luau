@@ -4,6 +4,7 @@
 -- their own icons. Tap a pet to equip or unequip it. Filter tabs, Equip Best, and a delete mode (tap pets
 -- to pick them, then delete).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
@@ -179,6 +180,14 @@ local function matches(info, equipped)
 end
 
 render = function()
+	-- keep the scroll position (picking pets to delete re-draws the list)
+	local scrolled = scroller.CanvasPosition
+	task.defer(function()
+		scroller.CanvasPosition = scrolled
+		-- and once more after the list's new height is worked out
+		RunService.Heartbeat:Wait()
+		scroller.CanvasPosition = scrolled
+	end)
 	Ui.clear(list)
 	Ui.clear(hugeList)
 	local data = State.Data

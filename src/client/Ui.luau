@@ -150,6 +150,8 @@ dim.Parent = Ui.gui
 -- a time. theme = { accent color } for the little bar next to the title.
 -- options.Fixed = no dark backdrop and no close button (the game closes it,
 -- like the shop when you step off its circle).
+-- options.Sticky = tapping the dark backdrop doesn't close it (only the ✕
+-- does), for big screens where a missed click shouldn't close them.
 -- Returns { Frame, Content, Title, open(), close(), toggle(), isOpen(), OnOpen }.
 function Ui.panel(title, _icon, size, theme, options)
 	local fixed = options and options.Fixed
@@ -221,7 +223,14 @@ function Ui.panel(title, _icon, size, theme, options)
 	content.BackgroundTransparency = 1
 	content.Parent = frame
 
-	local panel = { Frame = frame, Content = content, Title = titleLabel, OnOpen = Instance.new("BindableEvent"), Fixed = fixed }
+	local panel = {
+		Frame = frame,
+		Content = content,
+		Title = titleLabel,
+		OnOpen = Instance.new("BindableEvent"),
+		Fixed = fixed,
+		Sticky = options and options.Sticky,
+	}
 
 	function panel.isOpen()
 		return frame.Visible
@@ -255,10 +264,11 @@ function Ui.panel(title, _icon, size, theme, options)
 	return panel
 end
 
--- tapping the dark backdrop closes the open panel (fixed panels ignore it)
+-- tapping the dark backdrop closes the open panel (fixed and sticky panels
+-- ignore it)
 dim.Activated:Connect(function()
 	for _, panel in ipairs(panels) do
-		if not panel.Fixed then
+		if not panel.Fixed and not panel.Sticky then
 			panel.close()
 		end
 	end
