@@ -1262,8 +1262,8 @@
             "Shape": "Cylinder",
             "Size": [
               1,
-              84,
-              84
+              106,
+              106
             ],
             "CFrame": {
               "CFrame": {
@@ -1310,8 +1310,8 @@
               "Shape": "Cylinder",
               "Size": [
                 0.05,
-                78,
-                78
+                100,
+                100
               ],
               "CFrame": {
                 "CFrame": {
@@ -1356,8 +1356,8 @@
               "Shape": "Cylinder",
               "Size": [
                 0.05,
-                62,
-                62
+                80,
+                80
               ],
               "CFrame": {
                 "CFrame": {
@@ -1402,8 +1402,8 @@
               "Shape": "Cylinder",
               "Size": [
                 0.05,
-                46,
-                46
+                60,
+                60
               ],
               "CFrame": {
                 "CFrame": {
@@ -1448,8 +1448,8 @@
               "Shape": "Cylinder",
               "Size": [
                 0.05,
-                30,
-                30
+                40,
+                40
               ],
               "CFrame": {
                 "CFrame": {
@@ -1494,8 +1494,8 @@
               "Shape": "Cylinder",
               "Size": [
                 0.05,
-                14,
-                14
+                20,
+                20
               ],
               "CFrame": {
                 "CFrame": {
@@ -1543,12 +1543,12 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    41.0,
+                    52.0,
                     3.0,
                     1000.0
                   ],
@@ -1588,14 +1588,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    39.603,
+                    50.228,
                     3.0,
-                    1010.612
+                    1013.459
                   ],
                   "orientation": [
                     [
@@ -1633,14 +1633,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    35.507,
+                    45.033,
                     3.0,
-                    1020.5
+                    1026.0
                   ],
                   "orientation": [
                     [
@@ -1678,14 +1678,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    28.991,
+                    36.77,
                     3.0,
-                    1028.991
+                    1036.77
                   ],
                   "orientation": [
                     [
@@ -1723,14 +1723,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    20.5,
+                    26.0,
                     3.0,
-                    1035.507
+                    1045.033
                   ],
                   "orientation": [
                     [
@@ -1768,14 +1768,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    10.612,
+                    13.459,
                     3.0,
-                    1039.603
+                    1050.228
                   ],
                   "orientation": [
                     [
@@ -1813,14 +1813,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
                     0.0,
                     3.0,
-                    1041.0
+                    1052.0
                   ],
                   "orientation": [
                     [
@@ -1858,14 +1858,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -10.612,
+                    -13.459,
                     3.0,
-                    1039.603
+                    1050.228
                   ],
                   "orientation": [
                     [
@@ -1903,14 +1903,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -20.5,
+                    -26.0,
                     3.0,
-                    1035.507
+                    1045.033
                   ],
                   "orientation": [
                     [
@@ -1948,14 +1948,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -28.991,
+                    -36.77,
                     3.0,
-                    1028.991
+                    1036.77
                   ],
                   "orientation": [
                     [
@@ -1993,14 +1993,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -35.507,
+                    -45.033,
                     3.0,
-                    1020.5
+                    1026.0
                   ],
                   "orientation": [
                     [
@@ -2038,14 +2038,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -39.603,
+                    -50.228,
                     3.0,
-                    1010.612
+                    1013.459
                   ],
                   "orientation": [
                     [
@@ -2083,12 +2083,12 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -41.0,
+                    -52.0,
                     3.0,
                     1000.0
                   ],
@@ -2128,14 +2128,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -39.603,
+                    -50.228,
                     3.0,
-                    989.388
+                    986.541
                   ],
                   "orientation": [
                     [
@@ -2173,14 +2173,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -35.507,
+                    -45.033,
                     3.0,
-                    979.5
+                    974.0
                   ],
                   "orientation": [
                     [
@@ -2218,14 +2218,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -28.991,
+                    -36.77,
                     3.0,
-                    971.009
+                    963.23
                   ],
                   "orientation": [
                     [
@@ -2263,14 +2263,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -20.5,
+                    -26.0,
                     3.0,
-                    964.493
+                    954.967
                   ],
                   "orientation": [
                     [
@@ -2308,14 +2308,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    -10.612,
+                    -13.459,
                     3.0,
-                    960.397
+                    949.772
                   ],
                   "orientation": [
                     [
@@ -2353,14 +2353,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
                     -0.0,
                     3.0,
-                    959.0
+                    948.0
                   ],
                   "orientation": [
                     [
@@ -2398,14 +2398,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    10.612,
+                    13.459,
                     3.0,
-                    960.397
+                    949.772
                   ],
                   "orientation": [
                     [
@@ -2443,14 +2443,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    20.5,
+                    26.0,
                     3.0,
-                    964.493
+                    954.967
                   ],
                   "orientation": [
                     [
@@ -2488,14 +2488,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    28.991,
+                    36.77,
                     3.0,
-                    971.009
+                    963.23
                   ],
                   "orientation": [
                     [
@@ -2533,14 +2533,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    35.507,
+                    45.033,
                     3.0,
-                    979.5
+                    974.0
                   ],
                   "orientation": [
                     [
@@ -2578,14 +2578,14 @@
               "Size": [
                 2,
                 6,
-                11.53
+                14.41
               ],
               "CFrame": {
                 "CFrame": {
                   "position": [
-                    39.603,
+                    50.228,
                     3.0,
-                    989.388
+                    986.541
                   ],
                   "orientation": [
                     [
@@ -2634,9 +2634,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      -18.652,
+                      -17.0,
                       1.6,
-                      984.896
+                      1029.445
                     ],
                     "orientation": [
                       [
@@ -2680,9 +2680,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      -18.652,
+                      -17.0,
                       1.7,
-                      984.896
+                      1029.445
                     ],
                     "orientation": [
                       [
@@ -2726,9 +2726,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      -18.652,
+                      -17.0,
                       2.7,
-                      984.896
+                      1029.445
                     ],
                     "orientation": [
                       [
@@ -2770,9 +2770,9 @@
                   6
                 ],
                 "Position": [
-                  -18.652,
+                  -17.0,
                   6.65,
-                  984.896
+                  1029.445
                 ],
                 "Color": [
                   0.96078,
@@ -2823,9 +2823,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      -7.017,
+                      -29.445,
                       1.6,
-                      977.049
+                      1017.0
                     ],
                     "orientation": [
                       [
@@ -2869,9 +2869,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      -7.017,
+                      -29.445,
                       1.7,
-                      977.049
+                      1017.0
                     ],
                     "orientation": [
                       [
@@ -2915,9 +2915,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      -7.017,
+                      -29.445,
                       2.7,
-                      977.049
+                      1017.0
                     ],
                     "orientation": [
                       [
@@ -2959,9 +2959,9 @@
                   6
                 ],
                 "Position": [
-                  -7.017,
+                  -29.445,
                   6.65,
-                  977.049
+                  1017.0
                 ],
                 "Color": [
                   0.35294,
@@ -3012,9 +3012,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      7.017,
+                      -34.0,
                       1.6,
-                      977.049
+                      1000.0
                     ],
                     "orientation": [
                       [
@@ -3058,9 +3058,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      7.017,
+                      -34.0,
                       1.7,
-                      977.049
+                      1000.0
                     ],
                     "orientation": [
                       [
@@ -3104,9 +3104,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      7.017,
+                      -34.0,
                       2.7,
-                      977.049
+                      1000.0
                     ],
                     "orientation": [
                       [
@@ -3148,9 +3148,9 @@
                   6
                 ],
                 "Position": [
-                  7.017,
+                  -34.0,
                   6.65,
-                  977.049
+                  1000.0
                 ],
                 "Color": [
                   0.23529,
@@ -3201,9 +3201,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      18.652,
+                      -29.445,
                       1.6,
-                      984.896
+                      983.0
                     ],
                     "orientation": [
                       [
@@ -3247,9 +3247,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      18.652,
+                      -29.445,
                       1.7,
-                      984.896
+                      983.0
                     ],
                     "orientation": [
                       [
@@ -3293,9 +3293,9 @@
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      18.652,
+                      -29.445,
                       2.7,
-                      984.896
+                      983.0
                     ],
                     "orientation": [
                       [
@@ -3337,9 +3337,9 @@
                   6
                 ],
                 "Position": [
-                  18.652,
+                  -29.445,
                   6.65,
-                  984.896
+                  983.0
                 ],
                 "Color": [
                   0.86275,
@@ -3365,6 +3365,1329 @@
                     0.86275,
                     0.31373,
                     0.11765
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
+                }
+              }
+            }
+          },
+          "Candy Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1.2,
+                  10,
+                  10
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -17.0,
+                      1.6,
+                      970.555
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.81471,
+                  0.90294
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -17.0,
+                      1.7,
+                      970.555
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.58824,
+                  0.78431
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -17.0,
+                      2.7,
+                      970.555
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.98039,
+                  0.96078
+                ]
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  -17.0,
+                  6.65,
+                  970.555
+                ],
+                "Color": [
+                  1.0,
+                  0.58824,
+                  0.78431
+                ]
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    1.0,
+                    0.58824,
+                    0.78431
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
+                }
+              }
+            }
+          },
+          "Snow Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1.2,
+                  10,
+                  10
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -0.0,
+                      1.6,
+                      966.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.90294,
+                  0.95588,
+                  1.0
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -0.0,
+                      1.7,
+                      966.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.78431,
+                  0.90196,
+                  1.0
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -0.0,
+                      2.7,
+                      966.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.98039,
+                  0.96078
+                ]
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  -0.0,
+                  6.65,
+                  966.0
+                ],
+                "Color": [
+                  0.78431,
+                  0.90196,
+                  1.0
+                ]
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    0.78431,
+                    0.90196,
+                    1.0
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
+                }
+              }
+            }
+          },
+          "Jungle Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1.2,
+                  10,
+                  10
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      17.0,
+                      1.6,
+                      970.555
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.65588,
+                  0.85,
+                  0.69118
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      17.0,
+                      1.7,
+                      970.555
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.23529,
+                  0.66667,
+                  0.31373
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      17.0,
+                      2.7,
+                      970.555
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.98039,
+                  0.96078
+                ]
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  17.0,
+                  6.65,
+                  970.555
+                ],
+                "Color": [
+                  0.23529,
+                  0.66667,
+                  0.31373
+                ]
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    0.23529,
+                    0.66667,
+                    0.31373
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
+                }
+              }
+            }
+          },
+          "Desert Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1.2,
+                  10,
+                  10
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      29.445,
+                      1.6,
+                      983.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.97353,
+                  0.90294,
+                  0.76176
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      29.445,
+                      1.7,
+                      983.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.94118,
+                  0.78431,
+                  0.47059
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      29.445,
+                      2.7,
+                      983.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.98039,
+                  0.96078
+                ]
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  29.445,
+                  6.65,
+                  983.0
+                ],
+                "Color": [
+                  0.94118,
+                  0.78431,
+                  0.47059
+                ]
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    0.94118,
+                    0.78431,
+                    0.47059
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
+                }
+              }
+            }
+          },
+          "Space Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1.2,
+                  10,
+                  10
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      34.0,
+                      1.6,
+                      1000.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.69118,
+                  0.65588,
+                  0.83235
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      34.0,
+                      1.7,
+                      1000.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.31373,
+                  0.23529,
+                  0.62745
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      34.0,
+                      2.7,
+                      1000.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.98039,
+                  0.96078
+                ]
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  34.0,
+                  6.65,
+                  1000.0
+                ],
+                "Color": [
+                  0.31373,
+                  0.23529,
+                  0.62745
+                ]
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    0.31373,
+                    0.23529,
+                    0.62745
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
+                }
+              }
+            }
+          },
+          "Magic Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1.2,
+                  10,
+                  10
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      29.445,
+                      1.6,
+                      1017.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.86765,
+                  0.74412,
+                  1.0
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      29.445,
+                      1.7,
+                      1017.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.70588,
+                  0.43137,
+                  1.0
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      29.445,
+                      2.7,
+                      1017.0
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.98039,
+                  0.96078
+                ]
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  29.445,
+                  6.65,
+                  1017.0
+                ],
+                "Color": [
+                  0.70588,
+                  0.43137,
+                  1.0
+                ]
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    0.70588,
+                    0.43137,
+                    1.0
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
+                }
+              }
+            }
+          },
+          "Mythic Egg": {
+            "$className": "Model",
+            "Pedestal": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1.2,
+                  10,
+                  10
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      17.0,
+                      1.6,
+                      1029.445
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.92941,
+                  0.69118
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      17.0,
+                      1.7,
+                      1029.445
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.84314,
+                  0.31373
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      17.0,
+                      2.7,
+                      1029.445
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  1.0,
+                  0.98039,
+                  0.96078
+                ]
+              }
+            },
+            "Egg": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Ball",
+                "Size": [
+                  6,
+                  6,
+                  6
+                ],
+                "Position": [
+                  17.0,
+                  6.65,
+                  1029.445
+                ],
+                "Color": [
+                  1.0,
+                  0.84314,
+                  0.31373
+                ]
+              },
+              "Mesh": {
+                "$className": "SpecialMesh",
+                "$properties": {
+                  "MeshType": "Sphere",
+                  "Scale": [
+                    0.85,
+                    1.15,
+                    0.85
+                  ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    1.0,
+                    0.84314,
+                    0.31373
                   ],
                   "Range": 14,
                   "Brightness": 1.5

@@ -685,16 +685,16 @@ end
 
 local function hatchery()
 	-- candy gate over the arrival spot with a sign
-	gate(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 36), "🥚 HATCHERY 🥚", Color3.fromRGB(255, 120, 160), Color3.fromRGB(200, 170, 255))
+	gate(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 47), "🥚 HATCHERY 🥚", Color3.fromRGB(255, 120, 160), Color3.fromRGB(200, 170, 255))
 
 	-- giant spotted eggs around the edge
 	for _, angle in ipairs({ 0, 25, 155, 180, 205, 335 }) do
-		bigEgg(hatcherySpot(angle, rng:NextNumber(33, 36)), rng:NextNumber(5, 7.5), pick(PASTELS))
+		bigEgg(hatcherySpot(angle, rng:NextNumber(44, 46.5)), rng:NextNumber(5, 7.5), pick(PASTELS))
 	end
 
 	-- balloon bunches by the gate
 	for _, angle in ipairs({ 55, 125 }) do
-		local anchor = hatcherySpot(angle, 36)
+		local anchor = hatcherySpot(angle, 47)
 		part({
 			Name = "BalloonWeight",
 			Size = Vector3.new(1, 1, 1),
@@ -708,25 +708,28 @@ local function hatchery()
 
 	-- candy lamp posts with a warm glow
 	for _, angle in ipairs({ 40, 140, 228, 312 }) do
-		lamp(hatcherySpot(angle, 37))
+		lamp(hatcherySpot(angle, 48.5))
 	end
 
 	-- bushes and mushrooms along the fence, a stone path from the gate
-	for _ = 1, 14 do
+	for _ = 1, 20 do
 		local angle = rng:NextNumber(0, 360)
 		if math.abs(angle - 90) > 22 then -- keep the gate clear
-			bush(hatcherySpot(angle, rng:NextNumber(37, 38.5)))
+			bush(hatcherySpot(angle, rng:NextNumber(48.5, 49.5)))
 		end
 	end
-	for _ = 1, 6 do
-		mushroom(hatcherySpot(rng:NextNumber(150, 390) % 360, rng:NextNumber(30, 36)), rng:NextNumber(0.8, 1.3))
+	for _ = 1, 10 do
+		local angle = rng:NextNumber(0, 360)
+		if math.abs(angle - 90) > 22 then
+			mushroom(hatcherySpot(angle, rng:NextNumber(42, 46)), rng:NextNumber(0.8, 1.3))
+		end
 	end
-	stonePath(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 34), World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 6))
+	stonePath(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 45), World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 8))
 
 	-- soft sparkles floating in the air
 	local air = part({
 		Name = "SparkleAir",
-		Size = Vector3.new(70, 10, 70),
+		Size = Vector3.new(90, 10, 90),
 		Position = World.EGG_CENTER + Vector3.new(0, 9, 0),
 		Transparency = 1,
 		CanCollide = false,

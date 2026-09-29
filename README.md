@@ -28,7 +28,7 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Hatching**: Hatch 1, Hatch 3 or Auto from the egg popup. Any pet can
   come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy; not huges) for extra power. Every
   pet shows its odds ("1 in 5K") and rare hatches are announced to the server.
-- **Big numbers**: numbers start in the hundreds/thousands and grow ×10 per
+- **Big numbers**: numbers start in the hundreds/thousands and grow ×4 per
   rebirth (shown as 1.5K, 4.5M...); pets land 3x critical hits.
 - **Boosts**: small icons in the bottom right show every active upgrade.
 - **Free gifts** (coins + diamonds) after 1, 3, 5, 10, 15 and 20 minutes of play.
@@ -41,7 +41,7 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
     2x potions (coins / luck / damage, 10 min, only ticks while playing) and
     forever perks (coin bonus, luck, bigger backpack, extra pet slot).
 - **Index**: collection book of every pet; unfound ones are silhouettes.
-- **Rebirth**: resets everything except your pets (and index). Max 3 for now.
+- **Rebirth**: resets coins and shop upgrades; keeps pets, index, diamonds and perks. 10 rebirths, each unlocking a new egg (11 eggs).
 
 All numbers (costs, coin health, pet power, chances, upgrades, pet looks)
 are in `src/shared/Config.luau`.

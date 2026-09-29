@@ -9,14 +9,15 @@ local World = require(script.Parent.World)
 
 local Eggs = {}
 
--- Eggs stand in a half circle at the back of the hatchery, facing the gate.
-local ARC_RADIUS = 24
-local ARC_STEP = math.rad(34)
+-- Eggs stand in a ring around the hatchery: 12 slots of 30 degrees with the
+-- slot at the gate left open. Egg 1 is just left of the gate and they go
+-- around to the last egg on its right.
+local RING_RADIUS = 34
 
 -- Floor position of egg N (same layout as default.project.json).
 function Eggs.position(eggIndex)
-	local angle = (eggIndex - (Config.EGG_COUNT + 1) / 2) * ARC_STEP
-	return World.EGG_CENTER + Vector3.new(math.sin(angle) * ARC_RADIUS, World.FLOOR_Y, -math.cos(angle) * ARC_RADIUS)
+	local angle = math.rad(90 + 30 * eggIndex)
+	return World.EGG_CENTER + Vector3.new(math.cos(angle) * RING_RADIUS, World.FLOOR_Y, math.sin(angle) * RING_RADIUS)
 end
 
 local remotes

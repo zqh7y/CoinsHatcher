@@ -3,13 +3,13 @@ local Config = {}
 
 -- Rebirths ------------------------------------------------------------------
 
-Config.MAX_REBIRTHS = 3
+Config.MAX_REBIRTHS = 10
 
 -- Every rebirth multiplies the main area's coin health and coin value by this.
 -- Egg costs and pet power scale by the same amount so the game stays balanced.
--- Numbers start big (hundreds/thousands) and grow x10 per rebirth, so they
--- feel big without jumping into crazy ranges.
-Config.SCALE = 10
+-- Numbers start big (hundreds/thousands) and grow x4 per rebirth, so after
+-- 10 rebirths they reach millions/billions without jumping into crazy ranges.
+Config.SCALE = 4
 
 function Config.rebirthCost(rebirths: number): number
 	return 25000 * Config.SCALE ^ rebirths
@@ -48,6 +48,13 @@ Config.AREA_COLORS = {
 	Color3.fromRGB(250, 215, 130), -- sand
 	Color3.fromRGB(215, 235, 255), -- snow
 	Color3.fromRGB(255, 180, 215), -- candy
+	Color3.fromRGB(120, 200, 240), -- ocean
+	Color3.fromRGB(70, 160, 90), -- jungle
+	Color3.fromRGB(255, 170, 110), -- sunset
+	Color3.fromRGB(190, 160, 255), -- magic
+	Color3.fromRGB(150, 235, 200), -- mint
+	Color3.fromRGB(90, 80, 170), -- space
+	Color3.fromRGB(255, 215, 90), -- gold
 }
 
 function Config.areaColor(rebirths: number): Color3
@@ -79,6 +86,13 @@ Config.EGGS = {
 	{ Name = "Forest Egg", Color = Color3.fromRGB(90, 150, 70), Pets = { "Fox", "Deer", "Owl", "Wolf" } },
 	{ Name = "Ocean Egg", Color = Color3.fromRGB(60, 140, 210), Pets = { "Fish", "Crab", "Turtle", "Shark" } },
 	{ Name = "Lava Egg", Color = Color3.fromRGB(220, 80, 30), Pets = { "Salamander", "Magma Golem", "Phoenix", "Dragon" } },
+	{ Name = "Candy Egg", Color = Color3.fromRGB(255, 150, 200), Pets = { "Gummy Bear", "Candy Cat", "Jelly Bunny", "Unicorn" } },
+	{ Name = "Snow Egg", Color = Color3.fromRGB(200, 230, 255), Pets = { "Penguin", "Snow Fox", "Polar Bear", "Yeti" } },
+	{ Name = "Jungle Egg", Color = Color3.fromRGB(60, 170, 80), Pets = { "Monkey", "Parrot", "Tiger", "Lion" } },
+	{ Name = "Desert Egg", Color = Color3.fromRGB(240, 200, 120), Pets = { "Fennec", "Camel", "Scorpion", "Sphinx Cat" } },
+	{ Name = "Space Egg", Color = Color3.fromRGB(80, 60, 160), Pets = { "Alien", "Robot Dog", "Star Bunny", "Cosmic Whale" } },
+	{ Name = "Magic Egg", Color = Color3.fromRGB(180, 110, 255), Pets = { "Pixie", "Wizard Cat", "Crystal Bunny", "Griffin" } },
+	{ Name = "Mythic Egg", Color = Color3.fromRGB(255, 215, 80), Pets = { "Kitsune", "Pegasus", "Hydra", "Mythic Dragon" } },
 }
 
 -- Body color of each pet (the name tag uses the rarity color)
@@ -99,6 +113,34 @@ Config.PET_COLORS = {
 	["Magma Golem"] = Color3.fromRGB(230, 100, 60),
 	Phoenix = Color3.fromRGB(255, 200, 60),
 	Dragon = Color3.fromRGB(190, 110, 255),
+	["Gummy Bear"] = Color3.fromRGB(255, 110, 140),
+	["Candy Cat"] = Color3.fromRGB(255, 190, 230),
+	["Jelly Bunny"] = Color3.fromRGB(170, 230, 255),
+	Unicorn = Color3.fromRGB(255, 245, 255),
+	Penguin = Color3.fromRGB(70, 80, 110),
+	["Snow Fox"] = Color3.fromRGB(240, 245, 255),
+	["Polar Bear"] = Color3.fromRGB(250, 250, 250),
+	Yeti = Color3.fromRGB(200, 225, 255),
+	Monkey = Color3.fromRGB(170, 115, 70),
+	Parrot = Color3.fromRGB(80, 210, 100),
+	Tiger = Color3.fromRGB(255, 150, 50),
+	Lion = Color3.fromRGB(245, 190, 90),
+	Fennec = Color3.fromRGB(245, 205, 150),
+	Camel = Color3.fromRGB(215, 170, 110),
+	Scorpion = Color3.fromRGB(200, 90, 60),
+	["Sphinx Cat"] = Color3.fromRGB(240, 210, 130),
+	Alien = Color3.fromRGB(140, 240, 120),
+	["Robot Dog"] = Color3.fromRGB(180, 190, 210),
+	["Star Bunny"] = Color3.fromRGB(255, 235, 120),
+	["Cosmic Whale"] = Color3.fromRGB(90, 110, 220),
+	Pixie = Color3.fromRGB(255, 180, 240),
+	["Wizard Cat"] = Color3.fromRGB(120, 90, 200),
+	["Crystal Bunny"] = Color3.fromRGB(190, 240, 255),
+	Griffin = Color3.fromRGB(230, 180, 90),
+	Kitsune = Color3.fromRGB(255, 120, 80),
+	Pegasus = Color3.fromRGB(245, 245, 255),
+	Hydra = Color3.fromRGB(70, 170, 150),
+	["Mythic Dragon"] = Color3.fromRGB(255, 200, 60),
 }
 
 -- What each pet looks like. Pets are little cubes with a face plus:
@@ -123,6 +165,34 @@ Config.PET_LOOKS = {
 	["Magma Golem"] = { Extras = { "horns", "fire" } },
 	Phoenix = { Tail = "long", Extras = { "beak", "wings", "fire" } },
 	Dragon = { Tail = "long", Extras = { "horns", "wings" } },
+	["Gummy Bear"] = { Ears = "round", Tail = "short" },
+	["Candy Cat"] = { Ears = "pointy", Tail = "long" },
+	["Jelly Bunny"] = { Ears = "long", Tail = "fluffy" },
+	Unicorn = { Ears = "pointy", Tail = "fluffy", Extras = { "horns" } },
+	Penguin = { Extras = { "beak", "wings" } },
+	["Snow Fox"] = { Ears = "pointy", Tail = "fluffy" },
+	["Polar Bear"] = { Ears = "round", Tail = "short" },
+	Yeti = { Ears = "round", Extras = { "horns" } },
+	Monkey = { Ears = "round", Tail = "long" },
+	Parrot = { Tail = "long", Extras = { "beak", "wings" } },
+	Tiger = { Ears = "round", Tail = "long" },
+	Lion = { Ears = "round", Tail = "fluffy" },
+	Fennec = { Ears = "long", Tail = "fluffy" },
+	Camel = { Ears = "floppy", Tail = "short" },
+	Scorpion = { Tail = "long", Extras = { "claws" } },
+	["Sphinx Cat"] = { Ears = "pointy", Tail = "long", Extras = { "wings" } },
+	Alien = { Extras = { "antlers" } },
+	["Robot Dog"] = { Ears = "floppy", Tail = "short", Extras = { "antlers" } },
+	["Star Bunny"] = { Ears = "long", Tail = "fluffy" },
+	["Cosmic Whale"] = { Tail = "fin", Extras = { "topfin", "nofeet" } },
+	Pixie = { Ears = "pointy", Extras = { "wings" } },
+	["Wizard Cat"] = { Ears = "pointy", Tail = "long" },
+	["Crystal Bunny"] = { Ears = "long", Tail = "fluffy" },
+	Griffin = { Tail = "long", Extras = { "beak", "wings" } },
+	Kitsune = { Ears = "pointy", Tail = "fluffy", Extras = { "fire" } },
+	Pegasus = { Ears = "pointy", Tail = "fluffy", Extras = { "wings" } },
+	Hydra = { Tail = "long", Extras = { "horns", "fire" } },
+	["Mythic Dragon"] = { Tail = "long", Extras = { "horns", "wings", "fire" } },
 }
 
 Config.EGG_COUNT = math.min(#Config.EGGS, Config.MAX_REBIRTHS + 1)
