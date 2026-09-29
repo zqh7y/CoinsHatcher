@@ -94,6 +94,12 @@ local function load(player)
 	if PlayerData.isDev(player) then
 		data.Coins = math.max(data.Coins, Config.DEV_MONEY.Coins)
 		data.Diamonds = math.max(data.Diamonds, Config.DEV_MONEY.Diamonds)
+		-- a huge pet to look at (once)
+		local huge = Config.DEV_MONEY.Huge
+		if huge and Config.PETS[huge] and not table.find(data.Pets, huge) then
+			table.insert(data.Pets, huge)
+			data.Index[huge] = true
+		end
 		player:SetAttribute("Dev", true) -- the client shows free rebirths
 	end
 

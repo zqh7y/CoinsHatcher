@@ -157,6 +157,11 @@ local function update(dt)
 		local inMain = World.isInCoinZone(rootPos)
 		local speed = Config.PET_SPEED * Config.petSpeedMult(data.Upgrades)
 		local damageMult = Config.totalDamage(data)
+		-- the biggest pet sets the spacing of the follow rows
+		local maxHalf = 0
+		for _, pet in ipairs(pets) do
+			maxHalf = math.max(maxHalf, pet.Half)
+		end
 
 		for i, pet in ipairs(pets) do
 			local part = pet.Part
@@ -206,9 +211,15 @@ local function update(dt)
 					end
 				end
 			else
-				-- follow behind the owner in a little arc, bobbing up and down
-				local spread = (i - (#pets + 1) / 2) * (2.5 + pet.Half)
-				local behind = root.CFrame * CFrame.new(spread, 0, 4 + pet.Half + math.abs(spread) * 0.3)
+				-- follow behind the owner in two neat rows (the front row gets
+				-- the extra pet when it's an odd number), bobbing up and down
+				local frontCount = math.ceil(#pets / 2)
+				local row = if i <= frontCount then 0 else 1
+				local col = if row == 0 then i else i - frontCount
+				local inRow = if row == 0 then frontCount else #pets - frontCount
+				local gap = 2.6 + maxHalf * 1.4
+				local spread = (col - (inRow + 1) / 2) * gap
+				local behind = root.CFrame * CFrame.new(spread, 0, 3.5 + maxHalf + row * gap)
 				local groundY = rootPos.Y - 3 + pet.Lift
 				local goal = Vector3.new(behind.X, groundY + math.abs(math.sin(t * 4 + i)) * 0.6, behind.Z)
 				local dist = (goal - part.Position).Magnitude

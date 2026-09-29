@@ -26,12 +26,23 @@ local function newViewport(parent)
 	return vp, world, camera
 end
 
--- Points the camera at the model's front (pets face -Z), a little from the side.
-local function frame(camera, model)
+-- Points the camera at the model's front (pets face -Z), a little from the
+-- side, far enough back that the whole model fits (big huge pets too, and
+-- in narrow frames).
+local function frame(camera, model, vp)
 	local cf, size = model:GetBoundingBox()
-	local dist = size.Magnitude * 1.25
-	local center = cf.Position
-	camera.CFrame = CFrame.lookAt(center + Vector3.new(dist * 0.35, dist * 0.3, -dist), center)
+	-- previews spin around the body, so fit a sphere around the body that
+	-- reaches the farthest corner (tails and wings stay in view while spinning)
+	local pivot = model:GetPivot().Position
+	local radius = (cf.Position - pivot).Magnitude + size.Magnitude / 2
+	local aspect = if vp and vp.AbsoluteSize.Y > 0 then vp.AbsoluteSize.X / vp.AbsoluteSize.Y else 1
+	local halfV = math.rad(camera.FieldOfView / 2)
+	local halfH = math.atan(math.tan(halfV) * aspect)
+	-- a box never fills its whole bounding sphere, so pull in a little
+	local dist = radius / math.sin(math.min(halfV, halfH)) * 0.8
+	local center = pivot
+	local dir = Vector3.new(0.35, 0.3, -1).Unit
+	camera.CFrame = CFrame.lookAt(center + dir * dist, center)
 end
 
 -- A pet preview. Silhouette = true shows it all black (not found yet).
@@ -40,7 +51,16 @@ function Viewport.pet(parent, petName, silhouette)
 	local model = PetModel.build(petName, { Anchored = true, Silhouette = silhouette })
 	model:PivotTo(CFrame.new())
 	model.Parent = world
-	frame(camera, model)
+	frame(camera, model, vp)
+	-- refit once the frame has its real size on screen
+	vp:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+		if model.Parent then
+			local pivot = model:GetPivot()
+			model:PivotTo(CFrame.new())
+			frame(camera, model, vp)
+			model:PivotTo(pivot)
+		end
+	end)
 	return vp, model
 end
 

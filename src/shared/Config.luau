@@ -75,6 +75,7 @@ Config.DEV_MONEY = {
 	Coins = 1e15, -- 1Qd
 	Diamonds = 1e9, -- 1B
 	UserIds = {}, -- e.g. { 123456789 } to also get it in the live game
+	Huge = "Huge Mythic Dragon", -- developers also get this pet once, to see a huge
 }
 Config.PET_SPEED = 32 -- studs per second when running to a coin
 Config.PET_HIT_INTERVAL = 0.6 -- seconds between hits; each hit deals the pet's power
