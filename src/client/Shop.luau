@@ -14,7 +14,8 @@ local player = Players.LocalPlayer
 
 local Shop = {}
 
-local panel = Ui.panel("Shop", nil, UDim2.fromOffset(640, 540), { Ui.COLORS.Gold })
+-- fixed: only stepping off the shop circle closes it
+local panel = Ui.panel("Shop", nil, UDim2.fromOffset(640, 540), { Ui.COLORS.Gold }, { Fixed = true })
 
 -- minimal text tabs, like the pets menu
 local tabBar = Instance.new("Frame")

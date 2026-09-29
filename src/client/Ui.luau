@@ -148,8 +148,11 @@ dim.Parent = Ui.gui
 
 -- A white pop-up window with a title and close button. Only one is open at
 -- a time. theme = { accent color } for the little bar next to the title.
+-- options.Fixed = no dark backdrop and no close button (the game closes it,
+-- like the shop when you step off its circle).
 -- Returns { Frame, Content, Title, open(), close(), toggle(), isOpen(), OnOpen }.
-function Ui.panel(title, _icon, size, theme)
+function Ui.panel(title, _icon, size, theme, options)
+	local fixed = options and options.Fixed
 	local accent = theme and theme[1] or Ui.COLORS.Accent
 
 	local frame = Instance.new("Frame")
@@ -162,6 +165,7 @@ function Ui.panel(title, _icon, size, theme)
 	frame.BackgroundColor3 = Ui.COLORS.Panel
 	frame.Visible = false
 	frame.ZIndex = 5
+	frame.Active = true -- clicks on the panel stay on the panel (don't reach the backdrop)
 	frame.Parent = Ui.gui
 	Ui.corner(frame, 20)
 	Ui.stroke(frame, Ui.COLORS.Line, 1.5)
@@ -205,6 +209,7 @@ function Ui.panel(title, _icon, size, theme)
 	close.Font = Ui.FONT
 	close.TextSize = 18
 	close.TextColor3 = Ui.COLORS.SubText
+	close.Visible = not fixed
 	close.Parent = frame
 	Ui.corner(close, 0.5)
 	Ui.bounce(close)
@@ -216,7 +221,7 @@ function Ui.panel(title, _icon, size, theme)
 	content.BackgroundTransparency = 1
 	content.Parent = frame
 
-	local panel = { Frame = frame, Content = content, Title = titleLabel, OnOpen = Instance.new("BindableEvent") }
+	local panel = { Frame = frame, Content = content, Title = titleLabel, OnOpen = Instance.new("BindableEvent"), Fixed = fixed }
 
 	function panel.isOpen()
 		return frame.Visible
@@ -231,7 +236,7 @@ function Ui.panel(title, _icon, size, theme)
 				other.close()
 			end
 		end
-		dim.Visible = true
+		dim.Visible = not fixed
 		frame.Visible = true
 		scale.Scale = 0.85
 		TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
@@ -250,9 +255,12 @@ function Ui.panel(title, _icon, size, theme)
 	return panel
 end
 
+-- tapping the dark backdrop closes the open panel (fixed panels ignore it)
 dim.Activated:Connect(function()
 	for _, panel in ipairs(panels) do
-		panel.close()
+		if not panel.Fixed then
+			panel.close()
+		end
 	end
 end)
 

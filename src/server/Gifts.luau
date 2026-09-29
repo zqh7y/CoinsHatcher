@@ -20,9 +20,9 @@ local function give(player, data, item)
 		PlayerData.addDiamonds(player, item[2])
 		return item[2] .. " 💎"
 	elseif kind == "Coins" then
-		local coins = Config.giftCoins(item[2], data.Rebirths)
+		local coins = Config.giftCoins(item[2], data.Coins, data.Rebirths)
 		PlayerData.addCoins(player, coins)
-		return Config.formatNumber(coins) .. " 💰"
+		return ("+%d%% coins (%s 💰)"):format(item[2], Config.formatNumber(coins))
 	elseif kind == "Potion" then
 		local boost = Config.BOOSTS_BY_ID[item[2]]
 		PlayerData.addBoost(player, boost.Id, item[3] * 60)

@@ -33,7 +33,7 @@ local EFFECT = {
 		return tostring(Config.COINS_PER_PLAYER + l)
 	end,
 	ChestLuck = function(l)
-		return ("+%d%%"):format(l * 10)
+		return ("x%.1f"):format(10 ^ (l / 20))
 	end,
 	Respawn = function(l)
 		return ("-%d%%"):format(l * 5)
@@ -51,7 +51,7 @@ local EFFECT = {
 		return ("-%d%%"):format(l * 3)
 	end,
 	BigChestLuck = function(l)
-		return ("+%d%%"):format(l * 15)
+		return ("x%.1f"):format(10 ^ (l / 15))
 	end,
 	OrbLuck = function(l)
 		return ("+%d%%"):format(l * 10)

@@ -309,10 +309,16 @@ end
 -- The chance (in %) of each pet in an egg, including the player's luck
 -- (data can be nil for the base odds). Returns a list of { Pet, Chance }
 -- with the huge pet last.
+-- Chance (in %) of something rare after luck. Luck counts like extra tries
+-- (square-rooted), so even x100 luck keeps huges and mutations special.
+local function withLuck(chance: number, luck: number): number
+	return (1 - (1 - chance / 100) ^ math.sqrt(luck)) * 100
+end
+
 function Config.eggChances(eggIndex: number, data)
 	local luck = Config.totalLuck(data)
 	local egg = Config.EGGS[eggIndex]
-	local hugeChance = Config.HUGE_CHANCE * luck
+	local hugeChance = withLuck(Config.HUGE_CHANCE, luck)
 
 	-- luck makes Rare and better pets more likely
 	local weights, total = {}, 0
@@ -334,7 +340,7 @@ function Config.mutationChances(data)
 	local luck = Config.totalLuck(data)
 	local list = {}
 	for _, mutation in ipairs(Config.MUTATIONS) do
-		table.insert(list, { Mutation = mutation, Chance = mutation.Chance * luck })
+		table.insert(list, { Mutation = mutation, Chance = withLuck(mutation.Chance, luck) })
 	end
 	return list
 end
@@ -372,14 +378,12 @@ function Config.rollHatch(eggIndex: number, data): string
 	if Config.PETS[petName].Rarity == "Huge" then
 		return petName
 	end
-	-- rarest mutation first, so luck can't make a common one hide a rare one
-	local roll = math.random() * 100
+	-- try the rarest mutation first, then the next one, ...
 	local chances = Config.mutationChances(data)
 	for i = #chances, 1, -1 do
-		if roll < chances[i].Chance then
+		if math.random() * 100 < chances[i].Chance then
 			return chances[i].Mutation.Name .. " " .. petName
 		end
-		roll -= chances[i].Chance
 	end
 	return petName
 end
@@ -396,12 +400,11 @@ end
 -- Cost = BaseCost * Growth^level, times SCALE^rebirths like everything else.
 Config.UPGRADES = {
 	{ Id = "Damage", Name = "Pet Damage", Icon = "⚔️", Max = 10, BaseCost = 600, Growth = 1.6, Info = "+20% pet damage" },
-	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 900, Growth = 1.6, Info = "+15% rare & huge chance" },
+	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 900, Growth = 1.6, Info = "Luck x1.6 every level (x100 at max)" },
 	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 450, Growth = 1.5, Info = "+2 walk speed" },
 	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 750, Growth = 1.7, Info = "+15% pet run speed" },
 	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 10, BaseCost = 1200, Growth = 1.6, Info = "+10% coins" },
 	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 3, BaseCost = 4500, Growth = 3, Info = "+1 pet you can equip" },
-	{ Id = "Hoverboard", Name = "Hoverboard", Icon = "🛹", Max = 1, BaseCost = 7500, Growth = 1, Info = "Ride a super fast hoverboard!" },
 }
 
 -- Incremental "area" upgrades (📈 menu, buy anywhere, reset on rebirth).
@@ -410,13 +413,13 @@ Config.AREA_UPGRADES = {
 	{ Id = "CoinValue", Name = "Coin Value", Icon = "💰", Max = 50, BaseCost = 100, Growth = 1.18, Info = "Coin stacks & piles worth +10%" },
 	{ Id = "ChestValue", Name = "Chest Value", Icon = "🧰", Max = 50, BaseCost = 250, Growth = 1.2, Info = "Chests worth +15%" },
 	{ Id = "MoreBreakables", Name = "More Stuff", Icon = "➕", Max = 18, BaseCost = 50, Growth = 1.4, Info = "+1 thing to break (up to 20)" },
-	{ Id = "ChestLuck", Name = "Chest Luck", Icon = "🍀", Max = 20, BaseCost = 350, Growth = 1.3, Info = "Chests spawn 10% more often" },
+	{ Id = "ChestLuck", Name = "Chest Luck", Icon = "🍀", Max = 20, BaseCost = 350, Growth = 1.3, Info = "More chests (x10 at max)" },
 	{ Id = "Respawn", Name = "Fast Respawn", Icon = "⏩", Max = 10, BaseCost = 300, Growth = 1.4, Info = "Things come back 5% faster" },
 	{ Id = "DiamondFinder", Name = "Diamond Finder", Icon = "💎", Max = 10, BaseCost = 500, Growth = 1.45, Info = "+5% coin piles carry diamonds" },
 	{ Id = "CritChance", Name = "Crit Chance", Icon = "🎯", Max = 20, BaseCost = 450, Growth = 1.3, Info = "+1% critical hits" },
 	{ Id = "CritDamage", Name = "Crit Damage", Icon = "💥", Max = 10, BaseCost = 600, Growth = 1.4, Info = "Crits hit harder" },
 	{ Id = "HitSpeed", Name = "Hit Speed", Icon = "⚡", Max = 10, BaseCost = 700, Growth = 1.4, Info = "Pets hit 3% faster" },
-	{ Id = "BigChestLuck", Name = "Big Chest Luck", Icon = "👑", Max = 15, BaseCost = 800, Growth = 1.35, Info = "Big chests spawn more" },
+	{ Id = "BigChestLuck", Name = "Big Chest Luck", Icon = "👑", Max = 15, BaseCost = 800, Growth = 1.35, Info = "More big chests (x10 at max)" },
 	{ Id = "OrbLuck", Name = "Orb Luck", Icon = "🧪", Max = 15, BaseCost = 500, Growth = 1.3, Info = "Boost orbs drop more" },
 	{ Id = "OrbTime", Name = "Orb Time", Icon = "⏱️", Max = 10, BaseCost = 450, Growth = 1.35, Info = "Orb boosts last longer" },
 	{ Id = "ComboTime", Name = "Combo Time", Icon = "🔥", Max = 10, BaseCost = 450, Growth = 1.35, Info = "Combo boosts last longer" },
@@ -481,8 +484,8 @@ function Config.breakableValueMult(data, kind: number): number
 end
 -- Spawn weights with Chest Luck applied.
 function Config.breakableWeights(data)
-	local luck = 1 + 0.1 * areaLevel(data, "ChestLuck")
-	local bigLuck = 1 + 0.15 * areaLevel(data, "BigChestLuck")
+	local luck = 10 ^ (areaLevel(data, "ChestLuck") / 20) -- up to x10
+	local bigLuck = 10 ^ (areaLevel(data, "BigChestLuck") / 15) -- up to x10
 	local list = {}
 	for kind, b in ipairs(Config.BREAKABLES) do
 		local weight = b.Chance * (if kind >= 3 then luck else 1) * (if kind == #Config.BREAKABLES then bigLuck else 1)
@@ -509,8 +512,9 @@ end
 function Config.damageMult(upgrades): number
 	return 1 + 0.2 * level(upgrades, "Damage")
 end
+-- Luck grows fast: x1.6 per level, x100 at max level.
 function Config.luckMult(upgrades): number
-	return 1 + 0.15 * level(upgrades, "Luck")
+	return 100 ^ (level(upgrades, "Luck") / 10)
 end
 function Config.walkSpeed(upgrades): number
 	return 16 + 2 * level(upgrades, "WalkSpeed")
@@ -524,7 +528,6 @@ end
 function Config.maxEquipped(upgrades): number
 	return Config.MAX_EQUIPPED + level(upgrades, "Slots")
 end
-Config.HOVERBOARD_SPEED = 14 -- extra walk speed while riding
 
 -- Diamonds ------------------------------------------------------------------
 -- Diamonds never reset. Earned from chests, new pets, rebirths and gifts;
@@ -590,7 +593,7 @@ function Config.totalDamage(data): number
 	return Config.damageMult(data and data.Upgrades) * boosted(data, "Damage")
 end
 function Config.totalLuck(data): number
-	return (Config.luckMult(data and data.Upgrades) + 0.1 * perkLevel(data, "Luck")) * boosted(data, "Luck")
+	return Config.luckMult(data and data.Upgrades) * (1 + 0.1 * perkLevel(data, "Luck")) * boosted(data, "Luck")
 end
 function Config.totalCoins(data): number
 	return (Config.coinMult(data and data.Upgrades) + 0.1 * perkLevel(data, "Coins")) * boosted(data, "Coins")
@@ -617,27 +620,37 @@ function Config.formatNumber(n: number): string
 	return (text:gsub("%.0$", "")) .. SUFFIXES[tier]
 end
 
+-- Multipliers: x1.6 / x25 / x100
+function Config.formatMult(x: number): string
+	if x < 10 then
+		return ("x%.1f"):format(x)
+	end
+	return "x" .. Config.formatNumber(x)
+end
+
 -- Playtime gifts --------------------------------------------------------------
 -- Minutes of play (this session) needed for each gift.
 Config.GIFT_TIMES = { 1, 3, 5, 10, 15, 20 }
 
 -- Mystery gifts: each gift rolls one prize from its pool; later gifts have
 -- better pools and the last one is a MEGA gift. A prize is a list of items:
---   { "Diamonds", amount }       { "Coins", big chests worth }
+--   { "Diamonds", amount }       { "Coins", percent of your coins }
 --   { "Potion", boost id, minutes }   { "AllPotions", minutes }
 --   { "Hatch", count }  (free pets from your best unlocked egg)
 Config.GIFT_POOLS = {
-	{ { { "Diamonds", 40 } }, { { "Potion", "Coins", 3 } }, { { "Coins", 3 } } },
-	{ { { "Diamonds", 75 } }, { { "Potion", "Luck", 5 } }, { { "Coins", 6 } }, { { "Hatch", 1 } } },
-	{ { { "Hatch", 1 } }, { { "Potion", "Damage", 5 } }, { { "Diamonds", 120 } }, { { "Coins", 10 } } },
+	{ { { "Diamonds", 40 } }, { { "Potion", "Coins", 3 } }, { { "Coins", 10 } } },
+	{ { { "Diamonds", 75 } }, { { "Potion", "Luck", 5 } }, { { "Coins", 20 } }, { { "Hatch", 1 } } },
+	{ { { "Hatch", 1 } }, { { "Potion", "Damage", 5 } }, { { "Diamonds", 120 } }, { { "Coins", 35 } } },
 	{ { { "Hatch", 3 } }, { { "Potion", "Coins", 10 } }, { { "Diamonds", 200 } } },
 	{ { { "Hatch", 3 } }, { { "AllPotions", 5 } }, { { "Diamonds", 300 } } },
 	{ { { "Hatch", 3 }, { "Diamonds", 500 }, { "AllPotions", 10 } } }, -- MEGA
 }
 
--- Coins for a "Coins" gift item: worth this many big chests at your rebirth.
-function Config.giftCoins(chests: number, rebirths: number): number
-	return Config.coinStats(rebirths, #Config.BREAKABLES).Value * chests
+-- Coins for a "Coins" gift item: a percent of the coins you already have
+-- (at least a few big chests' worth, so new players get something too).
+function Config.giftCoins(percent: number, coins: number, rebirths: number): number
+	local minimum = Config.coinStats(rebirths, #Config.BREAKABLES).Value * percent / 10
+	return math.floor(math.max(coins * percent / 100, minimum))
 end
 
 return Config

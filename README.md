@@ -24,7 +24,8 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   coin zone and break them. Stronger pets hit harder. Every rebirth makes the
   area's breakables tougher and worth more (and changes its color).
 - **Shop** (stall in the main area): upgrade pet damage, luck, walk speed,
-  pet speed, coin bonus, pet slots, and buy a hoverboard.
+  pet speed, coin bonus and pet slots (luck goes up to x100 at max). Stand on
+  the glowing circle to open it; step off to close it.
 - **📈 Upgrade board** (white board in the main area, reset on rebirth): 15
   incremental upgrades on tall cards that scroll sideways, with Buy and Max:
   coin value, chest value, more things to break, chest luck, faster respawn,
@@ -46,9 +47,13 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   pet shows its odds ("1 in 5K") and rare hatches are announced to the server.
 - **Big numbers**: numbers start in the hundreds/thousands and grow ×4 per
   rebirth (shown as 1.5K, 4.5M...); pets land 3x critical hits.
-- **Boosts**: small icons in the bottom right show every active upgrade.
+- **Boosts**: small pills in the bottom right show active potions, perks and
+  upgrades (up to 5, then a "+N" pill that lists the rest).
 - **Mystery gifts** after 1, 3, 5, 10, 15 and 20 minutes of play: free pets
-  from your best egg, potions, diamonds or coins; the last one is a MEGA gift.
+  from your best egg, potions, diamonds or coins (10-35% of the coins you
+  have); the last one is a MEGA gift.
+- **Gate portals**: walk through the glowing portal in the PET PARK or
+  HATCHERY gate to travel between the two areas.
 - **Economy**:
   - 💰 **Coins** (reset on rebirth): from breakables and gifts; spent on eggs,
     shop upgrades and rebirths.
@@ -58,7 +63,8 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
     2x potions (coins / luck / damage, 10 min, only ticks while playing) and
     forever perks (coin bonus, luck, bigger backpack, extra pet slot).
 - **Index**: collection book of every pet; unfound ones are silhouettes.
-- **Rebirth**: resets coins and shop upgrades; keeps pets, index, diamonds and perks. 10 rebirths, each unlocking a new egg (11 eggs).
+- **Rebirth**: big reward cards (x4 coin value / +300%, diamonds, the new
+  egg, 100% pets kept) and a coin progress bar. Resets coins and shop upgrades; keeps pets, index, diamonds and perks. 10 rebirths, each unlocking a new egg (11 eggs).
 
 All numbers (costs, coin health, pet power, chances, upgrades, pet looks)
 are in `src/shared/Config.luau`.
@@ -72,7 +78,7 @@ are in `src/shared/Config.luau`.
 - `src/server/Pets.luau`: pets following you and breaking things
 - `src/server/Eggs.luau`: egg stands and hatching
 - `src/server/Shrines.luau`: themed shrine around each egg
-- `src/server/Shop.luau`: shop stall, upgrades, walk speed, hoverboard
+- `src/server/Shop.luau`: shop stall, upgrades, walk speed
 - `src/server/Inventory.luau`: equip, equip best, delete pets
 - `src/server/Gifts.luau`: playtime mystery gifts
 - `src/server/Pickups.luau`: combos and boost orbs

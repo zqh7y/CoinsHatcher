@@ -38,7 +38,6 @@ local DataChanged = remote("RemoteEvent", "DataChanged") -- server -> client: da
 remote("RemoteEvent", "Notify") -- server -> client: message, color
 remote("RemoteEvent", "Hatched") -- server -> client: { petName }
 remote("RemoteFunction", "BuyUpgrade") -- client -> server: upgrade id, returns ok, message
-remote("RemoteEvent", "ToggleHoverboard") -- client -> server
 remote("RemoteFunction", "BuyPerk") -- client -> server: perk id (costs diamonds)
 remote("RemoteFunction", "BuyBoost") -- client -> server: potion id (costs diamonds)
 local ChooseStarter = remote("RemoteFunction", "ChooseStarter") -- client -> server: "Dog" | "Cat"

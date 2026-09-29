@@ -22,7 +22,6 @@ local Fx = require(script.Fx)
 local Transition = require(script.Transition)
 require(script.Starter)
 require(script.Portals)
-require(script.HoverFx)
 require(script.AreaUpgrades)
 require(script.Shop)
 require(script.EggPreview)
@@ -374,13 +373,6 @@ giftsCell.LayoutOrder = 5
 gifts.Activated:Connect(Gifts.toggle)
 Gifts.attach(gifts)
 
-local board, _, _, boardCell = sideButton(Icons.board, "Board", Color3.fromRGB(40, 190, 210))
-boardCell.LayoutOrder = 6
-boardCell.Visible = false -- shows up once you buy the hoverboard
-board.Activated:Connect(function()
-	remotes.ToggleHoverboard:FireServer()
-end)
-
 -- the teleport button shows where it will take you
 task.spawn(function()
 	local showingEggs = nil
@@ -487,7 +479,6 @@ local function updateWorld()
 		end
 	end
 
-	boardCell.Visible = (data.Upgrades.Hoverboard or 0) > 0
 end
 
 State.Changed.Event:Connect(updateWorld)

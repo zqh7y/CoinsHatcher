@@ -89,12 +89,6 @@ function Icons.home(parent, color)
 	shape(parent, Color3.new(1, 1, 1), 0.5, 0.7, 0.16, 0.26, 0.2)
 end
 
-function Icons.board(parent, color)
-	shape(parent, color, 0.5, 0.48, 0.84, 0.2, true)
-	shape(parent, color, 0.28, 0.7, 0.16, 0.16, true)
-	shape(parent, color, 0.72, 0.7, 0.16, 0.16, true)
-end
-
 function Icons.coin(parent, color)
 	shape(parent, color, 0.5, 0.5, 0.84, 0.84, true)
 	local inner = shape(parent, color:Lerp(Color3.new(1, 1, 1), 0.35), 0.5, 0.5, 0.56, 0.56, true)

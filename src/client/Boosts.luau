@@ -15,7 +15,7 @@ local TEXT = {
 		return ("+%d%%"):format(math.floor((Config.damageMult(u) - 1) * 100 + 0.5))
 	end,
 	Luck = function(u)
-		return ("+%d%%"):format(math.floor((Config.luckMult(u) - 1) * 100 + 0.5))
+		return Config.formatMult(Config.luckMult(u))
 	end,
 	WalkSpeed = function(u)
 		return ("+%d"):format(Config.walkSpeed(u) - Config.walkSpeed(nil))
@@ -28,9 +28,6 @@ local TEXT = {
 	end,
 	Slots = function(u)
 		return ("+%d"):format(Config.maxEquipped(u) - Config.maxEquipped(nil))
-	end,
-	Hoverboard = function()
-		return "ON"
 	end,
 }
 
@@ -74,21 +71,21 @@ local PERK_TEXT = {
 	end,
 }
 
--- One little pill: icon + short text, with a name tooltip on hover.
+-- One small pill: icon + short text, with a name tooltip on hover.
 local function pill(order, icon, text, name, color)
 	local p = Instance.new("Frame")
 	p.AutomaticSize = Enum.AutomaticSize.X
-	p.Size = UDim2.fromOffset(0, 26)
-	-- white pill; potions and perks get a colored border
+	p.Size = UDim2.fromOffset(0, 22)
 	p.BackgroundColor3 = Ui.COLORS.Panel
 	p.LayoutOrder = order
 	p.Parent = holder
 	Ui.corner(p, 0.5)
-	Ui.stroke(p, color or Ui.COLORS.Line, if color then 2 else 1.5)
+	-- potions and perks get a colored border
+	Ui.stroke(p, color or Ui.COLORS.Line, if color then 1.5 else 1)
 
 	local pad = Instance.new("UIPadding")
-	pad.PaddingLeft = UDim.new(0, 6)
-	pad.PaddingRight = UDim.new(0, 8)
+	pad.PaddingLeft = UDim.new(0, 5)
+	pad.PaddingRight = UDim.new(0, 7)
 	pad.Parent = p
 
 	local row = Instance.new("UIListLayout")
@@ -98,18 +95,21 @@ local function pill(order, icon, text, name, color)
 	row.SortOrder = Enum.SortOrder.LayoutOrder
 	row.Parent = p
 
-	Ui.label(p, { Text = icon, Size = UDim2.fromOffset(18, 18), TextStrokeTransparency = 1, LayoutOrder = 1 })
+	if icon ~= "" then
+		Ui.label(p, { Text = icon, Size = UDim2.fromOffset(14, 14), LayoutOrder = 1 })
+	end
 	Ui.label(p, {
 		Text = text,
 		TextScaled = false,
-		TextSize = 14,
+		TextSize = 12,
 		AutomaticSize = Enum.AutomaticSize.X,
-		Size = UDim2.fromOffset(0, 18),
+		Size = UDim2.fromOffset(0, 14),
 		LayoutOrder = 2,
 	})
 
 	p.MouseEnter:Connect(function()
 		tooltip.Text = name
+		tooltip.Size = UDim2.fromOffset(math.max(140, #name * 7), 22)
 		tooltip.Position = UDim2.fromOffset(p.AbsolutePosition.X - 6, p.AbsolutePosition.Y + p.AbsoluteSize.Y)
 		tooltip.Visible = true
 	end)
@@ -120,31 +120,47 @@ end
 
 local POTION_COLOR = Ui.COLORS.Green
 local PERK_COLOR = Ui.COLORS.Gem
+local MAX_SHOWN = 5 -- the rest are summed up in a "+N" pill
 
 local function render()
 	Ui.clear(holder)
+	tooltip.Visible = false
 	local data = State.Data
 	if not data then
 		return
 	end
 
 	-- potions first (with a timer), then diamond perks, then coin upgrades
-	for order, boost in ipairs(Config.BOOSTS) do
+	local entries = {}
+	for _, boost in ipairs(Config.BOOSTS) do
 		local left = math.floor(State.boostLeft(boost.Id))
 		if left > 0 then
-			pill(order, "🧪", ("%s 2x %d:%02d"):format(boost.Icon, left // 60, left % 60), boost.Name .. " potion", POTION_COLOR)
+			table.insert(entries, { boost.Icon, ("2x %d:%02d"):format(left // 60, left % 60), boost.Name .. " potion", POTION_COLOR })
 		end
 	end
-	for order, perk in ipairs(Config.PERKS) do
+	for _, perk in ipairs(Config.PERKS) do
 		local level = data.Perks and data.Perks[perk.Id] or 0
 		if level > 0 then
-			pill(10 + order, "💎", perk.Icon .. " " .. PERK_TEXT[perk.Id](level), perk.Name .. " (forever)", PERK_COLOR)
+			table.insert(entries, { perk.Icon, PERK_TEXT[perk.Id](level), perk.Name .. " (forever)", PERK_COLOR })
 		end
 	end
-	for order, upgrade in ipairs(Config.UPGRADES) do
+	for _, upgrade in ipairs(Config.UPGRADES) do
 		if (data.Upgrades[upgrade.Id] or 0) > 0 then
-			pill(20 + order, upgrade.Icon, TEXT[upgrade.Id](data.Upgrades), upgrade.Name)
+			table.insert(entries, { upgrade.Icon, TEXT[upgrade.Id](data.Upgrades), upgrade.Name })
 		end
+	end
+
+	local shown = if #entries > MAX_SHOWN then MAX_SHOWN - 1 else #entries
+	for i = 1, shown do
+		local e = entries[i]
+		pill(i, e[1], e[2], e[3], e[4])
+	end
+	if #entries > shown then
+		local hidden = {}
+		for i = shown + 1, #entries do
+			table.insert(hidden, entries[i][3])
+		end
+		pill(MAX_SHOWN, "", "+" .. (#entries - shown), table.concat(hidden, ", "), Ui.COLORS.Accent)
 	end
 end
 
