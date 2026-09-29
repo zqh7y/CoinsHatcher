@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
 local State = require(script.Parent.State)
+local Fx = require(script.Parent.Fx)
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 
@@ -63,6 +64,7 @@ button.Activated:Connect(function()
 	Ui.toast(message, if ok then Color3.fromRGB(220, 170, 255) else Ui.COLORS.Red)
 	if ok then
 		panel.close()
+		Fx.celebrate("⭐ REBIRTH! ⭐", Color3.fromRGB(230, 180, 255))
 	end
 	busy = false
 end)

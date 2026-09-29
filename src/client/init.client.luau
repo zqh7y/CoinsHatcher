@@ -14,6 +14,8 @@ local Index = require(script.Index)
 local Rebirth = require(script.Rebirth)
 local Hatch = require(script.Hatch)
 local Gifts = require(script.Gifts)
+local Fx = require(script.Fx)
+local AreaUpgrades = require(script.AreaUpgrades)
 require(script.Shop)
 require(script.EggPreview)
 require(script.Breakables)
@@ -47,36 +49,44 @@ local function counter(icon, color, y)
 		Size = UDim2.new(1, -60, 0, 32),
 		Position = UDim2.fromOffset(50, 6),
 	})
-	local scale = Instance.new("UIScale")
-	scale.Parent = box
-	return value, scale
+	return value, box
 end
 
-local coinText, coinScale = counter("💰", Color3.fromRGB(255, 190, 50), 0)
-local diamondText, diamondScale = counter("💎", Color3.fromRGB(70, 190, 240), 52)
+-- A number that rolls up (or down) to its new value instead of jumping.
+local function rollingNumber(label, getValue)
+	local shown = Instance.new("NumberValue")
+	shown.Value = getValue()
+	label.Text = Config.formatNumber(shown.Value)
+	shown.Changed:Connect(function(v)
+		label.Text = Config.formatNumber(v)
+	end)
+	return function()
+		TweenService:Create(shown, TweenInfo.new(0.45, Enum.EasingStyle.Quad), { Value = getValue() }):Play()
+	end
+end
+
+local coinText, coinBox = counter("💰", Color3.fromRGB(255, 190, 50), 0)
+local diamondText, diamondBox = counter("💎", Color3.fromRGB(70, 190, 240), 52)
 local rebirthText = counter("⭐", Color3.fromRGB(170, 100, 230), 104)
+Fx.targets.Coins = coinBox
+Fx.targets.Diamonds = diamondBox
 
 task.spawn(function()
 	local stats = player:WaitForChild("leaderstats")
 	local rebirths = stats:WaitForChild("Rebirths")
-	local function updateCoins()
-		coinText.Text = Config.formatNumber(player:GetAttribute("Coins") or 0)
-		coinScale.Scale = 1.12
-		TweenService:Create(coinScale, TweenInfo.new(0.2, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-	end
+	local rollCoins = rollingNumber(coinText, function()
+		return player:GetAttribute("Coins") or 0
+	end)
+	local rollDiamonds = rollingNumber(diamondText, function()
+		return player:GetAttribute("Diamonds") or 0
+	end)
+	player:GetAttributeChangedSignal("Coins"):Connect(rollCoins)
+	player:GetAttributeChangedSignal("Diamonds"):Connect(rollDiamonds)
+
 	local function updateRebirths()
 		rebirthText.Text = ("Rebirth %d/%d"):format(rebirths.Value, Config.MAX_REBIRTHS)
 	end
-	player:GetAttributeChangedSignal("Coins"):Connect(updateCoins)
-	local function updateDiamonds()
-		diamondText.Text = Config.formatNumber(player:GetAttribute("Diamonds") or 0)
-		diamondScale.Scale = 1.15
-		TweenService:Create(diamondScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-	end
-	player:GetAttributeChangedSignal("Diamonds"):Connect(updateDiamonds)
-	updateDiamonds()
 	rebirths.Changed:Connect(updateRebirths)
-	updateCoins()
 	updateRebirths()
 end)
 
@@ -85,7 +95,7 @@ end)
 local side = Instance.new("Frame")
 side.AnchorPoint = Vector2.new(0, 0.5)
 side.Position = UDim2.new(0, 12, 0.6, 0)
-side.Size = UDim2.fromOffset(170, 260)
+side.Size = UDim2.fromOffset(170, 350)
 side.BackgroundTransparency = 1
 side.Parent = Ui.gui
 
@@ -102,6 +112,7 @@ local buttons = {
 		local atEggs = root and (root.Position - EGG_CENTER).Magnitude < 150
 		remotes.Teleport:FireServer(if atEggs then "Main" else "Eggs")
 	end },
+	{ "📈", "Upgrades", Color3.fromRGB(90, 200, 150), AreaUpgrades.toggle },
 	{ "🐾", "Pets", Color3.fromRGB(80, 160, 240), Inventory.toggle },
 	{ "📖", "Index", Color3.fromRGB(240, 110, 150), Index.toggle },
 	{ "⭐", "Rebirth", Color3.fromRGB(170, 100, 230), Rebirth.toggle },
@@ -122,6 +133,8 @@ for order, def in ipairs(buttons) do
 		button.Visible = false -- shows up once you buy the hoverboard
 	elseif def[2] == "Gifts" then
 		Gifts.attach(button)
+	elseif def[2] == "Upgrades" then
+		AreaUpgrades.attach(button)
 	end
 end
 
@@ -137,7 +150,13 @@ task.spawn(function()
 	end
 end)
 
-remotes.Notify.OnClientEvent:Connect(Ui.toast)
+-- server messages; `celebrate` adds confetti (e.g. a new pet discovered)
+remotes.Notify.OnClientEvent:Connect(function(message, color, celebrate)
+	Ui.toast(message, color)
+	if celebrate then
+		Fx.confetti(45)
+	end
+end)
 remotes.Hatched.OnClientEvent:Connect(Hatch.play)
 
 -- Server-wide shout-outs for rare hatches, so everyone can see the flex

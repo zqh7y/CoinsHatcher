@@ -204,11 +204,11 @@ local function spawnCoin(player)
 		return
 	end
 	local f = playerFolder(player)
-	if #f:GetChildren() >= Config.COINS_PER_PLAYER then
+	if #f:GetChildren() >= Config.breakableCount(data) then
 		return
 	end
 
-	local kind = Config.rollBreakable()
+	local kind = Config.rollBreakable(data)
 	local stats = Config.coinStats(data.Rebirths, kind)
 	local radius = RADIUS[kind]
 	local pos = findSpot(f, radius)
@@ -226,13 +226,14 @@ local function spawnCoin(player)
 	local height = BUILDERS[kind](model, origin)
 	model:SetAttribute("Health", stats.Health)
 	model:SetAttribute("MaxHealth", stats.Health)
-	model:SetAttribute("Value", stats.Value)
+	model:SetAttribute("Kind", kind)
+	model:SetAttribute("Value", stats.Value) -- base value; upgrades apply when it breaks
 	model:SetAttribute("Radius", radius)
 	model:SetAttribute("Height", height)
 
 	-- some breakables carry diamonds: a glowing gem floats above them
 	local breakable = Config.BREAKABLES[kind]
-	if breakable.Diamonds > 0 and math.random() < breakable.DiamondChance then
+	if math.random() < Config.diamondChance(data, kind) then
 		model:SetAttribute("Diamonds", breakable.Diamonds)
 		local gem = piece(
 			model,
@@ -260,10 +261,14 @@ local function spawnCoin(player)
 end
 
 local function fill(player)
-	for _ = 1, Config.COINS_PER_PLAYER do
+	local data = PlayerData.get(player)
+	for _ = 1, Config.breakableCount(data) do
 		spawnCoin(player)
 	end
 end
+
+-- Spawns extra breakables right away (after buying "More Stuff").
+Coins.fill = fill
 
 -- Returns the player's breakables that are still alive.
 function Coins.get(player)
@@ -286,13 +291,13 @@ function Coins.damage(player, model, amount, crit)
 	end
 
 	local data = PlayerData.get(player)
-	PlayerData.addCoins(player, model:GetAttribute("Value") * Config.totalCoins(data))
+	PlayerData.addCoins(player, Config.breakablePayout(data, model:GetAttribute("Kind") or 1, model:GetAttribute("Value")))
 	local diamonds = model:GetAttribute("Diamonds")
 	if diamonds then
 		PlayerData.addDiamonds(player, diamonds)
 	end
 	model:Destroy()
-	task.delay(Config.COIN_RESPAWN_TIME, spawnCoin, player)
+	task.delay(Config.respawnTime(data), spawnCoin, player)
 	return true
 end
 

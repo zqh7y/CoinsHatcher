@@ -197,7 +197,7 @@ local function update(dt)
 
 					if t >= pet.LastHit + Config.PET_HIT_INTERVAL then
 						pet.LastHit = t
-						local crit = math.random() < Config.CRIT_CHANCE
+						local crit = math.random() < Config.critChance(data)
 						local damage = math.floor(pet.Power * damageMult * (if crit then Config.CRIT_MULT else 1))
 						if Coins.damage(player, target, damage, crit) then
 							pet.Target = nil

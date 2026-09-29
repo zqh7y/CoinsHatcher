@@ -9,6 +9,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
 local State = require(script.Parent.State)
+local Fx = require(script.Parent.Fx)
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 
@@ -74,6 +75,7 @@ local function openAnimation(tile, message)
 	scale.Scale = 0.3
 	TweenService:Create(scale, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Scale = 1.3 }):Play()
 	Ui.toast(message, Ui.COLORS.Gold)
+	Fx.confetti(50)
 	task.wait(0.8)
 	TweenService:Create(scale, TweenInfo.new(0.2), { Scale = 1 }):Play()
 end

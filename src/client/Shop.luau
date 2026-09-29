@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
 local State = require(script.Parent.State)
+local Fx = require(script.Parent.Fx)
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local player = Players.LocalPlayer
@@ -142,6 +143,9 @@ local function row(order, item)
 		local ok, message = item.Buy()
 		if message then
 			Ui.toast(message, if ok then Ui.COLORS.Gold else Ui.COLORS.Red)
+		end
+		if ok then
+			Fx.confetti(20)
 		end
 		busy = false
 	end)

@@ -28,8 +28,8 @@ local MAX_DISTANCE = 20 -- how close you must be to hatch
 
 local RED = Color3.fromRGB(255, 90, 90)
 
-local function notify(player, message, color)
-	remotes.Notify:FireClient(player, message, color)
+local function notify(player, message, color, celebrate)
+	remotes.Notify:FireClient(player, message, color, celebrate)
 end
 
 -- Hatches `count` eggs (1 or 3) at once.
@@ -85,7 +85,7 @@ local function hatch(player, eggIndex, count)
 	local indexes = PlayerData.addPets(player, names)
 	if reward > 0 then
 		PlayerData.addDiamonds(player, reward)
-		notify(player, "📖 New pet discovered! +" .. reward .. " 💎", Color3.fromRGB(130, 220, 255))
+		notify(player, "📖 New pet discovered! +" .. reward .. " 💎", Color3.fromRGB(130, 220, 255), true)
 	end
 
 	-- auto-equip into free slots

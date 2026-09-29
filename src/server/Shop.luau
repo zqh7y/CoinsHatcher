@@ -7,6 +7,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local PetModel = require(ReplicatedStorage.Shared.PetModel)
 local PlayerData = require(script.Parent.PlayerData)
 local World = require(script.Parent.World)
+local Coins = require(script.Parent.Coins)
 
 local Shop = {}
 
@@ -154,27 +155,41 @@ end
 
 -- Buying ------------------------------------------------------------------------
 
-local function buy(player, id)
+-- Buys one level, or as many as you can afford when `max` is true.
+local function buy(player, id, max)
 	local data = PlayerData.get(player)
 	local upgrade = Config.UPGRADES_BY_ID[id]
 	if not data or not upgrade then
 		return false, "Can't buy that."
 	end
-	local level = data.Upgrades[id] or 0
-	if level >= upgrade.Max then
+	local startLevel = data.Upgrades[id] or 0
+	if startLevel >= upgrade.Max then
 		return false, upgrade.Name .. " is maxed out!"
 	end
-	local cost = Config.upgradeCost(upgrade, level, data.Rebirths)
-	if data.Coins < cost then
+
+	local level, spent = startLevel, 0
+	repeat
+		local cost = Config.upgradeCost(upgrade, level, data.Rebirths)
+		if data.Coins - spent < cost then
+			break
+		end
+		spent += cost
+		level += 1
+	until not max or level >= upgrade.Max
+	if level == startLevel then
 		return false, "Not enough coins!"
 	end
 
-	PlayerData.addCoins(player, -cost)
+	PlayerData.addCoins(player, -spent)
 	if id == "Hoverboard" then
 		riding[player] = true -- hop on right away
 	end
-	PlayerData.setUpgrade(player, id, level + 1)
-	return true, upgrade.Icon .. " " .. upgrade.Name .. " upgraded!"
+	PlayerData.setUpgrade(player, id, level)
+	if id == "MoreBreakables" then
+		Coins.fill(player) -- spawn the extra ones now
+	end
+	local levels = level - startLevel
+	return true, ("%s %s upgraded%s!"):format(upgrade.Icon, upgrade.Name, if levels > 1 then " x" .. levels else "")
 end
 
 -- Diamond shop: permanent perks and 2x potions.
@@ -230,11 +245,11 @@ function Shop.start(remotes)
 		return buyBoost(player, id)
 	end
 
-	remotes.BuyUpgrade.OnServerInvoke = function(player, id)
+	remotes.BuyUpgrade.OnServerInvoke = function(player, id, max)
 		if typeof(id) ~= "string" then
 			return false
 		end
-		return buy(player, id)
+		return buy(player, id, max == true)
 	end
 
 	remotes.ToggleHoverboard.OnServerEvent:Connect(function(player)

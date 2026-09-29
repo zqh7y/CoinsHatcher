@@ -8,6 +8,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
 local Viewport = require(script.Parent.Viewport)
+local Fx = require(script.Parent.Fx)
 
 local Hatch = {}
 
@@ -171,6 +172,7 @@ local function play(petNames)
 			ZIndex = 32,
 		})
 		table.insert(labels, banner)
+		Fx.confetti(80)
 	end
 
 	task.wait(if fast then 1 elseif anyRare then 3.5 else 2.2)

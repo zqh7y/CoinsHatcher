@@ -38,8 +38,8 @@ function Config.coinStats(rebirths: number, kind: number)
 	}
 end
 
-function Config.rollBreakable(): number
-	return Config.rollWeighted(Config.BREAKABLES)
+function Config.rollBreakable(data): number
+	return Config.rollWeighted(Config.breakableWeights(data))
 end
 
 -- Floor color of the main area at each rebirth level (last one repeats).
@@ -393,8 +393,23 @@ Config.UPGRADES = {
 	{ Id = "Hoverboard", Name = "Hoverboard", Icon = "🛹", Max = 1, BaseCost = 7500, Growth = 1, Info = "Ride a super fast hoverboard!" },
 }
 
+-- Incremental "area" upgrades (📈 menu, buy anywhere, reset on rebirth).
+-- Lots of cheap levels that make the coin zone pay out more and more.
+Config.AREA_UPGRADES = {
+	{ Id = "CoinValue", Name = "Coin Value", Icon = "💰", Max = 50, BaseCost = 100, Growth = 1.18, Info = "Coin stacks & piles worth +10%" },
+	{ Id = "ChestValue", Name = "Chest Value", Icon = "🧰", Max = 50, BaseCost = 250, Growth = 1.2, Info = "Chests worth +15%" },
+	{ Id = "MoreBreakables", Name = "More Stuff", Icon = "➕", Max = 12, BaseCost = 400, Growth = 1.45, Info = "+1 thing to break in the zone" },
+	{ Id = "ChestLuck", Name = "Chest Luck", Icon = "🍀", Max = 20, BaseCost = 350, Growth = 1.3, Info = "Chests spawn 10% more often" },
+	{ Id = "Respawn", Name = "Fast Respawn", Icon = "⏩", Max = 10, BaseCost = 300, Growth = 1.4, Info = "Things come back 5% faster" },
+	{ Id = "DiamondFinder", Name = "Diamond Finder", Icon = "💎", Max = 10, BaseCost = 500, Growth = 1.45, Info = "+5% coin piles carry diamonds" },
+	{ Id = "CritChance", Name = "Crit Chance", Icon = "💥", Max = 20, BaseCost = 450, Growth = 1.3, Info = "+1% critical hits" },
+}
+
 Config.UPGRADES_BY_ID = {}
 for _, upgrade in ipairs(Config.UPGRADES) do
+	Config.UPGRADES_BY_ID[upgrade.Id] = upgrade
+end
+for _, upgrade in ipairs(Config.AREA_UPGRADES) do
 	Config.UPGRADES_BY_ID[upgrade.Id] = upgrade
 end
 
@@ -404,6 +419,47 @@ end
 
 local function level(upgrades, id)
 	return if upgrades then upgrades[id] or 0 else 0
+end
+
+-- Area upgrade effects (data can be nil).
+local function areaLevel(data, id)
+	return level(data and data.Upgrades, id)
+end
+function Config.breakableCount(data): number
+	return Config.COINS_PER_PLAYER + areaLevel(data, "MoreBreakables")
+end
+function Config.respawnTime(data): number
+	return Config.COIN_RESPAWN_TIME * (1 - 0.05 * areaLevel(data, "Respawn"))
+end
+function Config.critChance(data): number
+	return Config.CRIT_CHANCE + 0.01 * areaLevel(data, "CritChance")
+end
+-- Value multiplier for a kind of breakable (1-2 coins, 3-4 chests).
+function Config.breakableValueMult(data, kind: number): number
+	if kind >= 3 then
+		return 1 + 0.15 * areaLevel(data, "ChestValue")
+	end
+	return 1 + 0.1 * areaLevel(data, "CoinValue")
+end
+-- Spawn weights with Chest Luck applied.
+function Config.breakableWeights(data)
+	local luck = 1 + 0.1 * areaLevel(data, "ChestLuck")
+	local list = {}
+	for kind, b in ipairs(Config.BREAKABLES) do
+		table.insert(list, { Chance = b.Chance * (if kind >= 3 then luck else 1) })
+	end
+	return list
+end
+function Config.diamondChance(data, kind: number): number
+	local b = Config.BREAKABLES[kind]
+	if b.Diamonds == 0 then
+		return 0
+	end
+	return math.min(1, b.DiamondChance + (if kind == 2 then 0.05 * areaLevel(data, "DiamondFinder") else 0))
+end
+-- Coins a broken breakable pays: its base value x area upgrades x bonuses.
+function Config.breakablePayout(data, kind: number, baseValue: number): number
+	return math.floor(baseValue * Config.breakableValueMult(data, kind) * Config.totalCoins(data))
 end
 
 function Config.damageMult(upgrades): number
