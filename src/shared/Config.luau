@@ -761,12 +761,16 @@ Config.ORB_SECONDS = 45 -- boost length
 Config.ORB_LIFETIME = 25 -- seconds before an orb disappears
 Config.ORB_RANGE = 10 -- how close you need to get
 
--- Pet merchant (the stall in the main area): sells pets for diamonds. The
--- stock changes every RESTOCK_MINUTES (same for everyone at the same
--- progress) and every offer can be bought once per restock. Pets come from
--- your best unlocked egg (or close to it).
+-- Pet merchant (the stall in the main area): sells pets for diamonds. It
+-- follows your progress: its three offers are pets about 10%, 50% and 90% as
+-- strong as your best pet. The stock changes every RESTOCK_MINUTES and every
+-- offer can be bought once per restock.
 Config.MERCHANT_RESTOCK_MINUTES = 10
-Config.MERCHANT_SLOTS = 4
+Config.MERCHANT_TIERS = {
+	{ Name = "Level 1", Strength = 0.1, Price = 2500 },
+	{ Name = "Level 2", Strength = 0.5, Price = 15000 },
+	{ Name = "Level 3", Strength = 0.9, Price = 60000 },
+}
 
 -- The current restock number and seconds until the next one. `now` is the
 -- server time (the client passes workspace:GetServerTimeNow()).
@@ -776,32 +780,85 @@ function Config.merchantCycle(now: number): (number, number)
 	return cycle, math.ceil((cycle + 1) * length - now)
 end
 
--- The merchant's offers for this player right now: { { Pet, Price } }.
+-- The pets the merchant can sell: every egg pet and its mutations (no huges),
+-- sorted by name so the list is the same everywhere.
+local merchantPool = nil
+local function getMerchantPool()
+	if not merchantPool then
+		merchantPool = {}
+		for petName, info in pairs(Config.PETS) do
+			if info.Egg and info.Rarity ~= "Huge" then
+				table.insert(merchantPool, petName)
+			end
+		end
+		table.sort(merchantPool)
+	end
+	return merchantPool
+end
+
+-- Power of the player's strongest pet.
+function Config.bestPetPower(data): number
+	local best = 0
+	for _, petName in ipairs((data and data.Pets) or {}) do
+		local info = Config.PETS[petName]
+		if info then
+			best = math.max(best, info.Power)
+		end
+	end
+	return if best > 0 then best else Config.PETS[Config.STARTER_CHOICES[1]].Power
+end
+
+-- The merchant's offers for this player right now: { { Pet, Price, Tier } }.
+-- Each one is picked from the few pets closest to its target strength, and
+-- prices grow a bit with every rebirth.
 function Config.merchantOffers(data, cycle: number)
-	local best = math.clamp(((data and data.Rebirths) or 0) + 1, 1, Config.REBIRTH_EGGS)
-	local rng = Random.new(cycle * 131 + best)
-	local function pet(eggIndex, rarityIndex)
-		return Config.EGGS[eggIndex].Pets[rarityIndex]
+	local best = Config.bestPetPower(data)
+	local rebirths = (data and data.Rebirths) or 0
+	local rng = Random.new(cycle * 131 + math.floor(math.log10(best) * 100))
+	local pool = getMerchantPool()
+	local offers, taken = {}, {}
+	for _, tier in ipairs(Config.MERCHANT_TIERS) do
+		local target = best * tier.Strength
+		-- the closest pets to the target strength (by ratio), never stronger
+		-- than your best pet (so it can't skip your progress)
+		local cap = math.min(target * 1.3, best * 0.95)
+		local candidates = {}
+		local function collect(limit)
+			for _, petName in ipairs(pool) do
+				local power = Config.PETS[petName].Power
+				if not taken[petName] and power <= limit then
+					table.insert(candidates, { Name = petName, Off = math.abs(math.log(power / target)) })
+				end
+			end
+		end
+		collect(cap)
+		if #candidates == 0 then
+			collect(best) -- very early on: nothing weaker exists, so up to your best
+		end
+		if #candidates == 0 then
+			for _, petName in ipairs(pool) do
+				if not taken[petName] then
+					table.insert(candidates, { Name = petName, Off = Config.PETS[petName].Power })
+				end
+			end
+		end
+		table.sort(candidates, function(x, y)
+			if x.Off ~= y.Off then
+				return x.Off < y.Off
+			end
+			return x.Name < y.Name
+		end)
+		local pick = candidates[rng:NextInteger(1, math.min(3, #candidates))].Name
+		taken[pick] = true
+		table.insert(offers, { Pet = pick })
 	end
-	local offers = {}
-	-- 1) a rare pet from your best egg
-	table.insert(offers, { Pet = pet(best, 3), Price = 200 })
-	-- 2) a legendary from one of your best eggs
-	table.insert(offers, { Pet = pet(rng:NextInteger(math.max(1, best - 2), best), 4), Price = 600 })
-	-- 3) a mutated legendary: Shiny, sometimes Rainbow, rarely Galaxy
-	local roll = rng:NextNumber()
-	local mutation, price = "Shiny", 1500
-	if roll < 0.1 then
-		mutation, price = "Galaxy", 8000
-	elseif roll < 0.4 then
-		mutation, price = "Rainbow", 3500
-	end
-	table.insert(offers, { Pet = mutation .. " " .. pet(best, 4), Price = price })
-	-- 4) the special slot: a Mythical 1 time in 4, otherwise a Shiny rare
-	if rng:NextNumber() < 0.25 then
-		table.insert(offers, { Pet = pet(best, 5), Price = 12000 })
-	else
-		table.insert(offers, { Pet = "Shiny " .. pet(best, 3), Price = 400 })
+	-- weakest first, so Level 1 < Level 2 < Level 3
+	table.sort(offers, function(x, y)
+		return Config.PETS[x.Pet].Power < Config.PETS[y.Pet].Power
+	end)
+	for tierIndex, offer in ipairs(offers) do
+		offer.Tier = tierIndex
+		offer.Price = Config.roundPrice(Config.MERCHANT_TIERS[tierIndex].Price * (1 + 0.5 * rebirths))
 	end
 	return offers
 end

@@ -179,14 +179,18 @@ local function merchantTab(data)
 	shownCycle = cycle
 	timerLabel = header(0, timerText(left))
 	local bought = if data.Merchant and data.Merchant.Cycle == cycle then data.Merchant.Bought else {}
+	local best = Config.bestPetPower(data)
 	for slot, offer in ipairs(Config.merchantOffers(data, cycle)) do
 		local info = Config.PETS[offer.Pet]
 		local sold = bought["s" .. slot] == true
+		local percent = math.floor(info.Power / best * 100 + 0.5)
 		row(slot, {
 			Pet = offer.Pet,
 			Name = offer.Pet,
-			Extra = info.Rarity,
-			Info = if sold then "Sold out · come back after the restock" else ("⚔ %s power · %s"):format(Config.formatNumber(info.Power), Config.chanceText(offer.Pet)),
+			Extra = Config.MERCHANT_TIERS[offer.Tier].Name,
+			Info = if sold
+				then "Sold out · come back after the restock"
+				else ("⚔ %s · %d%% of your best pet"):format(Config.formatNumber(info.Power), percent),
 			InfoColor = if sold then nil else info.Color:Lerp(Color3.new(0, 0, 0), 0.25),
 			Maxed = sold,
 			MaxedText = "SOLD",

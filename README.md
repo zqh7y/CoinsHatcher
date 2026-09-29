@@ -24,16 +24,17 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   coin zone and break them. Stronger pets hit harder. Every rebirth makes the
   area's breakables tougher and worth more (and changes its color).
 - **🌳 Upgrade tree** (the Upgrades button at the bottom middle of the
-  screen): every coin upgrade is a branch growing out of the middle, one
-  circle per level: coin bonus (x10), luck (x100), walk speed, pet speed,
-  and branches that open later: hatch speed and hatch amount (from luck),
-  pet slots (from pet speed). Kept forever. Every level has a fixed price,
-  set for the rebirth you'd be at when buying it.
-- **🐾 Merchant** (stall in the main area; stand on its circle): sells pets
-  for diamonds from your best egg (a rare, a legendary, a mutated legendary
-  and a special slot that's sometimes a Mythical). New pets every 10 minutes;
-  each offer can be bought once per restock. The Diamond Shop tab (potions
-  and perks) is there too.
+  screen): a sunny meadow where every coin upgrade is a wooden branch growing
+  out of the START tree, one shiny bubble per level: coin bonus (x10), luck
+  (x100), walk speed, pet speed, and branches that grow later: hatch speed
+  and hatch amount (from luck), pet slots (from pet speed). Scroll to zoom,
+  right-click and drag to move (pinch and drag on phones, or the +/−/⌂
+  buttons). After buying, the view glides to the next bubble. Kept forever.
+- **🐾 Merchant** (stall in the main area; stand on its circle): sells 3 pets
+  for diamonds that follow your progress: about 10%, 50% and 90% as strong as
+  your best pet (never stronger). New pets every 10 minutes; each offer once
+  per restock. Prices: 2.5K / 15K / 60K 💎, +50% per rebirth. The Diamond
+  Shop tab (potions and perks) is there too.
 - **📈 Upgrade board** (white board in the main area, reset on rebirth): one
   row of big, easy-to-read cards that scroll sideways, with Buy and Max:
   coin value, more coins, luck (x10 at max), diamond chance, crit, hit
