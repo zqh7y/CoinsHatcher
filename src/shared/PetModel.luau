@@ -29,8 +29,33 @@ function PetModel.build(petName: string, options)
 	local extras = look.Extras or {}
 	local s = info.Scale
 	local color = info.BodyColor
+	local material = Enum.Material.SmoothPlastic
+	if info.Mutation == "Shiny" then
+		color = color:Lerp(WHITE, 0.25)
+		material = Enum.Material.Foil
+	elseif info.Mutation == "Galaxy" then
+		color = Color3.fromRGB(70, 35, 140)
+		material = Enum.Material.Neon
+	end
 	local darker = color:Lerp(Color3.new(0, 0, 0), 0.15)
 	local lighter = color:Lerp(WHITE, 0.4)
+	if info.Mutation == "Galaxy" then
+		lighter = Color3.fromRGB(150, 110, 255)
+	end
+
+	-- body-colored parts get the mutation's look; rainbow pets get a new
+	-- color for every part
+	local rainbowHue = 0
+	local function paint(partColor)
+		if partColor ~= color and partColor ~= darker and partColor ~= lighter then
+			return partColor, Enum.Material.SmoothPlastic -- face, beak, horns...
+		end
+		if info.Mutation == "Rainbow" then
+			rainbowHue = (rainbowHue + 0.13) % 1
+			return Color3.fromHSV(rainbowHue, 0.5, 1), Enum.Material.SmoothPlastic
+		end
+		return partColor, if material == Enum.Material.Neon and partColor ~= color then Enum.Material.SmoothPlastic else material
+	end
 
 	local model = Instance.new("Model")
 	model.Name = petName
@@ -38,8 +63,7 @@ function PetModel.build(petName: string, options)
 	local body = Instance.new("Part")
 	body.Name = "Body"
 	body.Size = Vector3.one * PetModel.SIZE * s
-	body.Color = color
-	body.Material = Enum.Material.SmoothPlastic
+	body.Color, body.Material = paint(color)
 	body.TopSurface = Enum.SurfaceType.Smooth
 	body.BottomSurface = Enum.SurfaceType.Smooth
 	body.Anchored = true
@@ -55,8 +79,7 @@ function PetModel.build(petName: string, options)
 		local p = Instance.new("Part")
 		p.Shape = shape or Enum.PartType.Block
 		p.Size = size * s
-		p.Color = partColor
-		p.Material = Enum.Material.SmoothPlastic
+		p.Color, p.Material = paint(partColor)
 		p.TopSurface = Enum.SurfaceType.Smooth
 		p.BottomSurface = Enum.SurfaceType.Smooth
 		p.CanCollide = false
@@ -166,7 +189,7 @@ function PetModel.build(petName: string, options)
 		end
 	end
 
-	if info.Rarity == "Legendary" or info.Rarity == "Huge" then
+	if info.Rarity == "Legendary" or info.Rarity == "Huge" or info.Mutation then
 		local sparkles = Instance.new("Sparkles")
 		sparkles.SparkleColor = info.Color
 		sparkles.Parent = body

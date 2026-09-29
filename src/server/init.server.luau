@@ -10,6 +10,8 @@ local Coins = require(script.Coins)
 local Pets = require(script.Pets)
 local Eggs = require(script.Eggs)
 local Shop = require(script.Shop)
+local Inventory = require(script.Inventory)
+local Gifts = require(script.Gifts)
 
 -- Remotes the client talks to
 local remotes = Instance.new("Folder")
@@ -24,11 +26,16 @@ end
 
 local Teleport = remote("RemoteEvent", "Teleport") -- client -> server: "Main" | "Eggs"
 local Rebirth = remote("RemoteFunction", "Rebirth") -- client -> server, returns ok, message
-local SetEquipped = remote("RemoteFunction", "SetEquipped") -- client -> server: petIndex, bool
+remote("RemoteFunction", "SetEquipped") -- client -> server: petIndex, bool
+remote("RemoteFunction", "EquipBest") -- client -> server
+remote("RemoteFunction", "DeletePets") -- client -> server: { petIndex }
+remote("RemoteFunction", "ClaimGift") -- client -> server: gift number
+remote("RemoteEvent", "Hatch") -- client -> server: eggIndex, 1 or 3
+remote("RemoteEvent", "Announce") -- server -> all clients: player name, pet name
 local GetData = remote("RemoteFunction", "GetData") -- client -> server, returns data
 local DataChanged = remote("RemoteEvent", "DataChanged") -- server -> client: data
 remote("RemoteEvent", "Notify") -- server -> client: message, color
-remote("RemoteEvent", "Hatched") -- server -> client: petName
+remote("RemoteEvent", "Hatched") -- server -> client: { petName }
 remote("RemoteFunction", "BuyUpgrade") -- client -> server: upgrade id, returns ok, message
 remote("RemoteEvent", "ToggleHoverboard") -- client -> server
 
@@ -41,6 +48,8 @@ Coins.start()
 Pets.start()
 Eggs.start(remotes)
 Shop.start(remotes)
+Inventory.start(remotes)
+Gifts.start(remotes)
 
 -- Keep the client's copy of the data (pets, equipped, rebirths) up to date
 PlayerData.Changed.Event:Connect(function(player)
@@ -88,28 +97,4 @@ Rebirth.OnServerInvoke = function(player)
 	PlayerData.rebirth(player)
 	Coins.reset(player) -- respawn their coins at the new, stronger level
 	return true, "Rebirth " .. data.Rebirths .. "! The area got stronger and a new egg unlocked!"
-end
-
-SetEquipped.OnServerInvoke = function(player, petIndex, equip)
-	local data = PlayerData.get(player)
-	if not data or typeof(petIndex) ~= "number" or typeof(equip) ~= "boolean" then
-		return false
-	end
-	if not data.Pets[petIndex] then
-		return false
-	end
-
-	local equipped = table.clone(data.Equipped)
-	local pos = table.find(equipped, petIndex)
-	if equip and not pos then
-		local max = Config.maxEquipped(data.Upgrades)
-		if #equipped >= max then
-			return false, "You can only equip " .. max .. " pets! Buy more slots in the shop."
-		end
-		table.insert(equipped, petIndex)
-	elseif not equip and pos then
-		table.remove(equipped, pos)
-	end
-	PlayerData.setEquipped(player, equipped)
-	return true
 end

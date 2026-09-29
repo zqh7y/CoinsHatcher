@@ -25,23 +25,29 @@ folder.Parent = workspace
 local active = {}
 local equippedKey = {} -- [player] = the equipped pets we last built, to skip needless rebuilds
 
+-- Name and odds over the pet's head, so everyone can see how rare it is.
 local function addNameTag(body, petName)
 	local info = Config.PETS[petName]
 	local label = Instance.new("BillboardGui")
-	label.Size = UDim2.fromOffset(130, 24)
-	label.StudsOffset = Vector3.new(0, 3 * info.Scale, 0)
-	label.MaxDistance = 60
+	label.Size = UDim2.fromOffset(160, 40)
+	label.StudsOffset = Vector3.new(0, 3.3 * info.Scale, 0)
+	label.MaxDistance = 80
 	label.Parent = body
 
-	local text = Instance.new("TextLabel")
-	text.Size = UDim2.fromScale(1, 1)
-	text.BackgroundTransparency = 1
-	text.Text = petName
-	text.TextColor3 = info.Color
-	text.TextStrokeTransparency = 0.3
-	text.Font = Enum.Font.FredokaOne
-	text.TextScaled = true
-	text.Parent = label
+	local function line(text, color, y, height)
+		local l = Instance.new("TextLabel")
+		l.Size = UDim2.new(1, 0, height, 0)
+		l.Position = UDim2.fromScale(0, y)
+		l.BackgroundTransparency = 1
+		l.Text = text
+		l.TextColor3 = color
+		l.TextStrokeTransparency = 0.2
+		l.Font = Enum.Font.FredokaOne
+		l.TextScaled = true
+		l.Parent = label
+	end
+	line(petName, info.Color, 0, 0.58)
+	line(Config.chanceText(petName), Color3.new(1, 1, 1), 0.6, 0.4)
 end
 
 -- Rebuilds the player's pets from their equipped list (only if it changed).
@@ -191,7 +197,9 @@ local function update(dt)
 
 					if t >= pet.LastHit + Config.PET_HIT_INTERVAL then
 						pet.LastHit = t
-						if Coins.damage(player, target, math.floor(pet.Power * damageMult)) then
+						local crit = math.random() < Config.CRIT_CHANCE
+						local damage = math.floor(pet.Power * damageMult * (if crit then Config.CRIT_MULT else 1))
+						if Coins.damage(player, target, damage, crit) then
 							pet.Target = nil
 						end
 					end

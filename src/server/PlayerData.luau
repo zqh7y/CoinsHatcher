@@ -19,6 +19,7 @@ local DEFAULT = {
 	Equipped = {}, -- indexes into Pets for the pets following them
 	Upgrades = {}, -- [upgrade id] = level, bought in the shop
 	Index = {}, -- [pet name] = true for every pet ever hatched
+	Hatched = 0, -- eggs hatched, shown on the player list for flexing
 }
 
 local sessionData = {} -- [player] = data table while they're in game
@@ -30,6 +31,13 @@ local function setStat(player, name, value)
 	if stat then
 		stat.Value = value
 	end
+end
+
+-- Coins can get huge, so the player list shows them short ("1.5M") and the
+-- exact number is kept in the player's "Coins" attribute for the client.
+local function showCoins(player, coins)
+	setStat(player, "Coins", Config.formatNumber(coins))
+	player:SetAttribute("Coins", coins)
 end
 
 local function load(player)
@@ -54,6 +62,10 @@ local function load(player)
 	-- older saves: fill in the index from the pets they already own
 	for _, petName in ipairs(data.Pets) do
 		data.Index[petName] = true
+		local info = Config.PETS[petName]
+		if info and info.Base then
+			data.Index[info.Base] = true
+		end
 	end
 
 	-- new players get a starter pet so they can break coins
@@ -67,9 +79,8 @@ local function load(player)
 	local stats = Instance.new("Folder")
 	stats.Name = "leaderstats"
 
-	local coins = Instance.new("IntValue")
+	local coins = Instance.new("StringValue")
 	coins.Name = "Coins"
-	coins.Value = data.Coins
 	coins.Parent = stats
 
 	local rebirths = Instance.new("IntValue")
@@ -77,7 +88,13 @@ local function load(player)
 	rebirths.Value = data.Rebirths
 	rebirths.Parent = stats
 
+	local hatched = Instance.new("IntValue")
+	hatched.Name = "Hatched"
+	hatched.Value = data.Hatched
+	hatched.Parent = stats
+
 	stats.Parent = player
+	showCoins(player, data.Coins)
 
 	if player.Parent then
 		sessionData[player] = data
@@ -118,7 +135,7 @@ function PlayerData.addCoins(player, amount)
 		return
 	end
 	data.Coins = math.floor(data.Coins + amount)
-	setStat(player, "Coins", data.Coins)
+	showCoins(player, data.Coins)
 end
 
 -- Rebirth resets everything except pets (and the index of pets found).
@@ -134,20 +151,62 @@ function PlayerData.rebirth(player)
 	while #data.Equipped > Config.maxEquipped(data.Upgrades) do
 		table.remove(data.Equipped)
 	end
-	setStat(player, "Coins", data.Coins)
+	showCoins(player, data.Coins)
 	setStat(player, "Rebirths", data.Rebirths)
 	PlayerData.Changed:Fire(player)
 end
 
-function PlayerData.addPet(player, petName)
+-- Adds hatched pets. Returns the new pets' indexes.
+function PlayerData.addPets(player, petNames)
+	local data = sessionData[player]
+	if not data then
+		return {}
+	end
+	local indexes = {}
+	for _, petName in ipairs(petNames) do
+		table.insert(data.Pets, petName)
+		table.insert(indexes, #data.Pets)
+		data.Index[petName] = true
+		-- a mutated pet ("Shiny Dog") also counts as finding the normal one
+		local info = Config.PETS[petName]
+		if info and info.Base then
+			data.Index[info.Base] = true
+		end
+	end
+	data.Hatched += #petNames
+	setStat(player, "Hatched", data.Hatched)
+	PlayerData.Changed:Fire(player)
+	return indexes
+end
+
+-- Replaces the pet list (e.g. after deleting or combining pets). keep[i] is
+-- true for pets to keep; `added` are new pet names to append. Equipped pets
+-- that are kept stay equipped.
+function PlayerData.rebuildPets(player, keep, added)
 	local data = sessionData[player]
 	if not data then
 		return
 	end
-	table.insert(data.Pets, petName)
-	data.Index[petName] = true
+	local pets, newIndex = {}, {}
+	for i, petName in ipairs(data.Pets) do
+		if keep[i] then
+			table.insert(pets, petName)
+			newIndex[i] = #pets
+		end
+	end
+	for _, petName in ipairs(added or {}) do
+		table.insert(pets, petName)
+		data.Index[petName] = true
+	end
+	local equipped = {}
+	for _, i in ipairs(data.Equipped) do
+		if newIndex[i] then
+			table.insert(equipped, newIndex[i])
+		end
+	end
+	data.Pets = pets
+	data.Equipped = equipped
 	PlayerData.Changed:Fire(player)
-	return #data.Pets
 end
 
 function PlayerData.setUpgrade(player, id, level)

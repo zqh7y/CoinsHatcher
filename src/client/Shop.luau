@@ -115,16 +115,15 @@ end)
 
 -- coins change often; refresh the prices' colors when they do
 task.spawn(function()
-	local coins = player:WaitForChild("leaderstats"):WaitForChild("Coins")
 	local pending = false
-	coins.Changed:Connect(function()
+	player:GetAttributeChangedSignal("Coins"):Connect(function()
 		if panel.isOpen() and not pending then
 			pending = true
 			task.delay(0.3, function()
 				pending = false
 				if panel.isOpen() then
 					if State.Data then
-						State.Data.Coins = coins.Value
+						State.Data.Coins = player:GetAttribute("Coins") or 0
 					end
 					render()
 				end

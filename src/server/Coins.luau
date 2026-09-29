@@ -254,12 +254,13 @@ function Coins.get(player)
 end
 
 -- Deals one hit to a breakable. Returns true if it broke.
-function Coins.damage(player, model, amount)
+function Coins.damage(player, model, amount, crit)
 	if not model.Parent then
 		return true
 	end
 	local health = math.max(0, model:GetAttribute("Health") - amount)
-	-- the client watches this to show damage numbers and shake the breakable
+	-- the client watches these to show damage numbers and shake the breakable
+	model:SetAttribute("Crit", crit == true)
 	model:SetAttribute("Health", health)
 	if health > 0 then
 		updateHealthBar(model, health)

@@ -1,4 +1,5 @@
--- Egg stands in the egg area. Walk up and press E to hatch.
+-- Egg stands in the egg area. Walk up and press E (or use the popup buttons)
+-- to hatch 1 or 3 eggs.
 -- Egg N unlocks at rebirth N-1.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -11,52 +12,78 @@ local Eggs = {}
 local SPACING = 22
 
 local remotes
-local lastHatch = {} -- [player] = time, so hatches can't be spammed during the animation
-local HATCH_COOLDOWN = 1.5
+local eggModels = {} -- [eggIndex] = model, to check the player is close enough
+local lastHatch = {} -- [player] = time, so hatching can't be spammed
+local HATCH_COOLDOWN = 0.8
+local MAX_DISTANCE = 20 -- how close you must be to hatch
+
+local RED = Color3.fromRGB(255, 90, 90)
 
 local function notify(player, message, color)
 	remotes.Notify:FireClient(player, message, color)
 end
 
-local function hatch(player, eggIndex)
+-- Hatches `count` eggs (1 or 3) at once.
+local function hatch(player, eggIndex, count)
 	local data = PlayerData.get(player)
-	if not data then
+	local model = eggModels[eggIndex]
+	if not data or not model then
 		return
 	end
 	local now = os.clock()
 	if lastHatch[player] and now - lastHatch[player] < HATCH_COOLDOWN then
 		return
 	end
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not root or (root.Position - model:GetPivot().Position).Magnitude > MAX_DISTANCE then
+		return
+	end
 
 	local required = Config.eggRequiredRebirths(eggIndex)
 	if data.Rebirths < required then
-		notify(player, "Rebirth " .. required .. " needed to open this egg!", Color3.fromRGB(255, 90, 90))
+		notify(player, "🔒 Rebirth " .. required .. " needed to open this egg!", RED)
 		return
 	end
-	if #data.Pets >= Config.MAX_PETS then
-		notify(player, "Your pet inventory is full!", Color3.fromRGB(255, 90, 90))
+	if #data.Pets + count > Config.MAX_PETS then
+		notify(player, "🎒 Your pet inventory is full! Delete or combine some pets.", RED)
 		return
 	end
-	local cost = Config.eggCost(eggIndex)
+	local cost = Config.eggCost(eggIndex) * count
 	if data.Coins < cost then
-		notify(player, "Not enough coins!", Color3.fromRGB(255, 90, 90))
+		notify(player, "💰 You need " .. Config.formatNumber(cost) .. " coins!", RED)
 		return
 	end
 
 	lastHatch[player] = now
 	PlayerData.addCoins(player, -cost)
 
-	local petName = Config.rollHatch(eggIndex, data.Upgrades)
-	local index = PlayerData.addPet(player, petName)
+	local names = {}
+	for _ = 1, count do
+		table.insert(names, Config.rollHatch(eggIndex, data.Upgrades))
+	end
+	local indexes = PlayerData.addPets(player, names)
 
-	-- auto-equip if there's a free slot
-	if index and #data.Equipped < Config.maxEquipped(data.Upgrades) then
+	-- auto-equip into free slots
+	local max = Config.maxEquipped(data.Upgrades)
+	if #data.Equipped < max then
 		local equipped = table.clone(data.Equipped)
-		table.insert(equipped, index)
+		for _, index in ipairs(indexes) do
+			if #equipped < max then
+				table.insert(equipped, index)
+			end
+		end
 		PlayerData.setEquipped(player, equipped)
 	end
 
-	remotes.Hatched:FireClient(player, petName)
+	remotes.Hatched:FireClient(player, names)
+
+	-- let the whole server know about rare hatches
+	for _, petName in ipairs(names) do
+		local rarity = Config.PETS[petName].Rarity
+		if rarity == "Legendary" or rarity == "Huge" then
+			remotes.Announce:FireAllClients(player.DisplayName, petName)
+		end
+	end
 end
 
 -- Creates the pedestal + egg for an egg that isn't in the project file.
@@ -149,8 +176,9 @@ local function setupEgg(eggIndex, parent)
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = shell
 	prompt.Triggered:Connect(function(player)
-		hatch(player, eggIndex)
+		hatch(player, eggIndex, 1)
 	end)
+	eggModels[eggIndex] = model
 
 end
 
@@ -167,6 +195,14 @@ function Eggs.start(remoteFolder)
 	for eggIndex = 1, Config.EGG_COUNT do
 		setupEgg(eggIndex, eggsFolder)
 	end
+
+	-- the egg popup's Hatch 1 / Hatch 3 / Auto buttons
+	remotes.Hatch.OnServerEvent:Connect(function(player, eggIndex, count)
+		if typeof(eggIndex) ~= "number" or (count ~= 1 and count ~= 3) then
+			return
+		end
+		hatch(player, eggIndex, count)
+	end)
 
 	game:GetService("Players").PlayerRemoving:Connect(function(player)
 		lastHatch[player] = nil

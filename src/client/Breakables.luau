@@ -81,14 +81,15 @@ local function track(model)
 		local damage = info.Health - health
 		info.Health = health
 		if damage > 0 then
+			local crit = model:GetAttribute("Crit") == true
 			local jitter = Vector3.new(math.random(-10, 10) / 10, 0, math.random(-10, 10) / 10)
 			popup(
 				info.Pivot.Position + Vector3.new(0, info.Height + 0.5, 0) + jitter,
-				"-" .. Config.formatNumber(damage),
-				Color3.new(1, 1, 1),
-				26
+				(if crit then "💥 CRIT! -" else "-") .. Config.formatNumber(damage),
+				if crit then Color3.fromRGB(255, 80, 80) else Color3.new(1, 1, 1),
+				if crit then 38 else 26
 			)
-			info.ShakeUntil = os.clock() + 0.2
+			info.ShakeUntil = os.clock() + (if crit then 0.35 else 0.2)
 		end
 	end)
 end

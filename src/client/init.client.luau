@@ -13,6 +13,7 @@ local Inventory = require(script.Inventory)
 local Index = require(script.Index)
 local Rebirth = require(script.Rebirth)
 local Hatch = require(script.Hatch)
+local Gifts = require(script.Gifts)
 require(script.Shop)
 require(script.EggPreview)
 require(script.Breakables)
@@ -52,17 +53,16 @@ local rebirthText = counter("⭐", Color3.fromRGB(170, 100, 230), 52)
 
 task.spawn(function()
 	local stats = player:WaitForChild("leaderstats")
-	local coins = stats:WaitForChild("Coins")
 	local rebirths = stats:WaitForChild("Rebirths")
 	local function updateCoins()
-		coinText.Text = Config.formatNumber(coins.Value)
+		coinText.Text = Config.formatNumber(player:GetAttribute("Coins") or 0)
 		coinScale.Scale = 1.12
 		TweenService:Create(coinScale, TweenInfo.new(0.2, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
 	local function updateRebirths()
 		rebirthText.Text = ("Rebirth %d/%d"):format(rebirths.Value, Config.MAX_REBIRTHS)
 	end
-	coins.Changed:Connect(updateCoins)
+	player:GetAttributeChangedSignal("Coins"):Connect(updateCoins)
 	rebirths.Changed:Connect(updateRebirths)
 	updateCoins()
 	updateRebirths()
@@ -73,7 +73,7 @@ end)
 local side = Instance.new("Frame")
 side.AnchorPoint = Vector2.new(0, 0.5)
 side.Position = UDim2.new(0, 12, 0.55, 0)
-side.Size = UDim2.fromOffset(170, 260)
+side.Size = UDim2.fromOffset(170, 350)
 side.BackgroundTransparency = 1
 side.Parent = Ui.gui
 
@@ -93,6 +93,7 @@ local buttons = {
 	{ "🐾", "Pets", Color3.fromRGB(80, 160, 240), Inventory.toggle },
 	{ "📖", "Index", Color3.fromRGB(240, 110, 150), Index.toggle },
 	{ "⭐", "Rebirth", Color3.fromRGB(170, 100, 230), Rebirth.toggle },
+	{ "🎁", "Gifts", Color3.fromRGB(255, 120, 120), Gifts.toggle },
 	{ "🛹", "Board", Color3.fromRGB(80, 200, 210), function()
 		remotes.ToggleHoverboard:FireServer()
 	end },
@@ -105,11 +106,43 @@ for order, def in ipairs(buttons) do
 	if def[2] == "Board" then
 		boardButton = button
 		button.Visible = false -- shows up once you buy the hoverboard
+	elseif def[2] == "Gifts" then
+		Gifts.attach(button)
 	end
 end
 
 remotes.Notify.OnClientEvent:Connect(Ui.toast)
 remotes.Hatched.OnClientEvent:Connect(Hatch.play)
+
+-- Server-wide shout-outs for rare hatches, so everyone can see the flex
+local banner = Ui.label(Ui.gui, {
+	AnchorPoint = Vector2.new(0.5, 0),
+	Position = UDim2.new(0.5, 0, 0, 124),
+	Size = UDim2.fromOffset(640, 44),
+	BackgroundTransparency = 0.15,
+	BackgroundColor3 = Color3.fromRGB(60, 30, 110),
+	Visible = false,
+	ZIndex = 25,
+})
+Ui.corner(banner, 16)
+Ui.stroke(banner, Ui.COLORS.Gold, 3)
+local bannerId = 0
+remotes.Announce.OnClientEvent:Connect(function(playerName, petName)
+	local info = Config.PETS[petName]
+	if not info then
+		return
+	end
+	bannerId += 1
+	local id = bannerId
+	banner.Text = ("🎉 %s hatched a %s! (%s)"):format(playerName, petName, Config.chanceText(petName))
+	banner.TextColor3 = info.Color
+	banner.Visible = true
+	task.delay(5, function()
+		if bannerId == id then
+			banner.Visible = false
+		end
+	end)
+end)
 
 -- World: match this player's rebirth ----------------------------------------------
 

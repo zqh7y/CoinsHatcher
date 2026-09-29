@@ -23,6 +23,12 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   pet speed, coin bonus, pet slots, and buy a hoverboard.
 - **Egg area**: walk up to an egg to see what's inside, press E to hatch.
   Each rebirth unlocks a new egg. Every egg has a super rare **Huge** pet.
+- **Hatching**: Hatch 1, Hatch 3 or Auto from the egg popup. Any pet can
+  come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy) for extra power. Every
+  pet shows its odds ("1 in 5K") and rare hatches are announced to the server.
+- **Big numbers**: everything grows ×1000 per rebirth (shown as 1.5K, 25M, 750B...),
+  pets land 3x critical hits.
+- **Free gifts** after 1, 3, 5, 10, 15 and 20 minutes of play.
 - **Index**: collection book of every pet; unfound ones are silhouettes.
 - **Rebirth**: resets everything except your pets (and index). Max 3 for now.
 
@@ -38,6 +44,8 @@ are in `src/shared/Config.luau`.
 - `src/server/Pets.luau`: pets following you and breaking things
 - `src/server/Eggs.luau`: egg stands and hatching
 - `src/server/Shop.luau`: shop stall, upgrades, walk speed, hoverboard
+- `src/server/Inventory.luau`: equip, equip best, delete pets
+- `src/server/Gifts.luau`: playtime gifts
 - `src/server/init.server.luau`: starts everything, handles teleport/rebirth/equip
 - `src/client/`: UI (buttons, pets, shop, index, rebirth, egg popup,
   hatch animation) and breakable effects
