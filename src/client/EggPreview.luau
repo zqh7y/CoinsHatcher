@@ -211,9 +211,19 @@ local function canHatch(count)
 	if not data or not shownEgg then
 		return false
 	end
-	if #data.Pets + count > Config.maxPets(data) then
-		Ui.toast("🎒 Your pet inventory is full! Delete some pets.", Ui.COLORS.Red)
-		return false
+	-- only stop when there's no room at all and nothing from this egg gets
+	-- auto-deleted (the server rolls first and counts only the pets you keep)
+	if #data.Pets >= Config.maxPets(data) then
+		local anyAuto = false
+		for _, petName in ipairs(Config.EGGS[shownEgg].Pets) do
+			if data.AutoDelete and data.AutoDelete[petName] then
+				anyAuto = true
+			end
+		end
+		if not anyAuto then
+			Ui.toast("🎒 Your pet inventory is full! Delete some pets.", Ui.COLORS.Red)
+			return false
+		end
 	end
 	local cost = Config.eggPrice(data, shownEgg) * count
 	if (player:GetAttribute("Coins") or 0) < cost then
@@ -292,9 +302,7 @@ local function petTile(entry, order, known, marked)
 	local color = info.Color
 	local canDelete = AUTO_DELETABLE[rarity] == true
 
-	local tile = Instance.new("TextButton")
-	tile.Text = ""
-	tile.AutoButtonColor = canDelete
+	local tile = Instance.new("Frame")
 	tile.BackgroundColor3 = if marked then Color3.fromRGB(255, 225, 228) else color:Lerp(Color3.new(1, 1, 1), 0.85)
 	tile.LayoutOrder = order
 	tile.Parent = grid
@@ -336,7 +344,16 @@ local function petTile(entry, order, known, marked)
 		Ui.corner(badge, 0.5)
 	end
 
-	tile.Activated:Connect(function()
+	-- an invisible button over the whole tile catches the tap (so the 3D
+	-- preview inside can never swallow it)
+	local hit = Instance.new("TextButton")
+	hit.Name = "Tap"
+	hit.Text = ""
+	hit.BackgroundTransparency = 1
+	hit.Size = UDim2.fromScale(1, 1)
+	hit.ZIndex = 10
+	hit.Parent = tile
+	hit.Activated:Connect(function()
 		if not canDelete then
 			Ui.toast("Mythical and Huge pets can't be auto-deleted", Ui.COLORS.Red)
 			return
