@@ -2,8 +2,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Config = require(ReplicatedStorage.Shared.Config)
 local PetModel = require(ReplicatedStorage.Shared.PetModel)
+local EggModel = require(ReplicatedStorage.Shared.EggModel)
 
 local Viewport = {}
 
@@ -44,20 +44,12 @@ function Viewport.pet(parent, petName, silhouette)
 	return vp, model
 end
 
--- An egg preview.
+-- An egg preview (the same decorated egg as in the hatchery). Returns the
+-- ViewportFrame and the egg Model.
 function Viewport.egg(parent, eggIndex)
 	local vp, world, camera = newViewport(parent)
-	local egg = Instance.new("Part")
-	egg.Shape = Enum.PartType.Ball
-	egg.Size = Vector3.one * 6
-	egg.Color = Config.EGGS[eggIndex].Color
-	egg.Material = Enum.Material.SmoothPlastic
-	egg.Anchored = true
-	egg.CFrame = CFrame.new()
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.Sphere
-	mesh.Scale = Vector3.new(0.85, 1.15, 0.85)
-	mesh.Parent = egg
+	local egg = EggModel.build(eggIndex, 6)
+	egg:PivotTo(CFrame.new())
 	egg.Parent = world
 	camera.CFrame = CFrame.lookAt(Vector3.new(0, 1, -16), Vector3.zero)
 	return vp, egg

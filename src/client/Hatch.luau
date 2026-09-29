@@ -74,7 +74,7 @@ local function play(petNames)
 		local t = os.clock() - start
 		local strength = math.min(t / wobbleTime, 1)
 		for i, egg in ipairs(eggs) do
-			egg.CFrame = CFrame.Angles(0, 0, math.sin(t * (8 + 22 * strength) + i) * 0.35 * strength)
+			egg:PivotTo(CFrame.Angles(0, 0, math.sin(t * (8 + 22 * strength) + i) * 0.35 * strength))
 		end
 		stageScale.Scale = 1 + strength * 0.12
 	end)

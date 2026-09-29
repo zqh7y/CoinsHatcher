@@ -13,7 +13,7 @@ local EggArea = {}
 
 local LOCKED_GLOW = Color3.fromRGB(170, 170, 185)
 
-local eggs = {} -- { Model, Shell, Base, Phase }
+local eggs = {} -- { Model, Shell, Base, Phase, Look = { { Part, Offset } } }
 
 local function refreshLocks()
 	local data = State.Data
@@ -45,7 +45,17 @@ local function track(model)
 	if not shell then
 		return
 	end
-	table.insert(eggs, { Model = model, Shell = shell, Base = shell.CFrame, Phase = #eggs * 1.3 })
+	-- the pattern/shine parts move with the shell
+	local look = {}
+	local lookFolder = model:FindFirstChild("EggLook")
+	if lookFolder then
+		for _, part in ipairs(lookFolder:GetChildren()) do
+			if part:IsA("BasePart") then
+				table.insert(look, { Part = part, Offset = shell.CFrame:ToObjectSpace(part.CFrame) })
+			end
+		end
+	end
+	table.insert(eggs, { Model = model, Shell = shell, Base = shell.CFrame, Phase = #eggs * 1.3, Look = look })
 	refreshLocks()
 end
 
@@ -73,7 +83,11 @@ RunService.RenderStepped:Connect(function()
 	for _, egg in ipairs(eggs) do
 		local bob = math.sin(t * 1.6 + egg.Phase) * 0.35
 		local sway = math.sin(t * 1.1 + egg.Phase) * 0.07
-		egg.Shell.CFrame = egg.Base * CFrame.new(0, bob, 0) * CFrame.Angles(0, 0, sway)
+		local cf = egg.Base * CFrame.new(0, bob, 0) * CFrame.Angles(0, 0, sway)
+		egg.Shell.CFrame = cf
+		for _, piece in ipairs(egg.Look) do
+			piece.Part.CFrame = cf * piece.Offset
+		end
 	end
 end)
 

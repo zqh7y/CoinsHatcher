@@ -4,6 +4,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local EggModel = require(ReplicatedStorage.Shared.EggModel)
 local PlayerData = require(script.Parent.PlayerData)
 local World = require(script.Parent.World)
 local Shrines = require(script.Parent.Shrines)
@@ -196,6 +197,13 @@ local function setupEgg(eggIndex, parent)
 	model.PrimaryPart = shell
 	model:SetAttribute("EggIndex", eggIndex)
 	model:SetAttribute("RequiredRebirths", Config.eggRequiredRebirths(eggIndex))
+
+	-- the egg's pattern and shine (the client bobs these along with the egg)
+	shell.Color = EggModel.shellColor(eggIndex)
+	local look = Instance.new("Folder")
+	look.Name = "EggLook"
+	look.Parent = model
+	EggModel.decorate(shell, eggIndex, look)
 
 	-- themed shrine around the pedestal, name plaque and lock dome
 	Shrines.build(model, eggIndex, Eggs.position(eggIndex))
