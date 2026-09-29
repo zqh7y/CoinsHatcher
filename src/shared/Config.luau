@@ -7,11 +7,12 @@ Config.MAX_REBIRTHS = 3
 
 -- Every rebirth multiplies the main area's coin health and coin value by this.
 -- Egg costs and pet power scale by the same amount so the game stays balanced.
--- Big on purpose: numbers go from hundreds to billions over 3 rebirths.
-Config.SCALE = 1000
+-- Numbers start big (hundreds/thousands) and grow x10 per rebirth, so they
+-- feel big without jumping into crazy ranges.
+Config.SCALE = 10
 
 function Config.rebirthCost(rebirths: number): number
-	return 4000 * Config.SCALE ^ rebirths
+	return 25000 * Config.SCALE ^ rebirths
 end
 
 -- Main area -----------------------------------------------------------------
@@ -31,8 +32,8 @@ Config.BREAKABLES = {
 function Config.coinStats(rebirths: number, kind: number)
 	local scale = Config.SCALE ^ rebirths * Config.BREAKABLES[kind].Mult
 	return {
-		Health = 25 * scale,
-		Value = 25 * scale,
+		Health = 100 * scale,
+		Value = 150 * scale,
 	}
 end
 
@@ -126,7 +127,7 @@ Config.PET_LOOKS = {
 Config.EGG_COUNT = math.min(#Config.EGGS, Config.MAX_REBIRTHS + 1)
 
 function Config.eggCost(eggIndex: number): number
-	return 150 * Config.SCALE ^ (eggIndex - 1)
+	return 1000 * Config.SCALE ^ (eggIndex - 1)
 end
 
 function Config.eggRequiredRebirths(eggIndex: number): number
@@ -135,12 +136,12 @@ end
 
 -- Pet power = damage per hit. Stronger pets break coins faster.
 function Config.petPower(eggIndex: number, rarityIndex: number): number
-	return 10 * Config.SCALE ^ (eggIndex - 1) * Config.RARITIES[rarityIndex].Power
+	return 40 * Config.SCALE ^ (eggIndex - 1) * Config.RARITIES[rarityIndex].Power
 end
 
 -- Huge pets: every egg has a super rare giant version of its legendary pet.
 Config.HUGE_CHANCE = 0.5 -- percent per hatch, before luck
-Config.HUGE_POWER = 5 -- times the legendary's power
+Config.HUGE_POWER = 3 -- times the legendary's power
 Config.HUGE_SCALE = 2 -- times bigger
 Config.HUGE_COLOR = Color3.fromRGB(255, 90, 200)
 
@@ -174,18 +175,21 @@ for eggIndex, egg in ipairs(Config.EGGS) do
 	}
 end
 
--- Mutations: any hatched pet (even a huge) can come out mutated, with more
--- power and a special look. Chance is in percent, before luck.
+-- Mutations: a hatched pet can come out mutated, with more power and a
+-- special look. Huge pets don't mutate (they're special enough). Chance is in
+-- percent, before luck.
 Config.MUTATIONS = {
-	{ Name = "Shiny", Icon = "✨", Chance = 4, Power = 2, Color = Color3.fromRGB(255, 240, 150) },
-	{ Name = "Rainbow", Icon = "🌈", Chance = 1, Power = 4, Color = Color3.fromRGB(255, 120, 200) },
-	{ Name = "Galaxy", Icon = "🌌", Chance = 0.25, Power = 10, Color = Color3.fromRGB(170, 110, 255) },
+	{ Name = "Shiny", Icon = "✨", Chance = 5, Power = 1.5, Color = Color3.fromRGB(255, 240, 150) },
+	{ Name = "Rainbow", Icon = "🌈", Chance = 2, Power = 2, Color = Color3.fromRGB(255, 120, 200) },
+	{ Name = "Galaxy", Icon = "🌌", Chance = 0.5, Power = 3, Color = Color3.fromRGB(170, 110, 255) },
 }
 
 -- Adds "Shiny Dog", "Rainbow Huge Dragon", ... to Config.PETS
 local basePets = {}
-for petName in pairs(Config.PETS) do
-	table.insert(basePets, petName)
+for petName, info in pairs(Config.PETS) do
+	if info.Rarity ~= "Huge" then
+		table.insert(basePets, petName)
+	end
 end
 for _, petName in ipairs(basePets) do
 	local base = Config.PETS[petName]
@@ -282,6 +286,9 @@ end
 function Config.rollHatch(eggIndex: number, upgrades): string
 	local list = Config.eggChances(eggIndex, upgrades)
 	local petName = list[Config.rollWeighted(list)].Pet
+	if Config.PETS[petName].Rarity == "Huge" then
+		return petName
+	end
 	-- rarest mutation first, so luck can't make a common one hide a rare one
 	local roll = math.random() * 100
 	local chances = Config.mutationChances(upgrades)
@@ -305,13 +312,13 @@ end
 -- Upgrades reset on rebirth (rebirth resets everything except pets).
 -- Cost = BaseCost * Growth^level, times SCALE^rebirths like everything else.
 Config.UPGRADES = {
-	{ Id = "Damage", Name = "Pet Damage", Icon = "⚔️", Max = 10, BaseCost = 100, Growth = 1.6, Info = "+20% pet damage" },
-	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 150, Growth = 1.6, Info = "+15% rare & huge chance" },
-	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 75, Growth = 1.5, Info = "+2 walk speed" },
-	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 125, Growth = 1.7, Info = "+15% pet run speed" },
-	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 10, BaseCost = 200, Growth = 1.6, Info = "+10% coins" },
-	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 3, BaseCost = 750, Growth = 3, Info = "+1 pet you can equip" },
-	{ Id = "Hoverboard", Name = "Hoverboard", Icon = "🛹", Max = 1, BaseCost = 1250, Growth = 1, Info = "Ride a super fast hoverboard!" },
+	{ Id = "Damage", Name = "Pet Damage", Icon = "⚔️", Max = 10, BaseCost = 600, Growth = 1.6, Info = "+20% pet damage" },
+	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 900, Growth = 1.6, Info = "+15% rare & huge chance" },
+	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 450, Growth = 1.5, Info = "+2 walk speed" },
+	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 750, Growth = 1.7, Info = "+15% pet run speed" },
+	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 10, BaseCost = 1200, Growth = 1.6, Info = "+10% coins" },
+	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 3, BaseCost = 4500, Growth = 3, Info = "+1 pet you can equip" },
+	{ Id = "Hoverboard", Name = "Hoverboard", Icon = "🛹", Max = 1, BaseCost = 7500, Growth = 1, Info = "Ride a super fast hoverboard!" },
 }
 
 Config.UPGRADES_BY_ID = {}
@@ -368,7 +375,7 @@ Config.GIFT_TIMES = { 1, 3, 5, 10, 15, 20 }
 
 -- Gift coins grow with each gift and with your rebirths.
 function Config.giftReward(giftIndex: number, rebirths: number): number
-	return 300 * 2 ^ (giftIndex - 1) * Config.SCALE ^ rebirths
+	return 1800 * 2 ^ (giftIndex - 1) * Config.SCALE ^ rebirths
 end
 
 return Config

@@ -17,6 +17,7 @@ local Gifts = require(script.Gifts)
 require(script.Shop)
 require(script.EggPreview)
 require(script.Breakables)
+require(script.Boosts)
 
 local player = Players.LocalPlayer
 

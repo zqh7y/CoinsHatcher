@@ -24,10 +24,11 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Egg area**: walk up to an egg to see what's inside, press E to hatch.
   Each rebirth unlocks a new egg. Every egg has a super rare **Huge** pet.
 - **Hatching**: Hatch 1, Hatch 3 or Auto from the egg popup. Any pet can
-  come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy) for extra power. Every
+  come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy; not huges) for extra power. Every
   pet shows its odds ("1 in 5K") and rare hatches are announced to the server.
-- **Big numbers**: everything grows ×1000 per rebirth (shown as 1.5K, 25M, 750B...),
-  pets land 3x critical hits.
+- **Big numbers**: numbers start in the hundreds/thousands and grow ×10 per
+  rebirth (shown as 1.5K, 4.5M...); pets land 3x critical hits.
+- **Boosts**: small icons in the bottom right show every active upgrade.
 - **Free gifts** after 1, 3, 5, 10, 15 and 20 minutes of play.
 - **Index**: collection book of every pet; unfound ones are silhouettes.
 - **Rebirth**: resets everything except your pets (and index). Max 3 for now.
