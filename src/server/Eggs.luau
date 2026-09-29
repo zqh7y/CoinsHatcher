@@ -68,7 +68,8 @@ local function createEggModel(eggIndex, parent)
 	pedestal.Shape = Enum.PartType.Cylinder
 	pedestal.Size = Vector3.new(2, 9, 9)
 	pedestal.CFrame = CFrame.new(base + Vector3.new(0, 1, 0)) * CFrame.Angles(0, 0, math.rad(90))
-	pedestal.Color = Color3.fromRGB(90, 90, 100)
+	pedestal.Color = Color3.fromRGB(255, 225, 240)
+	pedestal.Material = Enum.Material.SmoothPlastic
 	pedestal.Parent = model
 
 	local shell = Instance.new("Part")
@@ -124,7 +125,7 @@ local function setupEgg(eggIndex, parent)
 		label.Text = text
 		label.TextColor3 = color
 		label.TextStrokeTransparency = 0.2
-		label.Font = Enum.Font.GothamBold
+		label.Font = Enum.Font.FredokaOne
 		label.TextScaled = true
 		label.Parent = sign
 		return label

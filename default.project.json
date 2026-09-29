@@ -28,21 +28,22 @@
         "$properties": {
           "Anchored": true,
           "Color": [
-            0.38823,
-            0.37254,
-            0.38823
+            0.43137,
+            0.76471,
+            0.33333
           ],
           "Locked": true,
           "Position": [
             0,
             -10,
-            0
+            500
           ],
           "Size": [
-            512,
+            2048,
             20,
-            512
-          ]
+            2048
+          ],
+          "Material": "SmoothPlastic"
         }
       },
       "MainArea": {
@@ -62,11 +63,11 @@
               0
             ],
             "Color": [
-              0.41568627450980394,
-              0.6901960784313725,
-              0.2980392156862745
+              0.47059,
+              0.82353,
+              0.35294
             ],
-            "Material": "Grass",
+            "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth"
           }
@@ -86,11 +87,11 @@
               0
             ],
             "Color": [
-              0.6392156862745098,
-              0.6352941176470588,
-              0.6470588235294118
+              1.0,
+              0.82353,
+              0.35294
             ],
-            "Material": "Plastic",
+            "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth",
             "Duration": 0
@@ -104,20 +105,20 @@
               "Anchored": true,
               "Size": [
                 264,
-                12,
+                6,
                 2
               ],
               "Position": [
                 0,
-                7.0,
+                3.0,
                 -131
               ],
               "Color": [
-                0.47058823529411764,
-                0.3333333333333333,
-                0.23529411764705882
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -128,20 +129,20 @@
               "Anchored": true,
               "Size": [
                 264,
-                12,
+                6,
                 2
               ],
               "Position": [
                 0,
-                7.0,
+                3.0,
                 131
               ],
               "Color": [
-                0.47058823529411764,
-                0.3333333333333333,
-                0.23529411764705882
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -152,20 +153,20 @@
               "Anchored": true,
               "Size": [
                 2,
-                12,
+                6,
                 260
               ],
               "Position": [
                 131,
-                7.0,
+                3.0,
                 0
               ],
               "Color": [
-                0.47058823529411764,
-                0.3333333333333333,
-                0.23529411764705882
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -176,20 +177,20 @@
               "Anchored": true,
               "Size": [
                 2,
-                12,
+                6,
                 260
               ],
               "Position": [
                 -131,
-                7.0,
+                3.0,
                 0
               ],
               "Color": [
-                0.47058823529411764,
-                0.3333333333333333,
-                0.23529411764705882
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -213,11 +214,11 @@
               1000
             ],
             "Color": [
-              0.9019607843137255,
-              0.8627450980392157,
-              0.7843137254901961
+              0.92157,
+              0.86275,
+              1.0
             ],
-            "Material": "Sand",
+            "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth"
           }
@@ -230,20 +231,20 @@
               "Anchored": true,
               "Size": [
                 124,
-                12,
+                6,
                 2
               ],
               "Position": [
                 0,
-                7.0,
+                3.0,
                 964
               ],
               "Color": [
-                0.47058823529411764,
-                0.3333333333333333,
-                0.23529411764705882
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -254,20 +255,20 @@
               "Anchored": true,
               "Size": [
                 124,
-                12,
+                6,
                 2
               ],
               "Position": [
                 0,
-                7.0,
+                3.0,
                 1036
               ],
               "Color": [
-                0.47058823529411764,
-                0.3333333333333333,
-                0.23529411764705882
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -278,20 +279,20 @@
               "Anchored": true,
               "Size": [
                 2,
-                12,
+                6,
                 70
               ],
               "Position": [
                 61,
-                7.0,
+                3.0,
                 1000
               ],
               "Color": [
-                0.47058823529411764,
-                0.3333333333333333,
-                0.23529411764705882
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -302,20 +303,20 @@
               "Anchored": true,
               "Size": [
                 2,
-                12,
+                6,
                 70
               ],
               "Position": [
                 -61,
-                7.0,
+                3.0,
                 1000
               ],
               "Color": [
-                0.47058823529411764,
-                0.3333333333333333,
-                0.23529411764705882
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -362,12 +363,13 @@
                   }
                 },
                 "Color": [
-                  0.35294117647058826,
-                  0.35294117647058826,
-                  0.39215686274509803
+                  1.0,
+                  0.88235,
+                  0.94118
                 ],
                 "TopSurface": "Smooth",
-                "BottomSurface": "Smooth"
+                "BottomSurface": "Smooth",
+                "Material": "SmoothPlastic"
               }
             },
             "Egg": {
@@ -446,12 +448,13 @@
                   }
                 },
                 "Color": [
-                  0.35294117647058826,
-                  0.35294117647058826,
-                  0.39215686274509803
+                  1.0,
+                  0.88235,
+                  0.94118
                 ],
                 "TopSurface": "Smooth",
-                "BottomSurface": "Smooth"
+                "BottomSurface": "Smooth",
+                "Material": "SmoothPlastic"
               }
             },
             "Egg": {
@@ -530,12 +533,13 @@
                   }
                 },
                 "Color": [
-                  0.35294117647058826,
-                  0.35294117647058826,
-                  0.39215686274509803
+                  1.0,
+                  0.88235,
+                  0.94118
                 ],
                 "TopSurface": "Smooth",
-                "BottomSurface": "Smooth"
+                "BottomSurface": "Smooth",
+                "Material": "SmoothPlastic"
               }
             },
             "Egg": {
@@ -614,12 +618,13 @@
                   }
                 },
                 "Color": [
-                  0.35294117647058826,
-                  0.35294117647058826,
-                  0.39215686274509803
+                  1.0,
+                  0.88235,
+                  0.94118
                 ],
                 "TopSurface": "Smooth",
-                "BottomSurface": "Smooth"
+                "BottomSurface": "Smooth",
+                "Material": "SmoothPlastic"
               }
             },
             "Egg": {
@@ -665,14 +670,64 @@
     "Lighting": {
       "$properties": {
         "Ambient": [
-          0,
-          0,
-          0
+          0.47059,
+          0.47059,
+          0.5098
         ],
-        "Brightness": 2,
+        "OutdoorAmbient": [
+          0.62745,
+          0.62745,
+          0.66667
+        ],
+        "Brightness": 3,
+        "ClockTime": 14,
         "GlobalShadows": true,
         "Outlines": false,
-        "Technology": "Voxel"
+        "Technology": "ShadowMap",
+        "EnvironmentDiffuseScale": 1,
+        "EnvironmentSpecularScale": 0.5
+      },
+      "Sky": {
+        "$className": "Sky",
+        "$properties": {
+          "SunAngularSize": 14,
+          "MoonAngularSize": 8
+        }
+      },
+      "Atmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.32,
+          "Offset": 0.2,
+          "Color": [
+            0.78431,
+            0.88235,
+            1.0
+          ],
+          "Decay": [
+            0.58824,
+            0.7451,
+            1.0
+          ],
+          "Glare": 0,
+          "Haze": 1.2
+        }
+      },
+      "ColorCorrection": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Saturation": 0.25,
+          "Contrast": 0.05,
+          "Brightness": 0.02
+        }
+      },
+      "Bloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 0.35,
+          "Size": 24,
+          "Threshold": 0.95
+        }
       }
     },
     "SoundService": {

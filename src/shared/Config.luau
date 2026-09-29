@@ -29,10 +29,10 @@ end
 
 -- Floor color of the main area at each rebirth level (last one repeats).
 Config.AREA_COLORS = {
-	Color3.fromRGB(106, 176, 76), -- grass
-	Color3.fromRGB(214, 190, 120), -- desert
-	Color3.fromRGB(120, 170, 220), -- ice
-	Color3.fromRGB(120, 60, 60), -- volcano
+	Color3.fromRGB(120, 210, 90), -- grass
+	Color3.fromRGB(250, 215, 130), -- sand
+	Color3.fromRGB(215, 235, 255), -- snow
+	Color3.fromRGB(255, 180, 215), -- candy
 }
 
 function Config.areaColor(rebirths: number): Color3
@@ -63,6 +63,26 @@ Config.EGGS = {
 	{ Name = "Lava Egg", Color = Color3.fromRGB(220, 80, 30), Pets = { "Salamander", "Magma Golem", "Phoenix", "Dragon" } },
 }
 
+-- Body color of each pet (the name tag uses the rarity color)
+Config.PET_COLORS = {
+	Dog = Color3.fromRGB(230, 185, 130),
+	Cat = Color3.fromRGB(255, 170, 90),
+	Bunny = Color3.fromRGB(255, 225, 235),
+	Bear = Color3.fromRGB(170, 120, 85),
+	Fox = Color3.fromRGB(255, 140, 60),
+	Deer = Color3.fromRGB(205, 150, 100),
+	Owl = Color3.fromRGB(175, 140, 215),
+	Wolf = Color3.fromRGB(165, 180, 205),
+	Fish = Color3.fromRGB(120, 205, 255),
+	Crab = Color3.fromRGB(255, 110, 100),
+	Turtle = Color3.fromRGB(120, 210, 130),
+	Shark = Color3.fromRGB(110, 150, 200),
+	Salamander = Color3.fromRGB(255, 150, 80),
+	["Magma Golem"] = Color3.fromRGB(230, 100, 60),
+	Phoenix = Color3.fromRGB(255, 200, 60),
+	Dragon = Color3.fromRGB(190, 110, 255),
+}
+
 Config.EGG_COUNT = math.min(#Config.EGGS, Config.MAX_REBIRTHS + 1)
 
 function Config.eggCost(eggIndex: number): number
@@ -88,6 +108,7 @@ for eggIndex, egg in ipairs(Config.EGGS) do
 			Rarity = rarity.Name,
 			Power = Config.petPower(eggIndex, rarityIndex),
 			Color = rarity.Color,
+			BodyColor = Config.PET_COLORS[petName] or rarity.Color,
 		}
 	end
 end

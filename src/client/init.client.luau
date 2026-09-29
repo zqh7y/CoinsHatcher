@@ -2,6 +2,7 @@
 -- hatch popups, and making the world match this player's rebirth.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -30,11 +31,16 @@ local function button(text, color, parent)
 	b.Text = text
 	b.TextColor3 = Color3.new(1, 1, 1)
 	b.TextStrokeTransparency = 0.5
-	b.Font = Enum.Font.GothamBold
+	b.Font = Enum.Font.FredokaOne
 	b.TextScaled = true
 	b.AutoButtonColor = true
 	b.Parent = parent
-	corner(b)
+	corner(b, 14)
+	local stroke = Instance.new("UIStroke")
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	stroke.Color = color:Lerp(Color3.new(0, 0, 0), 0.35)
+	stroke.Thickness = 3
+	stroke.Parent = b
 	local pad = Instance.new("UIPadding")
 	pad.PaddingLeft = UDim.new(0, 8)
 	pad.PaddingRight = UDim.new(0, 8)
@@ -50,10 +56,10 @@ local toast = Instance.new("TextLabel")
 toast.AnchorPoint = Vector2.new(0.5, 0)
 toast.Position = UDim2.new(0.5, 0, 0, 60)
 toast.Size = UDim2.fromOffset(520, 44)
-toast.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+toast.BackgroundColor3 = Color3.fromRGB(70, 55, 120)
 toast.BackgroundTransparency = 0.2
 toast.TextColor3 = Color3.new(1, 1, 1)
-toast.Font = Enum.Font.GothamBold
+toast.Font = Enum.Font.FredokaOne
 toast.TextScaled = true
 toast.Visible = false
 toast.Parent = gui
@@ -117,7 +123,7 @@ local panel = Instance.new("Frame")
 panel.AnchorPoint = Vector2.new(0.5, 0.5)
 panel.Position = UDim2.fromScale(0.5, 0.5)
 panel.Size = UDim2.fromOffset(560, 400)
-panel.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+panel.BackgroundColor3 = Color3.fromRGB(95, 80, 160)
 panel.Visible = false
 panel.Parent = gui
 corner(panel, 14)
@@ -127,7 +133,7 @@ title.Position = UDim2.fromOffset(16, 10)
 title.Size = UDim2.new(1, -80, 0, 36)
 title.BackgroundTransparency = 1
 title.TextColor3 = Color3.new(1, 1, 1)
-title.Font = Enum.Font.GothamBold
+title.Font = Enum.Font.FredokaOne
 title.TextScaled = true
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = panel
@@ -139,7 +145,7 @@ close.Size = UDim2.fromOffset(36, 36)
 close.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
 close.Text = "X"
 close.TextColor3 = Color3.new(1, 1, 1)
-close.Font = Enum.Font.GothamBold
+close.Font = Enum.Font.FredokaOne
 close.TextScaled = true
 close.Parent = panel
 corner(close, 8)
@@ -182,7 +188,7 @@ local function renderPets()
 		local card = Instance.new("Frame")
 		-- equipped first, then strongest first
 		card.LayoutOrder = (if isEquipped then 0 else 1e9) - info.Power
-		card.BackgroundColor3 = if isEquipped then Color3.fromRGB(60, 90, 60) else Color3.fromRGB(55, 55, 70)
+		card.BackgroundColor3 = if isEquipped then Color3.fromRGB(80, 170, 110) else Color3.fromRGB(125, 110, 195)
 		card.Parent = list
 		corner(card)
 
@@ -197,7 +203,7 @@ local function renderPets()
 		nameLabel.BackgroundTransparency = 1
 		nameLabel.Text = petName
 		nameLabel.TextColor3 = info.Color
-		nameLabel.Font = Enum.Font.GothamBold
+		nameLabel.Font = Enum.Font.FredokaOne
 		nameLabel.TextScaled = true
 		nameLabel.Parent = card
 
@@ -207,7 +213,7 @@ local function renderPets()
 		statLabel.BackgroundTransparency = 1
 		statLabel.Text = info.Rarity .. "\n⚔ " .. Config.formatNumber(info.Power)
 		statLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-		statLabel.Font = Enum.Font.Gotham
+		statLabel.Font = Enum.Font.FredokaOne
 		statLabel.TextScaled = true
 		statLabel.Parent = card
 
@@ -218,7 +224,7 @@ local function renderPets()
 		equipButton.BackgroundColor3 = if isEquipped then Color3.fromRGB(200, 70, 70) else Color3.fromRGB(70, 170, 80)
 		equipButton.Text = if isEquipped then "Unequip" else "Equip"
 		equipButton.TextColor3 = Color3.new(1, 1, 1)
-		equipButton.Font = Enum.Font.GothamBold
+		equipButton.Font = Enum.Font.FredokaOne
 		equipButton.TextScaled = true
 		equipButton.Parent = card
 		corner(equipButton, 8)
@@ -246,9 +252,9 @@ local hatchLabel = Instance.new("TextLabel")
 hatchLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 hatchLabel.Position = UDim2.fromScale(0.5, 0.4)
 hatchLabel.Size = UDim2.fromOffset(0, 0)
-hatchLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+hatchLabel.BackgroundColor3 = Color3.fromRGB(70, 55, 120)
 hatchLabel.BackgroundTransparency = 0.1
-hatchLabel.Font = Enum.Font.GothamBold
+hatchLabel.Font = Enum.Font.FredokaOne
 hatchLabel.TextScaled = true
 hatchLabel.Visible = false
 hatchLabel.Parent = gui
@@ -330,20 +336,34 @@ task.spawn(function()
 	updateWorld()
 end)
 
--- Hide other players' coins (each player has their own) ----------------------
+-- Coins: ours spin and bob like toys, other players' are hidden ------------
 
 local myId = tostring(player.UserId)
+local spinning = {} -- [coin] = { Position, Phase }
 
 local function hide(obj)
 	if obj:IsA("BasePart") then
 		obj.Transparency = 1
-	elseif obj:IsA("BillboardGui") then
+	elseif obj:IsA("LayerCollector") then -- BillboardGui / SurfaceGui
 		obj.Enabled = false
+	end
+end
+
+local function addSpinner(coin)
+	if coin:IsA("BasePart") then
+		spinning[coin] = { Position = coin.Position, Phase = math.random() * math.pi * 2 }
 	end
 end
 
 local function onCoinFolder(folder)
 	if folder.Name == myId then
+		for _, coin in ipairs(folder:GetChildren()) do
+			addSpinner(coin)
+		end
+		folder.ChildAdded:Connect(addSpinner)
+		folder.ChildRemoved:Connect(function(coin)
+			spinning[coin] = nil
+		end)
 		return
 	end
 	for _, obj in ipairs(folder:GetDescendants()) do
@@ -357,3 +377,11 @@ coinsFolder.ChildAdded:Connect(onCoinFolder)
 for _, folder in ipairs(coinsFolder:GetChildren()) do
 	onCoinFolder(folder)
 end
+
+RunService.RenderStepped:Connect(function()
+	local t = os.clock()
+	for coin, info in pairs(spinning) do
+		local bob = math.sin(t * 2.5 + info.Phase) * 0.35
+		coin.CFrame = CFrame.new(info.Position + Vector3.new(0, bob, 0)) * CFrame.Angles(0, t * 2 + info.Phase, 0)
+	end
+end)

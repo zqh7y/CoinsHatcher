@@ -23,6 +23,50 @@ folder.Parent = workspace
 -- [player] = list of { Part, Power, Target }
 local active = {}
 
+local function circle(parent, color, size, pos)
+	local f = Instance.new("Frame")
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.Position = pos
+	f.Size = size
+	f.BackgroundColor3 = color
+	f.BorderSizePixel = 0
+	f.Parent = parent
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0.5, 0)
+	c.Parent = f
+	return f
+end
+
+-- Big shiny eyes and pink cheeks on the front of the pet.
+local function makeFace(body)
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = Enum.NormalId.Front
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 60
+	gui.Parent = body
+
+	local black = Color3.fromRGB(35, 30, 40)
+	for _, x in ipairs({ 0.3, 0.7 }) do
+		local eye = circle(gui, black, UDim2.fromScale(0.2, 0.27), UDim2.fromScale(x, 0.42))
+		circle(eye, Color3.new(1, 1, 1), UDim2.fromScale(0.4, 0.3), UDim2.fromScale(0.65, 0.3))
+	end
+	for _, x in ipairs({ 0.18, 0.82 }) do
+		local cheek = circle(gui, Color3.fromRGB(255, 140, 170), UDim2.fromScale(0.16, 0.1), UDim2.fromScale(x, 0.62))
+		cheek.BackgroundTransparency = 0.3
+	end
+	-- little smile
+	local mouth = Instance.new("TextLabel")
+	mouth.AnchorPoint = Vector2.new(0.5, 0.5)
+	mouth.Position = UDim2.fromScale(0.5, 0.64)
+	mouth.Size = UDim2.fromScale(0.25, 0.18)
+	mouth.BackgroundTransparency = 1
+	mouth.Text = "w"
+	mouth.TextColor3 = black
+	mouth.TextScaled = true
+	mouth.Font = Enum.Font.FredokaOne
+	mouth.Parent = gui
+end
+
 local function makePet(petName, parent)
 	local info = Config.PETS[petName]
 
@@ -30,12 +74,20 @@ local function makePet(petName, parent)
 	body.Name = petName
 	body.Shape = Enum.PartType.Ball
 	body.Size = Vector3.one * PET_SIZE
-	body.Color = info.Color
+	body.Color = info.BodyColor
 	body.Material = Enum.Material.SmoothPlastic
 	body.Anchored = true
 	body.CanCollide = false
 	body.CanQuery = false
 	body.CanTouch = false
+
+	makeFace(body)
+
+	if info.Rarity == "Legendary" then
+		local sparkles = Instance.new("Sparkles")
+		sparkles.SparkleColor = info.Color
+		sparkles.Parent = body
+	end
 
 	local label = Instance.new("BillboardGui")
 	label.Size = UDim2.fromOffset(120, 24)
@@ -49,7 +101,7 @@ local function makePet(petName, parent)
 	text.Text = petName
 	text.TextColor3 = info.Color
 	text.TextStrokeTransparency = 0.3
-	text.Font = Enum.Font.GothamBold
+	text.Font = Enum.Font.FredokaOne
 	text.TextScaled = true
 	text.Parent = label
 

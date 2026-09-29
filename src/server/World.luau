@@ -19,6 +19,8 @@ local function part(props)
 	return p
 end
 
+World.part = part
+
 local function folder(name)
 	local f = workspace:FindFirstChild(name)
 	if not f then
@@ -38,8 +40,8 @@ function World.build()
 			Name = "Floor",
 			Size = Vector3.new(World.MAIN_SIZE + 20, 1, World.MAIN_SIZE + 20),
 			Position = World.MAIN_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0),
-			Color = Color3.fromRGB(106, 176, 76), -- the client recolors this by rebirth
-			Material = Enum.Material.Grass,
+			Color = Color3.fromRGB(120, 210, 90), -- the client recolors this by rebirth
+			Material = Enum.Material.SmoothPlastic,
 			Parent = main,
 		})
 	end
@@ -60,8 +62,8 @@ function World.build()
 			Name = "Floor",
 			Size = Vector3.new(120, 1, 70),
 			Position = World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0),
-			Color = Color3.fromRGB(230, 220, 200),
-			Material = Enum.Material.Sand,
+			Color = Color3.fromRGB(235, 220, 255),
+			Material = Enum.Material.SmoothPlastic,
 			Parent = eggs,
 		})
 	end

@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PlayerData = require(script.PlayerData)
 local World = require(script.World)
+local Decor = require(script.Decor)
 local Coins = require(script.Coins)
 local Pets = require(script.Pets)
 local Eggs = require(script.Eggs)
@@ -31,6 +32,7 @@ remote("RemoteEvent", "Hatched") -- server -> client: petName
 remotes.Parent = ReplicatedStorage
 
 World.build()
+Decor.build()
 PlayerData.start()
 Coins.start()
 Pets.start()
