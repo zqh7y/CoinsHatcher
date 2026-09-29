@@ -68,9 +68,9 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Boosts**: small pills in the bottom right show active potions, perks and
   upgrades (up to 5, then a "+N" pill that lists the rest).
 - **Mystery gifts** after 1, 3, 5, 10, 15 and 20 minutes of play: free pets
-  from your best egg, potions, diamonds or coins, plus a really tiny chance
-  (1 in 5,000) of the **Huge Present**, a giant gift-box pet (10-35% of the coins you
-  have); the last one is a MEGA gift.
+  from your best egg, potions, diamonds or coins (10-35% of the coins you
+  have); the last one is a MEGA gift. Every gift also has a really tiny
+  chance (1 in 5,000) of the **Huge Present**, a giant gift-box pet.
 - **Gate portals**: walk through the glowing portal in the PET PARK or
   HATCHERY gate to travel between the two areas.
 - **Economy**:
