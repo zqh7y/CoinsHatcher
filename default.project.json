@@ -21,7 +21,8 @@
     },
     "Workspace": {
       "$properties": {
-        "FilteringEnabled": true
+        "FilteringEnabled": true,
+        "StreamingEnabled": false
       },
       "Baseplate": {
         "$className": "Part",
@@ -99,14 +100,9 @@
           "$properties": {
             "Anchored": true,
             "Size": [
-              50,
               0.2,
+              50,
               50
-            ],
-            "Position": [
-              0,
-              1.1,
-              0
             ],
             "Color": [
               0.66667,
@@ -115,7 +111,34 @@
             ],
             "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
-            "BottomSurface": "Smooth"
+            "BottomSurface": "Smooth",
+            "Shape": "Cylinder",
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  1.1,
+                  0
+                ],
+                "orientation": [
+                  [
+                    0,
+                    -1,
+                    0
+                  ],
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            }
           }
         },
         "Spawn": {

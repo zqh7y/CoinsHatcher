@@ -4,7 +4,7 @@ local World = {}
 
 World.MAIN_CENTER = Vector3.new(0, 0, 0)
 World.MAIN_RADIUS = 51 -- the round main area's wall (floor is 104 wide)
-World.COIN_ZONE = 50 -- coins spawn in this square in the middle
+World.COIN_ZONE = 50 -- coins spawn in this circle in the middle (diameter)
 World.MAIN_SPAWN = Vector3.new(0, 0, 38) -- spawn pad, between the coins and the wall
 World.EGG_CENTER = Vector3.new(0, 0, 1000)
 World.FLOOR_Y = 1 -- top of both floors
@@ -87,11 +87,12 @@ function World.isInMainArea(position: Vector3): boolean
 	return flat <= World.MAIN_RADIUS + 5 and offset.Y < 50
 end
 
-function World.randomCoinPosition(): Vector3
-	local half = World.COIN_ZONE / 2 - 3 -- keep big coins inside the zone
-	local x = math.random(-half, half)
-	local z = math.random(-half, half)
-	return World.MAIN_CENTER + Vector3.new(x, World.FLOOR_Y, z)
+-- A random spot in the round coin zone, keeping `margin` studs from its edge.
+function World.randomCoinPosition(margin: number): Vector3
+	local radius = World.COIN_ZONE / 2 - margin
+	local dist = radius * math.sqrt(math.random()) -- sqrt spreads spots evenly
+	local angle = math.random() * math.pi * 2
+	return World.MAIN_CENTER + Vector3.new(math.cos(angle) * dist, World.FLOOR_Y, math.sin(angle) * dist)
 end
 
 return World

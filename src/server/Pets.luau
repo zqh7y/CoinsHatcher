@@ -1,6 +1,6 @@
 -- Equipped pets follow their owner. In the main area they run to the nearest
--- coin and break it; a pet's power is its damage per second, so stronger pets
--- break coins faster.
+-- breakable and hit it every Config.PET_HIT_INTERVAL seconds; each hit deals
+-- the pet's power, so stronger pets break things faster.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -15,13 +15,13 @@ local Pets = {}
 local PET_SIZE = 2.2
 local PET_LIFT = PET_SIZE / 2 + 0.3 -- body height above the ground (feet underneath)
 local SEARCH_RADIUS = 70 -- pets only go for coins this close to their owner
-local ATTACK_RANGE = 1
+local ATTACK_RANGE = 1.5
 
 local folder = Instance.new("Folder")
 folder.Name = "Pets"
 folder.Parent = workspace
 
--- [player] = list of { Part, Power, Target }
+-- [player] = list of { Part, Power, Target, LastHit }
 local active = {}
 
 local function circle(parent, color, size, pos)
@@ -279,7 +279,7 @@ function Pets.refresh(player)
 		if petName and Config.PETS[petName] then
 			local part = makePet(petName, playerFolder)
 			part.CFrame = CFrame.new(startPos)
-			table.insert(list, { Part = part, Power = Config.PETS[petName].Power })
+			table.insert(list, { Part = part, Power = Config.PETS[petName].Power, LastHit = 0 })
 		end
 	end
 	active[player] = list
@@ -296,7 +296,7 @@ local function findTarget(player, pets, rootPos)
 
 	local best, bestDist, bestFree = nil, math.huge, false
 	for _, coin in ipairs(Coins.get(player)) do
-		local dist = (coin.Position - rootPos).Magnitude
+		local dist = (coin:GetPivot().Position - rootPos).Magnitude
 		if dist <= SEARCH_RADIUS then
 			local free = not taken[coin]
 			-- a free coin always beats a taken one; otherwise the closer one wins
@@ -341,7 +341,14 @@ local function update(dt)
 
 			-- drop the target if it broke or the owner walked away
 			local target = pet.Target
-			if target and (not target.Parent or not inMain or (target.Position - rootPos).Magnitude > SEARCH_RADIUS + 10) then
+			if
+				target
+				and (
+					not target.Parent
+					or not inMain
+					or (target:GetPivot().Position - rootPos).Magnitude > SEARCH_RADIUS + 10
+				)
+			then
 				target = nil
 			end
 			if not target and inMain then
@@ -350,18 +357,28 @@ local function update(dt)
 			pet.Target = target
 
 			if target then
-				-- spread pets around the coin so they don't stack
+				-- spread pets around the breakable so they don't stack
+				local center = target:GetPivot().Position
 				local angle = (i / #pets) * math.pi * 2
-				local ring = target.Size.Y / 2 + 0.5
+				local ring = (target:GetAttribute("Radius") or 1.5) + PET_SIZE / 2 + 0.2
 				local goal = Vector3.new(
-					target.Position.X + math.cos(angle) * ring,
+					center.X + math.cos(angle) * ring,
 					World.FLOOR_Y + PET_LIFT,
-					target.Position.Z + math.sin(angle) * ring
+					center.Z + math.sin(angle) * ring
 				)
 				local left = moveTowards(part, goal, Config.PET_SPEED, dt)
 				if left <= ATTACK_RANGE then
-					if Coins.damage(player, target, pet.Power * dt) then
-						pet.Target = nil
+					-- face the breakable and do a little hop on each hit
+					local sinceHit = t - pet.LastHit
+					local hop = if sinceHit < 0.3 then math.sin(sinceHit / 0.3 * math.pi) * 0.9 else 0
+					local pos = goal + Vector3.new(0, hop, 0)
+					part.CFrame = CFrame.lookAt(pos, Vector3.new(center.X, pos.Y, center.Z))
+
+					if t >= pet.LastHit + Config.PET_HIT_INTERVAL then
+						pet.LastHit = t
+						if Coins.damage(player, target, pet.Power) then
+							pet.Target = nil
+						end
 					end
 				end
 			else

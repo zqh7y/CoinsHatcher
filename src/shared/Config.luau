@@ -10,21 +10,33 @@ Config.MAX_REBIRTHS = 3
 Config.SCALE = 5
 
 function Config.rebirthCost(rebirths: number): number
-	return 2500 * Config.SCALE ^ rebirths
+	return 1500 * Config.SCALE ^ rebirths
 end
 
 -- Main area -----------------------------------------------------------------
 
-Config.COINS_PER_PLAYER = 20
-Config.COIN_RESPAWN_TIME = 1.5
+Config.COINS_PER_PLAYER = 18
+Config.COIN_RESPAWN_TIME = 1
 
--- size is 1 (small), 2 (medium) or 3 (big)
-function Config.coinStats(rebirths: number, size: number)
-	local scale = Config.SCALE ^ rebirths
+-- The things pets break in the coin zone. Chance is a weight;
+-- Mult multiplies both health and coins.
+Config.BREAKABLES = {
+	{ Name = "Coins", Chance = 60, Mult = 1 }, -- a stack of 4 coins
+	{ Name = "Coin Pile", Chance = 27, Mult = 3 },
+	{ Name = "Chest", Chance = 10, Mult = 10 },
+	{ Name = "Big Chest", Chance = 3, Mult = 30 },
+}
+
+function Config.coinStats(rebirths: number, kind: number)
+	local scale = Config.SCALE ^ rebirths * Config.BREAKABLES[kind].Mult
 	return {
-		Health = 20 * size * scale,
-		Value = 5 * size * scale,
+		Health = 12 * scale,
+		Value = 10 * scale,
 	}
+end
+
+function Config.rollBreakable(): number
+	return Config.rollWeighted(Config.BREAKABLES)
 end
 
 -- Floor color of the main area at each rebirth level (last one repeats).
@@ -45,6 +57,7 @@ Config.MAX_EQUIPPED = 3
 Config.MAX_PETS = 50
 Config.STARTER_PET = "Dog"
 Config.PET_SPEED = 32 -- studs per second when running to a coin
+Config.PET_HIT_INTERVAL = 0.6 -- seconds between hits; each hit deals the pet's power
 
 -- Rarities in order. Chance is a weight, Power multiplies the egg's base power.
 Config.RARITIES = {
@@ -110,7 +123,7 @@ Config.PET_LOOKS = {
 Config.EGG_COUNT = math.min(#Config.EGGS, Config.MAX_REBIRTHS + 1)
 
 function Config.eggCost(eggIndex: number): number
-	return 100 * Config.SCALE ^ (eggIndex - 1)
+	return 50 * Config.SCALE ^ (eggIndex - 1)
 end
 
 function Config.eggRequiredRebirths(eggIndex: number): number
@@ -137,20 +150,24 @@ for eggIndex, egg in ipairs(Config.EGGS) do
 	end
 end
 
--- Picks a random rarity index using the Chance weights.
-function Config.rollRarity(): number
+-- Picks a random index from a list of { Chance = weight } entries.
+function Config.rollWeighted(list): number
 	local total = 0
-	for _, rarity in ipairs(Config.RARITIES) do
-		total += rarity.Chance
+	for _, entry in ipairs(list) do
+		total += entry.Chance
 	end
 	local roll = math.random() * total
-	for i, rarity in ipairs(Config.RARITIES) do
-		roll -= rarity.Chance
+	for i, entry in ipairs(list) do
+		roll -= entry.Chance
 		if roll <= 0 then
 			return i
 		end
 	end
 	return 1
+end
+
+function Config.rollRarity(): number
+	return Config.rollWeighted(Config.RARITIES)
 end
 
 -- 12345 -> "12,345"
