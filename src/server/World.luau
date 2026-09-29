@@ -125,6 +125,24 @@ function World.build()
 	end
 
 	local eggs = folder("EggArea")
+	-- older place files still have the round hatchery saved in them: remove
+	-- its floor rings and ring walls, and make the floor the hall's shape
+	local oldRings = eggs:FindFirstChild("FloorRings")
+	if oldRings then
+		oldRings:Destroy()
+	end
+	local walls = eggs:FindFirstChild("Walls")
+	if walls then
+		for _, wall in ipairs(walls:GetChildren()) do
+			if wall.Name:match("^Wall%d+$") then
+				wall:Destroy()
+			end
+		end
+	end
+	local oldFloor = eggs:FindFirstChild("Floor")
+	if oldFloor and oldFloor:IsA("Part") and oldFloor.Shape ~= Enum.PartType.Block then
+		oldFloor:Destroy()
+	end
 	if not eggs:FindFirstChild("Floor") then
 		part({
 			Name = "Floor",

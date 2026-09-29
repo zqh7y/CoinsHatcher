@@ -222,10 +222,10 @@ local function createEggModel(eggIndex, parent)
 	return model
 end
 
--- Builds each egg with its pattern, shrine and attributes.
+-- Builds each egg with its stand, pattern, platform and attributes.
 local function setupEgg(eggIndex, parent)
 	local egg = Config.EGGS[eggIndex]
-	local model = parent:FindFirstChild(egg.Name) or createEggModel(eggIndex, parent)
+	local model = createEggModel(eggIndex, parent)
 	local shell = model:FindFirstChild("Egg")
 	if not shell then
 		warn(egg.Name .. " needs a part named Egg inside it")
@@ -258,6 +258,9 @@ function Eggs.start(remoteFolder)
 		eggsFolder.Parent = workspace.EggArea
 	end
 
+	-- always build the eggs fresh in the hall (older place files still have
+	-- the eggs from the round hatchery saved in them)
+	eggsFolder:ClearAllChildren()
 	for eggIndex = 1, Config.EGG_COUNT do
 		setupEgg(eggIndex, eggsFolder)
 	end

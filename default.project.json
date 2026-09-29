@@ -1264,11 +1264,6 @@
               1,
               312
             ],
-            "Position": [
-              0,
-              0.5,
-              1000
-            ],
             "Color": [
               0.92941,
               0.90196,
@@ -1276,7 +1271,34 @@
             ],
             "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
-            "BottomSurface": "Smooth"
+            "BottomSurface": "Smooth",
+            "Shape": "Block",
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  0.5,
+                  1000
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            }
           }
         },
         "Walls": {
@@ -1290,11 +1312,6 @@
                 6,
                 312
               ],
-              "Position": [
-                -22,
-                3,
-                1000
-              ],
               "Color": [
                 1.0,
                 0.96078,
@@ -1302,7 +1319,33 @@
               ],
               "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
-              "BottomSurface": "Smooth"
+              "BottomSurface": "Smooth",
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -22,
+                    3,
+                    1000
+                  ],
+                  "orientation": [
+                    [
+                      1,
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0,
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              }
             }
           },
           "RightWall": {
@@ -1314,11 +1357,6 @@
                 6,
                 312
               ],
-              "Position": [
-                22,
-                3,
-                1000
-              ],
               "Color": [
                 1.0,
                 0.96078,
@@ -1326,7 +1364,33 @@
               ],
               "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
-              "BottomSurface": "Smooth"
+              "BottomSurface": "Smooth",
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    22,
+                    3,
+                    1000
+                  ],
+                  "orientation": [
+                    [
+                      1,
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0,
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              }
             }
           },
           "GateWall": {
@@ -1338,11 +1402,6 @@
                 6,
                 2
               ],
-              "Position": [
-                0,
-                3,
-                1155
-              ],
               "Color": [
                 1.0,
                 0.96078,
@@ -1350,7 +1409,33 @@
               ],
               "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
-              "BottomSurface": "Smooth"
+              "BottomSurface": "Smooth",
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    0,
+                    3,
+                    1155
+                  ],
+                  "orientation": [
+                    [
+                      1,
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0,
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              }
             }
           },
           "EndWall": {
@@ -1362,11 +1447,6 @@
                 6,
                 2
               ],
-              "Position": [
-                0,
-                3,
-                845
-              ],
               "Color": [
                 1.0,
                 0.96078,
@@ -1374,10 +1454,38 @@
               ],
               "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
-              "BottomSurface": "Smooth"
+              "BottomSurface": "Smooth",
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    0,
+                    3,
+                    845
+                  ],
+                  "orientation": [
+                    [
+                      1,
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0,
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              }
             }
-          }
-        }
+          },
+          "$ignoreUnknownInstances": false
+        },
+        "$ignoreUnknownInstances": false
       }
     },
     "Lighting": {
