@@ -37,7 +37,8 @@ remote("RemoteEvent", "Announce") -- server -> all clients: player name, pet nam
 local GetData = remote("RemoteFunction", "GetData") -- client -> server, returns data
 local DataChanged = remote("RemoteEvent", "DataChanged") -- server -> client: data
 remote("RemoteEvent", "Notify") -- server -> client: message, color
-remote("RemoteEvent", "Hatched") -- server -> client: { petName }
+remote("RemoteEvent", "Hatched") -- server -> client: { petName }, { [i] = auto-deleted }
+remote("RemoteFunction", "SetAutoDelete") -- client -> server: petName, on
 remote("RemoteFunction", "BuyUpgrade") -- client -> server: upgrade id, returns ok, message
 remote("RemoteFunction", "BuyPerk") -- client -> server: perk id (costs diamonds)
 remote("RemoteFunction", "BuyBoost") -- client -> server: potion id (costs diamonds)

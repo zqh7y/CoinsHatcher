@@ -58,14 +58,18 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   (Ocean, Snow, Space, Mythic and Release), with very low odds even with
   max luck. Any pet can come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy;
   not huges). Hatching plays an animation with light rays; Mythical, Huge
-  and 1-in-10K+ pets get a special one. Rare hatches are announced to the
+  and 1-in-10K+ pets get a special one, and when one of those hatches only
+  the good pets are shown (a Huge gets the whole screen). Tap a pet in the
+  popup to **auto-delete** it: hatched copies don't go into your inventory
+  (Mythical, Huge and mutated pets are always kept). Rare hatches are announced to the
   server.
 - **Big numbers**: numbers start in the hundreds/thousands and grow ×4 per
   rebirth (shown as 1.5K, 4.5M...); pets land 3x critical hits.
 - **Boosts**: small pills in the bottom right show active potions, perks and
   upgrades (up to 5, then a "+N" pill that lists the rest).
 - **Mystery gifts** after 1, 3, 5, 10, 15 and 20 minutes of play: free pets
-  from your best egg, potions, diamonds or coins (10-35% of the coins you
+  from your best egg, potions, diamonds or coins, plus a really tiny chance
+  (1 in 5,000) of the **Huge Present**, a giant gift-box pet (10-35% of the coins you
   have); the last one is a MEGA gift.
 - **Gate portals**: walk through the glowing portal in the PET PARK or
   HATCHERY gate to travel between the two areas.

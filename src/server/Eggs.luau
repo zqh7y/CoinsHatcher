@@ -37,17 +37,20 @@ local function notify(player, message, color, celebrate)
 	remotes.Notify:FireClient(player, message, color, celebrate)
 end
 
--- Rolls `count` pets from an egg and gives them to the player: diamonds for
--- new discoveries, auto-equip into free slots, the hatch animation and a
--- server-wide shout-out for rare ones. No cost or distance checks here.
-local function giveHatch(player, eggIndex, count)
+-- Should this freshly hatched pet be deleted right away? (The player picked
+-- it for auto-delete in the egg popup; mutated pets are always kept.)
+local function autoDeleted(data, petName)
+	local info = Config.PETS[petName]
+	return data.AutoDelete ~= nil and data.AutoDelete[petName] == true and info ~= nil and info.Mutation == nil
+end
+
+-- Gives hatched pets to the player: diamonds for new discoveries, auto-delete,
+-- auto-equip into free slots, the hatch animation and a server-wide shout-out
+-- for rare ones. No cost or distance checks here.
+local function giveHatch(player, names)
 	local data = PlayerData.get(player)
 	if not data then
 		return
-	end
-	local names = {}
-	for _ = 1, count do
-		table.insert(names, Config.rollHatch(eggIndex, data))
 	end
 
 	-- diamonds for pets you've never found before (checked before adding them)
@@ -61,7 +64,11 @@ local function giveHatch(player, eggIndex, count)
 		end
 	end
 
-	local indexes = PlayerData.addPets(player, names)
+	local deleted = {}
+	for i, petName in ipairs(names) do
+		deleted[i] = autoDeleted(data, petName)
+	end
+	local indexes = PlayerData.addPets(player, names, deleted)
 	if reward > 0 then
 		PlayerData.addDiamonds(player, reward)
 		notify(player, "📖 New pet discovered! +" .. reward .. " 💎", Color3.fromRGB(130, 220, 255), true)
@@ -69,7 +76,7 @@ local function giveHatch(player, eggIndex, count)
 
 	-- auto-equip into free slots
 	local max = Config.totalSlots(data)
-	if #data.Equipped < max then
+	if #data.Equipped < max and #indexes > 0 then
 		local equipped = table.clone(data.Equipped)
 		for _, index in ipairs(indexes) do
 			if #equipped < max then
@@ -79,7 +86,7 @@ local function giveHatch(player, eggIndex, count)
 		PlayerData.setEquipped(player, equipped)
 	end
 
-	remotes.Hatched:FireClient(player, names)
+	remotes.Hatched:FireClient(player, names, deleted)
 
 	-- let the whole server know about rare hatches
 	for _, petName in ipairs(names) do
@@ -89,15 +96,43 @@ local function giveHatch(player, eggIndex, count)
 	end
 end
 
+-- How many of these pets would actually go into the inventory.
+local function keptCount(data, names)
+	local kept = 0
+	for _, petName in ipairs(names) do
+		if not autoDeleted(data, petName) then
+			kept += 1
+		end
+	end
+	return kept
+end
+
+local function roll(eggIndex, data, count)
+	local names = {}
+	for _ = 1, count do
+		table.insert(names, Config.rollHatch(eggIndex, data))
+	end
+	return names
+end
+
 -- Free pets (from gifts) out of the best egg the player has unlocked.
 -- Returns false if their inventory is too full.
 function Eggs.freeHatch(player, count)
 	local data = PlayerData.get(player)
-	if not data or #data.Pets + count > Config.maxPets(data) then
+	if not data then
 		return false
 	end
-	giveHatch(player, math.min(data.Rebirths + 1, Config.REBIRTH_EGGS), count)
+	local names = roll(math.min(data.Rebirths + 1, Config.REBIRTH_EGGS), data, count)
+	if #data.Pets + keptCount(data, names) > Config.maxPets(data) then
+		return false
+	end
+	giveHatch(player, names)
 	return true
+end
+
+-- Gives one special pet (the gift huge) with the hatch animation.
+function Eggs.giveSpecial(player, petName)
+	giveHatch(player, { petName })
 end
 
 -- Hatches `count` eggs (1 up to the Hatch Amount) at once, paying with coins.
@@ -120,19 +155,36 @@ local function hatch(player, eggIndex, count)
 		notify(player, "🔒 Rebirth " .. required .. " needed to open this egg!", RED)
 		return
 	end
-	if #data.Pets + count > Config.maxPets(data) then
-		notify(player, "🎒 Your pet inventory is full! Delete some pets.", RED)
-		return
-	end
 	local cost = Config.eggPrice(data, eggIndex) * count
 	if data.Coins < cost then
 		notify(player, "💰 You need " .. Config.formatNumber(cost) .. " coins!", RED)
 		return
 	end
+	-- roll first: auto-deleted pets don't need room in the inventory
+	local names = roll(eggIndex, data, count)
+	if #data.Pets + keptCount(data, names) > Config.maxPets(data) then
+		notify(player, "🎒 Your pet inventory is full! Delete some pets.", RED)
+		return
+	end
 
 	lastHatch[player] = now
 	PlayerData.addCoins(player, -cost)
-	giveHatch(player, eggIndex, count)
+	giveHatch(player, names)
+end
+
+-- Turns auto-delete on or off for one pet of an egg. Only normal pets up to
+-- Legendary can be auto-deleted (never Mythical or Huge ones).
+local AUTO_DELETABLE = { Common = true, Uncommon = true, Rare = true, Legendary = true }
+local function setAutoDelete(player, petName, on)
+	local data = PlayerData.get(player)
+	local info = Config.PETS[petName]
+	if not data or not info or info.Mutation or not AUTO_DELETABLE[info.Rarity] then
+		return false
+	end
+	data.AutoDelete = data.AutoDelete or {}
+	data.AutoDelete[petName] = if on then true else nil
+	PlayerData.Changed:Fire(player)
+	return true
 end
 
 -- Builds an egg stand: a tiered pedestal with a gold rim and a glowing ring,
@@ -277,6 +329,14 @@ function Eggs.start(remoteFolder)
 		end
 		hatch(player, eggIndex, count)
 	end)
+
+	-- tapping a pet in the egg popup toggles auto-delete for it
+	remotes.SetAutoDelete.OnServerInvoke = function(player, petName, on)
+		if typeof(petName) ~= "string" or typeof(on) ~= "boolean" then
+			return false
+		end
+		return setAutoDelete(player, petName, on)
+	end
 
 	game:GetService("Players").PlayerRemoving:Connect(function(player)
 		lastHatch[player] = nil

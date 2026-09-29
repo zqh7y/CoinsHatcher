@@ -24,6 +24,7 @@ local DEFAULT = {
 	Diamonds = 0, -- never reset
 	Perks = {}, -- [perk id] = level, bought with diamonds, never reset
 	Boosts = {}, -- [boost id] = seconds left on a potion (counts down while online)
+	AutoDelete = {}, -- [pet name] = true: hatched copies are deleted right away
 	Rarest = nil, -- { Pet = name, Odds = N } the rarest pet ever hatched (1 in N)
 }
 
@@ -64,6 +65,7 @@ local function load(player)
 	data.Upgrades = {}
 	data.Index = {}
 	data.Perks = {}
+	data.AutoDelete = {}
 	data.Boosts = {}
 	if ok and saved then
 		for k, v in pairs(saved) do
@@ -94,11 +96,12 @@ local function load(player)
 	if PlayerData.isDev(player) then
 		data.Coins = math.max(data.Coins, Config.DEV_MONEY.Coins)
 		data.Diamonds = math.max(data.Diamonds, Config.DEV_MONEY.Diamonds)
-		-- a huge pet to look at (once)
-		local huge = Config.DEV_MONEY.Huge
-		if huge and Config.PETS[huge] and not table.find(data.Pets, huge) then
-			table.insert(data.Pets, huge)
-			data.Index[huge] = true
+		-- huge pets to look at (once each)
+		for _, huge in ipairs(Config.DEV_MONEY.Huges or {}) do
+			if Config.PETS[huge] and not table.find(data.Pets, huge) then
+				table.insert(data.Pets, huge)
+				data.Index[huge] = true
+			end
 		end
 		player:SetAttribute("Dev", true) -- the client shows free rebirths
 	end
@@ -235,16 +238,20 @@ function PlayerData.giveStarter(player, petName)
 	return true
 end
 
--- Adds hatched pets. Returns the new pets' indexes.
-function PlayerData.addPets(player, petNames)
+-- Adds hatched pets. `deleted[i]` = true for pets that are auto-deleted: they
+-- still count as found and hatched, but don't go into the inventory.
+-- Returns the new pets' indexes.
+function PlayerData.addPets(player, petNames, deleted)
 	local data = sessionData[player]
 	if not data then
 		return {}
 	end
 	local indexes = {}
-	for _, petName in ipairs(petNames) do
-		table.insert(data.Pets, petName)
-		table.insert(indexes, #data.Pets)
+	for i, petName in ipairs(petNames) do
+		if not (deleted and deleted[i]) then
+			table.insert(data.Pets, petName)
+			table.insert(indexes, #data.Pets)
+		end
 		data.Index[petName] = true
 		-- a mutated pet ("Shiny Dog") also counts as finding the normal one
 		local info = Config.PETS[petName]

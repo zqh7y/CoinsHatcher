@@ -1,6 +1,7 @@
 -- When you walk up to an egg, a small popup floats on top of it: the pets
 -- inside in a 3-wide grid with the chance to get each one under it (with your
--- luck), and three buttons that show the price:
+-- luck), and three buttons that show the price (tap a pet to auto-delete it
+-- whenever you hatch it):
 --   E = buy 1 egg, F = buy more (3, up to 8 with the Hatch Amount upgrade),
 --   T = auto hatch (on/off)
 -- The keys work while the popup is open; the buttons can be tapped too.
@@ -54,7 +55,17 @@ popupScale.Parent = popup
 
 local title = Ui.label(popup, {
 	Position = UDim2.fromOffset(12, 8),
-	Size = UDim2.new(1, -24, 0, 24),
+	Size = UDim2.new(1, -160, 0, 24),
+	TextXAlignment = Enum.TextXAlignment.Left,
+})
+Ui.label(popup, {
+	Text = "tap a pet to auto-delete",
+	Font = Ui.FONT_BODY,
+	TextColor3 = Ui.COLORS.SubText,
+	TextXAlignment = Enum.TextXAlignment.Right,
+	AnchorPoint = Vector2.new(1, 0),
+	Position = UDim2.new(1, -12, 0, 13),
+	Size = UDim2.fromOffset(130, 14),
 })
 
 local grid = Instance.new("Frame")
@@ -222,17 +233,30 @@ local eggModels = {} -- [eggIndex] = model
 local stopSpins = {} -- stops the spinning pet previews when the grid is rebuilt
 
 -- One pet tile: the pet, and its chance under it in the rarity's color.
-local function petTile(entry, order, known)
+-- Pets that can be picked for auto-delete (never Mythical or Huge ones).
+local AUTO_DELETABLE = { Common = true, Uncommon = true, Rare = true, Legendary = true }
+local busyToggle = false
+
+-- One pet tile: the pet, and its chance under it in the rarity's color.
+-- Tap it to auto-delete that pet when you hatch it (red with a trash can).
+local function petTile(entry, order, known, marked)
 	local info = Config.PETS[entry.Pet]
 	local rarity = info.Rarity
 	local color = info.Color
+	local canDelete = AUTO_DELETABLE[rarity] == true
 
-	local tile = Instance.new("Frame")
-	tile.BackgroundColor3 = color:Lerp(Color3.new(1, 1, 1), 0.85)
+	local tile = Instance.new("TextButton")
+	tile.Text = ""
+	tile.AutoButtonColor = canDelete
+	tile.BackgroundColor3 = if marked then Color3.fromRGB(255, 225, 228) else color:Lerp(Color3.new(1, 1, 1), 0.85)
 	tile.LayoutOrder = order
 	tile.Parent = grid
 	Ui.corner(tile, 12)
-	Ui.stroke(tile, color:Lerp(Color3.new(1, 1, 1), 0.3), if rarity == "Mythical" or rarity == "Huge" then 2.5 else 1.5)
+	Ui.stroke(
+		tile,
+		if marked then Ui.COLORS.Red else color:Lerp(Color3.new(1, 1, 1), 0.3),
+		if marked or rarity == "Mythical" or rarity == "Huge" then 2.5 else 1.5
+	)
 
 	local view = Instance.new("Frame")
 	view.BackgroundTransparency = 1
@@ -240,16 +264,49 @@ local function petTile(entry, order, known)
 	view.Size = UDim2.new(1, -8, 0, CELL.Y - 26)
 	view.Parent = tile
 	-- huge pets stay a mystery until you find one
-	local _, model = Viewport.pet(view, entry.Pet, rarity == "Huge" and not known)
+	local vp, model = Viewport.pet(view, entry.Pet, rarity == "Huge" and not known)
 	table.insert(stopSpins, Viewport.spin(model, 1))
+	if marked then
+		vp.ImageTransparency = 0.55
+	end
 
 	Ui.label(tile, {
-		Text = Config.chanceLabel(entry.Chance),
-		TextColor3 = color:Lerp(Color3.new(0, 0, 0), 0.25),
+		Text = if marked then "auto-delete" else Config.chanceLabel(entry.Chance),
+		TextColor3 = if marked then Ui.COLORS.Red else color:Lerp(Color3.new(0, 0, 0), 0.25),
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, -4),
 		Size = UDim2.new(1, -8, 0, 18),
 	})
+	if marked then
+		local badge = Ui.label(tile, {
+			Text = "🗑",
+			BackgroundTransparency = 0,
+			BackgroundColor3 = Ui.COLORS.Red,
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.new(1, -4, 0, 4),
+			Size = UDim2.fromOffset(22, 22),
+		})
+		Ui.corner(badge, 0.5)
+	end
+
+	tile.Activated:Connect(function()
+		if not canDelete then
+			Ui.toast("Mythical and Huge pets can't be auto-deleted", Ui.COLORS.Red)
+			return
+		end
+		if busyToggle then
+			return
+		end
+		busyToggle = true
+		local ok = remotes.SetAutoDelete:InvokeServer(entry.Pet, not marked)
+		busyToggle = false
+		if ok then
+			Ui.toast(
+				if marked then entry.Pet .. " will be kept again" else entry.Pet .. " will be auto-deleted",
+				if marked then Ui.COLORS.Green else Ui.COLORS.Red
+			)
+		end
+	end)
 end
 
 local function show(eggIndex)
@@ -290,7 +347,7 @@ local function show(eggIndex)
 
 	local chances = Config.eggChances(eggIndex, data)
 	for order, entry in ipairs(chances) do
-		petTile(entry, order, data and data.Index[entry.Pet])
+		petTile(entry, order, data and data.Index[entry.Pet], data and data.AutoDelete and data.AutoDelete[entry.Pet] == true)
 	end
 	local rows = math.ceil(#chances / 3)
 	board.Size = UDim2.fromOffset(WIDTH, 38 + rows * CELL.Y + (rows - 1) * GAP + 10 + 46 + 10)

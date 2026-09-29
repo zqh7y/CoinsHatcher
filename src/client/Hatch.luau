@@ -3,6 +3,8 @@
 --   2) they wobble harder and harder while cracks appear
 --   3) flash! the pets pop out in front of spinning light rays in their
 --      rarity color, with their name, a rarity chip and their odds
+-- If something good hatches, only the good pets are shown (a Huge gets the
+-- whole screen). Auto-deleted pets are marked AUTO-DELETED.
 -- Really rare pets (Mythical, Huge or 1 in 10,000+) get a special version:
 -- the screen goes dark, the egg glows and shakes longer with a heartbeat,
 -- two colored flashes, rainbow rays, a big title and extra confetti.
@@ -108,11 +110,41 @@ local RARITY_TITLES = {
 	Huge = "HUGE!!",
 }
 
-local function play(petNames)
+local function play(allNames, allDeleted)
+	allDeleted = allDeleted or {}
 	local fast = Hatch.fast
-	-- up to 8 eggs fit across the screen
-	local screenWidth = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize.X or 1200
-	SLOT = math.min(240, math.floor(screenWidth * 0.94 / #petNames))
+
+	-- Something good in there? Then only the good ones are shown: a Huge gets
+	-- the whole screen to itself, otherwise just the special pets. The rest
+	-- are hatched quietly ("+N other pets").
+	local petNames, deleted = {}, {}
+	local hugeIndex = nil
+	for i, petName in ipairs(allNames) do
+		if Config.PETS[petName].Rarity == "Huge" then
+			hugeIndex = hugeIndex or i
+		end
+	end
+	for i, petName in ipairs(allNames) do
+		local show = if hugeIndex then i == hugeIndex else Config.isEpic(petName)
+		if show then
+			table.insert(petNames, petName)
+			table.insert(deleted, allDeleted[i] == true)
+		end
+	end
+	if #petNames == 0 then
+		petNames = allNames
+		for i = 1, #allNames do
+			deleted[i] = allDeleted[i] == true
+		end
+	end
+	local hiddenCount = #allNames - #petNames
+	local full = hugeIndex ~= nil
+
+	-- up to 8 eggs fit across the screen; a Huge fills most of it
+	local camera = workspace.CurrentCamera
+	local screen = if camera then camera.ViewportSize else Vector2.new(1200, 800)
+	SLOT = if full then math.floor(math.min(screen.X * 0.9, screen.Y * 0.55)) else math.min(240, math.floor(screen.X * 0.94 / #petNames))
+	local k = math.max(1, SLOT / 240) -- text scale for the big view
 	-- the Hatch Speed upgrade makes everything quicker
 	local speed = Config.hatchSpeed(State.Data and State.Data.Upgrades)
 	local count = #petNames
@@ -161,10 +193,11 @@ local function play(petNames)
 	-- 1) the eggs drop in and bounce
 	local eggs = {}
 	for i, petName in ipairs(petNames) do
-		local _, egg = Viewport.egg(slots[i], Config.PETS[petName].Egg)
+		local _, egg = Viewport.egg(slots[i], Config.PETS[petName].Egg or Config.EGG_COUNT)
 		eggs[i] = egg
 	end
-	local home = UDim2.fromScale(0.5, 0.42)
+	local home = UDim2.fromScale(0.5, if full then 0.46 else 0.42)
+	local homeY = home.Y.Scale
 	tween(stage, if fast then 0.3 else 0.55, { Position = home }, Enum.EasingStyle.Bounce).Completed:Wait()
 
 	-- the special one: a glow grows behind the egg that holds it
@@ -244,8 +277,11 @@ local function play(petNames)
 		view.BackgroundTransparency = 1
 		view.ZIndex = 1
 		view.Parent = slot
-		local _, pet = Viewport.pet(view, petName)
+		local petView, pet = Viewport.pet(view, petName)
 		table.insert(stops, Viewport.spin(pet, 2))
+		if deleted[i] then
+			petView.ImageTransparency = 0.55
+		end
 
 		local x = (i - (count + 1) / 2) * SLOT
 		local name = Ui.label(overlay, {
@@ -253,18 +289,18 @@ local function play(petNames)
 			TextColor3 = color,
 			TextStrokeTransparency = 0.2,
 			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.new(0.5, x, 0.42, SLOT / 2 + 4),
-			Size = UDim2.fromOffset(SLOT - 10, 36),
+			Position = UDim2.new(0.5, x, homeY, SLOT / 2 + 4 * k),
+			Size = UDim2.fromOffset(SLOT - 10, 36 * k),
 			ZIndex = 32,
 		})
 		local chip = Ui.label(overlay, {
-			Text = info.Rarity:upper(),
+			Text = if deleted[i] then "AUTO-DELETED" else info.Rarity:upper(),
 			TextColor3 = Color3.new(1, 1, 1),
 			BackgroundTransparency = 0,
-			BackgroundColor3 = color:Lerp(Color3.new(0, 0, 0), 0.15),
+			BackgroundColor3 = if deleted[i] then Ui.COLORS.Red else color:Lerp(Color3.new(0, 0, 0), 0.15),
 			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.new(0.5, x, 0.42, SLOT / 2 + 44),
-			Size = UDim2.fromOffset(120, 24),
+			Position = UDim2.new(0.5, x, homeY, SLOT / 2 + 44 * k),
+			Size = UDim2.fromOffset((if deleted[i] then 150 else 120) * k, 24 * k),
 			ZIndex = 32,
 		})
 		Ui.corner(chip, 0.5)
@@ -276,8 +312,8 @@ local function play(petNames)
 			Text = Config.chanceText(petName) .. "  ·  ⚔️ " .. Config.formatNumber(info.Power),
 			TextColor3 = Color3.new(1, 1, 1),
 			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.new(0.5, x, 0.42, SLOT / 2 + 74),
-			Size = UDim2.fromOffset(SLOT - 10, 20),
+			Position = UDim2.new(0.5, x, homeY, SLOT / 2 + 74 * k),
+			Size = UDim2.fromOffset(SLOT - 10, 20 * k),
 			ZIndex = 32,
 		})
 		for _, label in ipairs({ name, chip, odds }) do
@@ -308,7 +344,7 @@ local function play(petNames)
 			Text = RARITY_TITLES[info.Rarity] or "INSANE LUCK!",
 			TextStrokeTransparency = 0,
 			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.new(0.5, 0, 0.42, -SLOT / 2 - 10),
+			Position = UDim2.new(0.5, 0, homeY, -SLOT / 2 - 10),
 			Size = UDim2.fromOffset(560, 80),
 			ZIndex = 33,
 		})
@@ -333,12 +369,28 @@ local function play(petNames)
 			TextColor3 = Ui.COLORS.Gold,
 			TextStrokeTransparency = 0.2,
 			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.new(0.5, 0, 0.42, -SLOT / 2 - 6),
+			Position = UDim2.new(0.5, 0, homeY, -SLOT / 2 - 6),
 			Size = UDim2.fromOffset(420, 56),
 			ZIndex = 32,
 		})
 		table.insert(labels, banner)
 		Fx.confetti(70)
+	end
+
+	-- the pets we didn't show
+	if hiddenCount > 0 then
+		table.insert(
+			labels,
+			Ui.label(overlay, {
+				Text = ("+%d other pet%s"):format(hiddenCount, if hiddenCount > 1 then "s" else ""),
+				Font = Ui.FONT_BODY,
+				TextColor3 = Color3.fromRGB(220, 220, 235),
+				AnchorPoint = Vector2.new(0.5, 1),
+				Position = UDim2.new(0.5, 0, 1, -24),
+				Size = UDim2.fromOffset(300, 24),
+				ZIndex = 32,
+			})
+		)
 	end
 
 	task.wait(if epic then 4.5 elseif fast then 1 / speed elseif anyRare then 3 / speed else 2 / speed)
@@ -357,15 +409,16 @@ local function play(petNames)
 end
 
 -- Plays hatches one after another.
-function Hatch.play(petNames)
-	table.insert(queue, petNames)
+function Hatch.play(petNames, deleted)
+	table.insert(queue, { petNames, deleted })
 	if playing then
 		return
 	end
 	playing = true
 	task.spawn(function()
 		while #queue > 0 do
-			local ok, err = pcall(play, table.remove(queue, 1))
+			local item = table.remove(queue, 1)
+			local ok, err = pcall(play, item[1], item[2])
 			if not ok then
 				warn("Hatch animation failed:", err)
 				if current then

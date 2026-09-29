@@ -1,6 +1,7 @@
 -- Playtime mystery gifts after 1, 3, 5, 10, 15 and 20 minutes of play. Each
 -- one rolls a prize from Config.GIFT_POOLS: free hatches, potions, diamonds
--- or coins. The last one is a MEGA gift.
+-- or coins. The last one is a MEGA gift. Every gift also has a really tiny
+-- chance to be the Huge Present, a giant gift-box pet.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -58,6 +59,14 @@ local function claim(player, giftIndex)
 	end
 
 	claimed[player][giftIndex] = true
+
+	-- the really tiny chance: the Huge Present!
+	local huge = Config.PETS[Config.GIFT_HUGE]
+	if math.random(1, huge.Odds) == 1 and #data.Pets < Config.maxPets(data) then
+		Eggs.giveSpecial(player, Config.GIFT_HUGE)
+		return true, "🎁 HUGE PRESENT!!", "🎁 " .. Config.GIFT_HUGE .. "!"
+	end
+
 	local prize = pool[math.random(#pool)]
 	local parts = {}
 	for _, item in ipairs(prize) do

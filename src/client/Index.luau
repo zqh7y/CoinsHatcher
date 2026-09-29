@@ -33,11 +33,20 @@ local function render()
 	end
 
 	local found, total = 0, 0
-	for eggIndex, egg in ipairs(Config.EGGS) do
+	-- every egg's pets, then a row for the special pets (like the gift huge)
+	local sections = {}
+	for _, egg in ipairs(Config.EGGS) do
 		local pets = table.clone(egg.Pets)
 		if egg.Huge then
 			table.insert(pets, egg.Huge)
 		end
+		table.insert(sections, { Name = egg.Name, Pets = pets })
+	end
+	table.insert(sections, { Name = "Special", Pets = Config.SPECIAL_PETS })
+
+	for eggIndex, section in ipairs(sections) do
+		local egg = section
+		local pets = section.Pets
 
 		local eggFound = 0
 		for _, petName in ipairs(pets) do

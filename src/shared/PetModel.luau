@@ -197,6 +197,15 @@ function PetModel.build(petName: string, options)
 				add(side * 0.3, -0.75, -1.12, Vector3.new(0.45, 0.4, 0.1), Color3.fromRGB(230, 40, 90), nil, CFrame.Angles(0, 0, side * 0.3))
 			end)
 			add(0, -0.75, -1.15, Vector3.new(0.2, 0.2, 0.1), Color3.fromRGB(255, 120, 160))
+		elseif extra == "giftbox" then
+			-- a present: gold ribbon bands all around the box and a big bow on top
+			local ribbon = Color3.fromRGB(255, 210, 70)
+			add(0, -0.72, 0, Vector3.new(2.3, 0.4, 2.3), ribbon) -- around the bottom (under the face)
+			add(0, 0, 0, Vector3.new(2.3, 2.3, 0.5), ribbon) -- over the top and down the sides
+			both(function(side)
+				add(side * 0.45, 1.45, 0, Vector3.new(0.9, 0.6, 0.35), ribbon, nil, CFrame.Angles(0, 0, side * -0.5))
+			end)
+			add(0, 1.35, 0, Vector3.one * 0.5, ribbon:Lerp(WHITE, 0.2), BALL)
 		elseif extra == "balloon" then
 			add(1.3, 1.1, 0.4, Vector3.new(0.06, 2.2, 0.06), WHITE)
 			add(1.3, 2.8, 0.4, Vector3.new(1.2, 1.4, 1.2), Color3.fromRGB(255, 80, 120), BALL)

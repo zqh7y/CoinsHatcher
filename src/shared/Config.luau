@@ -75,7 +75,7 @@ Config.DEV_MONEY = {
 	Coins = 1e15, -- 1Qd
 	Diamonds = 1e9, -- 1B
 	UserIds = {}, -- e.g. { 123456789 } to also get it in the live game
-	Huge = "Huge Mythic Dragon", -- developers also get this pet once, to see a huge
+	Huges = { "Huge Mythic Dragon", "Huge Present" }, -- developers also get these once, to see them
 }
 Config.PET_SPEED = 32 -- studs per second when running to a coin
 Config.PET_HIT_INTERVAL = 0.6 -- seconds between hits; each hit deals the pet's power
@@ -343,6 +343,21 @@ for eggIndex, egg in ipairs(Config.EGGS) do
 	}
 end
 
+-- Special pets that don't come from an egg (shown in their own index row).
+-- The Huge Present is a giant gift-box pet with a really tiny chance to come
+-- out of any playtime gift (Odds = 1 in N per gift opened).
+Config.GIFT_HUGE = "Huge Present"
+Config.PETS[Config.GIFT_HUGE] = {
+	Rarity = "Huge",
+	Power = Config.petPower(6, 4) * Config.HUGE_POWER,
+	Color = Config.HUGE_COLOR,
+	BodyColor = Color3.fromRGB(235, 60, 80),
+	Look = { Extras = { "giftbox" } },
+	Scale = Config.HUGE_SCALE,
+	Odds = 5000,
+}
+Config.SPECIAL_PETS = { Config.GIFT_HUGE }
+
 -- Mutations: a hatched pet can come out mutated, with more power and a
 -- special look. Huge pets don't mutate (they're special enough). Chance is in
 -- percent, before luck.
@@ -452,6 +467,12 @@ end
 function Config.odds(petName: string): number?
 	local info = Config.PETS[petName]
 	if not info then
+		return nil
+	end
+	if info.Odds then
+		return info.Odds -- special pets have fixed odds
+	end
+	if not info.Egg then
 		return nil
 	end
 	local name = info.Base or petName
