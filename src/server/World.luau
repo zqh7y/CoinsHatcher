@@ -35,6 +35,32 @@ local function folder(name)
 	return f
 end
 
+-- A tall ring of invisible walls on top of an area's fence, so nobody can
+-- jump over it and leave the area.
+local function invisibleRing(parent, center, radius)
+	if parent:FindFirstChild("InvisibleWalls") then
+		return
+	end
+	local ring = Instance.new("Folder")
+	ring.Name = "InvisibleWalls"
+	local pieces = 32
+	local height = 150
+	local length = 2 * math.pi * radius / pieces + 1 -- a bit of overlap, no gaps
+	for i = 0, pieces - 1 do
+		local a = (i + 0.5) / pieces * math.pi * 2
+		local pos = center + Vector3.new(math.cos(a) * radius, World.FLOOR_Y + height / 2, math.sin(a) * radius)
+		part({
+			Name = "InvisibleWall",
+			Size = Vector3.new(2, height, length),
+			CFrame = CFrame.lookAt(pos, Vector3.new(center.X, pos.Y, center.Z)) * CFrame.Angles(0, math.rad(90), 0),
+			Transparency = 1,
+			CastShadow = false,
+			Parent = ring,
+		})
+	end
+	ring.Parent = parent
+end
+
 -- The map lives in default.project.json so you can see and edit it in Studio.
 -- This only builds the pieces that are missing, as a fallback.
 function World.build()
@@ -79,6 +105,9 @@ function World.build()
 			Parent = eggs,
 		})
 	end
+
+	invisibleRing(main, World.MAIN_CENTER, World.MAIN_RADIUS)
+	invisibleRing(eggs, World.EGG_CENTER, World.EGG_RADIUS)
 end
 
 -- Where a player lands when they teleport to an area.

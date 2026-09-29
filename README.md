@@ -25,6 +25,7 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   area's breakables tougher and worth more (and changes its color).
 - **Shop** (stall in the main area): upgrade pet damage, luck, walk speed,
   pet speed, coin bonus and pet slots. Kept forever (not reset on rebirth).
+  Every level has a fixed price, set for the rebirth you'd be at when buying it.
   Luck goes up to x100, damage x20 and coins x10 at max. Stand on
   the glowing circle to open it; step off to close it.
 - **📈 Upgrade board** (white board in the main area, reset on rebirth): 15
@@ -93,3 +94,18 @@ are in `src/shared/Config.luau`.
 - `src/server/init.server.luau`: starts everything, handles teleport/rebirth/equip
 - `src/client/`: UI (buttons, pets, shop, index, rebirth, egg popup,
   hatch animation) and breakable effects
+
+## Before publishing (checklist)
+
+1. **Turn off developer money and free rebirths**: in `src/shared/Config.luau`
+   set `Config.DEV_MONEY.Enabled = false` (or keep it on and only list your own
+   user id in `UserIds`; Studio always counts as a developer while it's on).
+2. **Game Settings → Security → Enable Studio Access to API Services**: needed
+   for saving player data and the global leaderboards when testing in Studio.
+3. **Game Settings → Security**: leave "Allow HTTP Requests" and "Allow
+   Third Party Sales/Teleports" off (the game doesn't need them).
+4. **Publish to Roblox** (File → Publish to Roblox), then open the game's
+   settings on the Creator Dashboard: set the age rating questionnaire,
+   max players, and a thumbnail/icon.
+5. Play the published game once and check that coins save after rejoining
+   and that the leaderboards fill in within a minute.

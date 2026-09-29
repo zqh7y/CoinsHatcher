@@ -404,14 +404,17 @@ end
 
 -- Shop upgrades ----------------------------------------------------------------
 -- Shop upgrades are kept forever (rebirth only resets coins and the board).
--- Cost = BaseCost * Growth^level, times SCALE^rebirths like everything else.
+-- Every level has its own fixed price that doesn't change on rebirth. The
+-- levels are spread over the rebirths (Span): level L is priced for the
+-- rebirth you'd be at when buying it, so the price grows x4 (like everything
+-- else per rebirth) every Max/Span levels.
 Config.UPGRADES = {
-	{ Id = "Damage", Name = "Pet Damage", Icon = "⚔️", Max = 15, BaseCost = 600, Growth = 1.55, Info = "Pet damage x20 at max" },
-	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 900, Growth = 1.6, Info = "Luck x1.6 every level (x100 at max)" },
-	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 450, Growth = 1.5, Info = "+2 walk speed" },
-	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 750, Growth = 1.7, Info = "+15% pet run speed" },
-	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 15, BaseCost = 1200, Growth = 1.55, Info = "Coins x10 at max" },
-	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 3, BaseCost = 4500, Growth = 3, Info = "+1 pet you can equip" },
+	{ Id = "Damage", Name = "Pet Damage", Icon = "⚔️", Max = 15, BaseCost = 1500, Span = 10, Info = "Pet damage x20 at max" },
+	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 2500, Span = 10, Info = "Luck x1.6 every level (x100 at max)" },
+	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 1000, Span = 5, Info = "+2 walk speed" },
+	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 2000, Span = 8, Info = "+15% pet run speed" },
+	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 15, BaseCost = 3000, Span = 10, Info = "Coins x10 at max" },
+	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 3, BaseCost = 10000, Span = 9, Info = "+1 pet you can equip" },
 }
 
 -- Incremental "area" upgrades (📈 menu, buy anywhere, reset on rebirth).
@@ -442,8 +445,23 @@ for _, upgrade in ipairs(Config.AREA_UPGRADES) do
 	Config.UPGRADES_BY_ID[upgrade.Id] = upgrade
 end
 
+-- Price of the next level. Shop upgrades (with a Span) have a fixed price
+-- per level; board upgrades (reset on rebirth) scale with your rebirths.
 function Config.upgradeCost(upgrade, level: number, rebirths: number): number
+	if upgrade.Span then
+		local stage = upgrade.Span * level / upgrade.Max -- the rebirth this level is meant for
+		return Config.roundPrice(upgrade.BaseCost * Config.SCALE ^ stage)
+	end
 	return math.floor(upgrade.BaseCost * upgrade.Growth ^ level * Config.SCALE ^ rebirths)
+end
+
+-- Rounds a price to 2 significant digits (1234 -> 1200) so it looks clean.
+function Config.roundPrice(x: number): number
+	if x < 100 then
+		return math.floor(x)
+	end
+	local unit = 10 ^ (math.floor(math.log10(x)) - 1)
+	return math.floor(x / unit + 0.5) * unit
 end
 
 local function level(upgrades, id)
