@@ -15,3 +15,21 @@ rojo serve
 ```
 
 For more help, check out [the Rojo documentation](https://rojo.space/docs).
+## The game
+- **Main area**: your pets run to coins and break them. Stronger pets break coins faster.
+  Every rebirth makes the area's coins tougher and worth more (and changes its color).
+- **Egg area**: hatch pets with coins. Each rebirth unlocks a new egg with stronger pets.
+- **Rebirth**: resets everything except your pets. Max 3 rebirths for now.
+- Use the buttons on the left of the screen to teleport, rebirth and manage pets.
+
+All numbers (costs, coin health, pet power, rarity chances, eggs) are in `src/shared/Config.luau`.
+
+## Code layout
+- `src/shared/Config.luau`: game numbers and formulas
+- `src/server/PlayerData.luau`: saving/loading, coins, rebirths, pets
+- `src/server/World.luau`: builds the main area and egg area
+- `src/server/Coins.luau`: each player's coins in the main area
+- `src/server/Pets.luau`: pets following you and breaking coins
+- `src/server/Eggs.luau`: egg stands and hatching
+- `src/server/init.server.luau`: starts everything, handles teleport/rebirth/equip
+- `src/client/init.client.luau`: screen buttons, pet inventory, hatch popup
