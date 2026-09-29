@@ -118,6 +118,15 @@ function Icons.token(parent, color)
 	star2.ZIndex = 2
 end
 
+-- a music note: two round notes joined by a beam
+function Icons.music(parent, color)
+	shape(parent, color, 0.3, 0.76, 0.3, 0.24, true, -20)
+	shape(parent, color, 0.74, 0.66, 0.3, 0.24, true, -20)
+	shape(parent, color, 0.4, 0.46, 0.1, 0.6, 0.3)
+	shape(parent, color, 0.84, 0.36, 0.1, 0.6, 0.3)
+	shape(parent, color, 0.62, 0.2, 0.54, 0.14, 0.3, -12)
+end
+
 -- a shopping bag with a handle and a star (for the token shop)
 function Icons.shop(parent, color)
 	local handle = Instance.new("Frame")

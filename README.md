@@ -133,6 +133,12 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   - Prices and the token rate are in `Config.TOKEN_SHOP` /
     `Config.TOKENS_PER_MINUTE`.
 
+- **🎵 Music**: calm background tracks (shuffled, soft fade in). The round
+  note button next to the Tokens counter turns it on/off (saved). Add tracks
+  in `Config.MUSIC`: Studio → Toolbox → Creator Store → Audio, filter to
+  Music, pick tracks made by Roblox, right-click → Copy Asset ID, paste it
+  as an `Id`.
+
 All numbers (costs, coin health, pet power, chances, upgrades, pet looks)
 are in `src/shared/Config.luau`.
 

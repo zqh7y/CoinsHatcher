@@ -501,6 +501,22 @@ Config.TOKEN_SHOP = {
 	All = { Key = "All", Name = "ALL PASSES", Icon = "👑", Price = 450 },
 }
 
+-- Background music ---------------------------------------------------------------
+-- Calm tracks that play one after another (shuffled). To add one: in Studio
+-- open the Toolbox → Creator Store → Audio, search e.g. "calm", "lofi",
+-- "cozy" or "ukulele", filter to Music, and use tracks made by Roblox (those
+-- work in every game). Right-click a track → Copy Asset ID and paste it here.
+-- Tracks with Id = 0 are skipped.
+Config.MUSIC = {
+	Volume = 0.3,
+	Tracks = {
+		{ Id = 0, Name = "Main theme" },
+		{ Id = 0, Name = "Chill 2" },
+		{ Id = 0, Name = "Chill 3" },
+		{ Id = 0, Name = "Chill 4" },
+	},
+}
+
 -- Promo codes: typed at the bottom of the shop, once per player.
 --   { "Diamonds", n }  { "Tokens", n }  { "AllPotions", minutes }  { "ExclusiveEggs", n }
 Config.CODES = {

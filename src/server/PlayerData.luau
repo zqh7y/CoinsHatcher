@@ -30,6 +30,7 @@ local DEFAULT = {
 	Tokens = 0, -- earned by playing (1 a minute), spent in the token shop, never reset
 	Passes = {}, -- [pass key] = true for passes bought in the token shop
 	Codes = {}, -- [code] = true for promo codes already redeemed
+	MusicOff = nil, -- true if the player turned the music off
 }
 
 local sessionData = {} -- [player] = data table while they're in game

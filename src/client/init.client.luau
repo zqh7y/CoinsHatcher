@@ -21,6 +21,7 @@ local Gifts = require(script.Gifts)
 local TokenShop = require(script.TokenShop)
 local Fx = require(script.Fx)
 local Transition = require(script.Transition)
+local Music = require(script.Music)
 require(script.Starter)
 require(script.Portals)
 require(script.AreaUpgrades)
@@ -206,6 +207,43 @@ task.spawn(function()
 		end
 	end
 end)
+
+-- Music on/off: a round button next to the token counter
+local musicButton = Instance.new("TextButton")
+musicButton.Position = UDim2.fromOffset(254, 172)
+musicButton.Size = UDim2.fromOffset(48, 48)
+musicButton.BackgroundColor3 = Ui.COLORS.Panel
+musicButton.Text = ""
+musicButton.AutoButtonColor = true
+musicButton.Parent = Ui.gui
+Ui.corner(musicButton, 0.5)
+local musicStroke = Ui.stroke(musicButton, Ui.COLORS.Line, 1.5)
+Ui.bounce(musicButton)
+local musicIcon = Instance.new("Frame")
+musicIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+musicIcon.Position = UDim2.fromScale(0.5, 0.5)
+musicIcon.Size = UDim2.fromScale(0.58, 0.58)
+musicIcon.BackgroundTransparency = 1
+musicIcon.Parent = musicButton
+local musicSlash = Instance.new("Frame")
+musicSlash.AnchorPoint = Vector2.new(0.5, 0.5)
+musicSlash.Position = UDim2.fromScale(0.5, 0.5)
+musicSlash.Size = UDim2.new(0.8, 0, 0, 4)
+musicSlash.Rotation = -45
+musicSlash.BackgroundColor3 = Ui.COLORS.Red
+musicSlash.ZIndex = 3
+musicSlash.Parent = musicButton
+Ui.corner(musicSlash, 0.5)
+local MUSIC_COLOR = Color3.fromRGB(95, 110, 255)
+local function showMusic(on)
+	Ui.clear(musicIcon)
+	Icons.music(musicIcon, if on then MUSIC_COLOR else Ui.COLORS.Disabled)
+	musicSlash.Visible = not on
+	musicStroke.Color = if on then MUSIC_COLOR:Lerp(Color3.new(1, 1, 1), 0.5) else Ui.COLORS.Line
+end
+showMusic(Music.isOn())
+Music.Changed.Event:Connect(showMusic)
+musicButton.Activated:Connect(Music.toggle)
 
 -- Rebirth reminder: a glowing button under the counters when you can rebirth --
 

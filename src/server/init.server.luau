@@ -45,6 +45,7 @@ remote("RemoteFunction", "BuyUpgrade") -- client -> server: upgrade id, returns 
 remote("RemoteFunction", "BuyPerk") -- client -> server: perk id (costs diamonds)
 remote("RemoteFunction", "BuyMerchant") -- client -> server: offer slot (pets for diamonds)
 remote("RemoteFunction", "SetAutoBuy") -- client -> server: on (the board's Auto Buy switch)
+local SetMusic = remote("RemoteEvent", "SetMusic") -- client -> server: music on/off (saved)
 local SetGuideStep = remote("RemoteEvent", "SetGuideStep") -- client -> server: new-player guide step (0 = done)
 remote("RemoteFunction", "BuyBoost") -- client -> server: potion id (costs diamonds)
 remote("RemoteFunction", "BuyTokenItem") -- client -> server: "Product" | "Pass", key (see Config.TOKEN_SHOP), returns ok, message
@@ -72,6 +73,13 @@ SetGuideStep.OnServerEvent:Connect(function(player, step)
 	local data = PlayerData.get(player)
 	if data and typeof(step) == "number" and step == math.floor(step) and step >= 0 and step <= 20 then
 		data.Guide = step
+	end
+end)
+
+SetMusic.OnServerEvent:Connect(function(player, on)
+	local data = PlayerData.get(player)
+	if data and typeof(on) == "boolean" then
+		data.MusicOff = if on then nil else true
 	end
 end)
 
