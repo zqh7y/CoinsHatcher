@@ -27,9 +27,9 @@ local DEFAULT = {
 	AutoDelete = {}, -- [pet name] = true: hatched copies are deleted right away
 	Guide = 1, -- step of the new-player guide (0 = finished or skipped)
 	Rarest = nil, -- { Pet = name, Odds = N } the rarest pet ever hatched (1 in N)
-	Passes = {}, -- [pass key] = true for owned gamepasses (see Config.ROBUX)
+	Tokens = 0, -- earned by playing (1 a minute), spent in the token shop, never reset
+	Passes = {}, -- [pass key] = true for passes bought in the token shop
 	Codes = {}, -- [code] = true for promo codes already redeemed
-	Receipts = {}, -- [purchase id] = time, Robux purchases already given
 }
 
 local sessionData = {} -- [player] = data table while they're in game
@@ -54,6 +54,10 @@ local function showDiamonds(player, diamonds)
 	player:SetAttribute("Diamonds", diamonds)
 end
 
+local function showTokens(player, tokens)
+	player:SetAttribute("Tokens", tokens)
+end
+
 local function load(player)
 	local ok, saved = pcall(function()
 		return store:GetAsync("user_" .. player.UserId)
@@ -73,12 +77,12 @@ local function load(player)
 	data.Boosts = {}
 	data.Passes = {}
 	data.Codes = {}
-	data.Receipts = {}
 	if ok and saved then
 		for k, v in pairs(saved) do
 			data[k] = v
 		end
 	end
+	data.Receipts = nil -- from when the shop used Robux
 	-- older saves: drop upgrades that aren't sold any more (their levels would
 	-- otherwise keep giving hidden bonuses)
 	for id in pairs(data.Upgrades) do
@@ -108,6 +112,7 @@ local function load(player)
 	if PlayerData.isDev(player) then
 		data.Coins = math.max(data.Coins, Config.DEV_MONEY.Coins)
 		data.Diamonds = math.max(data.Diamonds, Config.DEV_MONEY.Diamonds)
+		data.Tokens = math.max(data.Tokens, Config.DEV_MONEY.Tokens)
 		-- huge pets to look at (once each)
 		for _, huge in ipairs(Config.DEV_MONEY.Huges or {}) do
 			if Config.PETS[huge] and not table.find(data.Pets, huge) then
@@ -139,6 +144,7 @@ local function load(player)
 	stats.Parent = player
 	showCoins(player, data.Coins)
 	showDiamonds(player, data.Diamonds)
+	showTokens(player, data.Tokens)
 
 	if player.Parent then
 		sessionData[player] = data
@@ -146,10 +152,10 @@ local function load(player)
 	end
 end
 
-local function save(player): boolean
+local function save(player)
 	local data = sessionData[player]
 	if not data or loadFailed[player] then
-		return false
+		return
 	end
 	local ok, err = pcall(function()
 		store:SetAsync("user_" .. player.UserId, data)
@@ -157,12 +163,6 @@ local function save(player): boolean
 	if not ok then
 		warn("Save failed for", player.Name, err)
 	end
-	return ok
-end
-
--- Saves right away (after a Robux purchase). Returns true if it worked.
-function PlayerData.saveNow(player): boolean
-	return save(player)
 end
 
 -- Developers (in Studio, or user ids in Config.DEV_MONEY) get test money and
@@ -202,6 +202,15 @@ function PlayerData.addDiamonds(player, amount)
 	end
 	data.Diamonds = math.floor(data.Diamonds + amount)
 	showDiamonds(player, data.Diamonds)
+end
+
+function PlayerData.addTokens(player, amount)
+	local data = sessionData[player]
+	if not data then
+		return
+	end
+	data.Tokens = math.floor(data.Tokens + amount)
+	showTokens(player, data.Tokens)
 end
 
 function PlayerData.setPerk(player, id, level)

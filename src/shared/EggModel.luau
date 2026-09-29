@@ -30,7 +30,7 @@ local STYLES = {
 }
 
 -- An egg's settings: a number is an egg in Config.EGGS, "Exclusive" is the
--- Robux shop's Exclusive Egg.
+-- token shop's Exclusive Egg.
 local function eggInfo(eggIndex)
 	return if eggIndex == "Exclusive" then Config.EXCLUSIVE_EGG else Config.EGGS[eggIndex]
 end

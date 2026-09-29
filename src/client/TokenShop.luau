@@ -1,8 +1,9 @@
--- The Robux shop (the Shop button on the left):
---   🥚 Exclusive Egg - pets that grow with you (Robux, 1 / 3 / 10 eggs)
---   👑 All Gamepasses + the 4 gamepasses (yours forever)
+-- The token shop (the Shop button on the left). The game is free to play:
+-- everything here costs Tokens, which you earn just by playing (1 a minute).
+--   🥚 Exclusive Egg - pets that grow with you (1 / 3 / 10 eggs)
+--   👑 All Passes + the 4 passes (yours forever)
 --   🎟️ Promo codes at the bottom
--- Prices and ids are in Config.ROBUX; the server does the buying.
+-- Prices are in Config.TOKEN_SHOP; the server does the buying.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -14,7 +15,7 @@ local Viewport = require(script.Parent.Viewport)
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 
-local RobuxShop = {}
+local TokenShop = {}
 
 local PINK = Color3.fromRGB(255, 80, 170)
 local PURPLE = Color3.fromRGB(150, 80, 255)
@@ -22,6 +23,8 @@ local BLUE = Color3.fromRGB(60, 170, 255)
 local GOLD = Color3.fromRGB(255, 190, 40)
 local WHITE = Color3.new(1, 1, 1)
 local NEON = Config.EXCLUSIVE_COLOR
+local TOKEN = Config.TOKEN_ICON
+local SHOP = Config.TOKEN_SHOP
 local TIER_COLORS = {
 	Color3.fromRGB(150, 160, 185),
 	Color3.fromRGB(70, 200, 110),
@@ -93,7 +96,7 @@ local function sparkles(parent, count, seed)
 	end
 end
 
--- A big glossy Robux price button ("R$ 39"). `tag` is a small ribbon on top.
+-- A big glossy price button ("🎟️ 39"). `tag` is a small ribbon on top.
 local function priceButton(parent, top, price, color, tag)
 	local b = Ui.button(parent, "", color, { Size = UDim2.fromScale(1, 1) })
 	b.Text = ""
@@ -106,7 +109,7 @@ local function priceButton(parent, top, price, color, tag)
 	})
 	local bottom = Ui.label(b, {
 		Name = "Bottom",
-		Text = "R$ " .. price,
+		Text = TOKEN .. " " .. price,
 		TextColor3 = WHITE,
 		Position = UDim2.fromScale(0, 0.44),
 		Size = UDim2.fromScale(1, 0.56),
@@ -132,20 +135,35 @@ local function priceButton(parent, top, price, color, tag)
 	return b
 end
 
+-- Buys with tokens (the server checks the price) and shows how it went.
+local buying = false
+local function buy(kind, key)
+	if buying then
+		return
+	end
+	buying = true
+	local ok, message = remotes.BuyTokenItem:InvokeServer(kind, key)
+	Ui.toast(message or "", if ok then Ui.COLORS.Green else Ui.COLORS.Red)
+	if ok then
+		Fx.confetti(40)
+	end
+	buying = false
+end
+
 -- 1) the welcome banner -------------------------------------------------------
 local hero = frame(list, { Size = UDim2.new(1, 0, 0, 74), LayoutOrder = 1, BackgroundColor3 = WHITE })
 Ui.corner(hero, 18)
 gradient(hero, { PINK, PURPLE, BLUE }, 0)
 sparkles(hero, 14, 7)
 Ui.label(hero, {
-	Text = "✨ Welcome to the Shop! ✨",
+	Text = "✨ Earn 1 " .. TOKEN .. " every minute you play! ✨",
 	TextColor3 = WHITE,
 	TextStrokeTransparency = 0.6,
 	Position = UDim2.fromOffset(16, 8),
 	Size = UDim2.new(1, -32, 0, 34),
 })
-Ui.label(hero, {
-	Text = "Every purchase helps Pet Park grow 💜",
+local balance = Ui.label(hero, {
+	Text = "",
 	Font = Ui.FONT_BODY,
 	TextColor3 = WHITE,
 	Position = UDim2.fromOffset(16, 44),
@@ -192,7 +210,7 @@ local eggView = frame(eggSide, {
 local _, eggModel = Viewport.egg(eggView, "Exclusive")
 Viewport.spin(eggModel, 0.8)
 local limitedTag = Ui.label(eggSide, {
-	Text = "🔥 ROBUX ONLY",
+	Text = "✨ EXCLUSIVE",
 	TextColor3 = WHITE,
 	AnchorPoint = Vector2.new(0.5, 1),
 	Position = UDim2.new(0.5, 0, 1, -16),
@@ -287,8 +305,8 @@ buyLayout.FillDirection = Enum.FillDirection.Horizontal
 buyLayout.Padding = UDim.new(0, 10)
 buyLayout.Parent = buyRow
 
-local singlePrice = Config.ROBUX.Products[1].Price
-for order, product in ipairs(Config.ROBUX.Products) do
+local singlePrice = SHOP.Products[1].Price
+for order, product in ipairs(SHOP.Products) do
 	local cell = frame(buyRow, {
 		Size = UDim2.new(1 / 3, -7, 1, 0),
 		BackgroundTransparency = 1,
@@ -304,22 +322,22 @@ for order, product in ipairs(Config.ROBUX.Products) do
 		if save > 0 then "SAVE " .. save .. "%" else nil
 	)
 	b.Activated:Connect(function()
-		remotes.BuyRobux:FireServer("Product", product.Key)
+		buy("Product", product.Key)
 	end)
 end
 
 -- 3) gamepasses ----------------------------------------------------------------
 Ui.label(list, {
-	Text = "⭐ GAMEPASSES  ·  yours forever!",
+	Text = "⭐ PASSES  ·  yours forever!",
 	TextXAlignment = Enum.TextXAlignment.Left,
 	Size = UDim2.new(1, 0, 0, 26),
 	LayoutOrder = 3,
 })
 
 -- the big gold "ALL GAMEPASSES" deal
-local all = Config.ROBUX.All
+local all = SHOP.All
 local allFull = 0
-for _, pass in ipairs(Config.ROBUX.Passes) do
+for _, pass in ipairs(SHOP.Passes) do
 	allFull += pass.Price
 end
 local allCard = frame(list, { Size = UDim2.new(1, 0, 0, 112), LayoutOrder = 4, BackgroundColor3 = WHITE })
@@ -351,7 +369,7 @@ Ui.label(allCard, {
 	Size = UDim2.new(0.62, -106, 0, 34),
 })
 local icons = {}
-for _, pass in ipairs(Config.ROBUX.Passes) do
+for _, pass in ipairs(SHOP.Passes) do
 	table.insert(icons, pass.Icon .. " " .. pass.Name)
 end
 Ui.label(allCard, {
@@ -370,7 +388,7 @@ local allRight = frame(allCard, {
 	BackgroundTransparency = 1,
 })
 local allWas = Ui.label(allRight, {
-	Text = ("was R$ %d  ·  SAVE R$ %d"):format(allFull, allFull - all.Price),
+	Text = ("was %s %d  ·  SAVE %d"):format(TOKEN, allFull, allFull - all.Price),
 	TextColor3 = Color3.fromRGB(120, 50, 0),
 	Size = UDim2.new(1, 0, 0, 18),
 })
@@ -381,7 +399,7 @@ local allButtonHolder = frame(allRight, {
 })
 local allButton = priceButton(allButtonHolder, "GET ALL 4", all.Price, PINK)
 allButton.Activated:Connect(function()
-	remotes.BuyRobux:FireServer("Pass", all.Key)
+	buy("Pass", all.Key)
 end)
 local allOwned = Ui.label(allButtonHolder, {
 	Text = "OWNED ✓",
@@ -402,7 +420,7 @@ passLayout.SortOrder = Enum.SortOrder.LayoutOrder
 passLayout.Parent = passGrid
 
 local passCards = {}
-for order, pass in ipairs(Config.ROBUX.Passes) do
+for order, pass in ipairs(SHOP.Passes) do
 	local card = frame(passGrid, { LayoutOrder = order, BackgroundColor3 = WHITE })
 	Ui.corner(card, 18)
 	Ui.stroke(card, pass.Color, 2.5)
@@ -444,7 +462,7 @@ for order, pass in ipairs(Config.ROBUX.Passes) do
 	})
 	local b = priceButton(holder, "BUY", pass.Price, Color3.fromRGB(35, 190, 120))
 	b.Activated:Connect(function()
-		remotes.BuyRobux:FireServer("Pass", pass.Key)
+		buy("Pass", pass.Key)
 	end)
 	local owned = Ui.label(holder, {
 		Text = "OWNED ✓",
@@ -579,7 +597,24 @@ RunService.RenderStepped:Connect(function(dt)
 	end
 end)
 
-RobuxShop.toggle = panel.toggle
-RobuxShop.open = panel.open
+-- your tokens and a countdown to the next one
+local player = game:GetService("Players").LocalPlayer
+task.spawn(function()
+	while true do
+		if panel.isOpen() then
+			local left = math.max(0, math.ceil((player:GetAttribute("NextToken") or 0) - workspace:GetServerTimeNow()))
+			balance.Text = ("You have %s %s  ·  next token in %d:%02d"):format(
+				TOKEN,
+				Config.formatNumber(player:GetAttribute("Tokens") or 0),
+				left // 60,
+				left % 60
+			)
+		end
+		task.wait(0.25)
+	end
+end)
 
-return RobuxShop
+TokenShop.toggle = panel.toggle
+TokenShop.open = panel.open
+
+return TokenShop

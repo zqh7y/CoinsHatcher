@@ -18,7 +18,7 @@ local Index = require(script.Index)
 local Rebirth = require(script.Rebirth)
 local Hatch = require(script.Hatch)
 local Gifts = require(script.Gifts)
-local RobuxShop = require(script.RobuxShop)
+local TokenShop = require(script.TokenShop)
 local Fx = require(script.Fx)
 local Transition = require(script.Transition)
 require(script.Starter)
@@ -37,13 +37,13 @@ require(script.WorldFx)
 local player = Players.LocalPlayer
 local EGG_CENTER = Vector3.new(0, 0, 1000) -- same as World.EGG_CENTER on the server
 
--- Coin + diamond counters (top left) ------------------------------------------
+-- Coin, diamond and token counters (top left) ------------------------------------------
 -- Sleek white pills with a glossy icon badge, a rolling number and a live
 -- "+X/s" income rate. A shine sweeps across them now and then.
 
 local hud = Instance.new("Frame")
 hud.Position = UDim2.fromOffset(14, 60)
-hud.Size = UDim2.fromOffset(230, 110)
+hud.Size = UDim2.fromOffset(230, 166)
 hud.BackgroundTransparency = 1
 hud.Parent = Ui.gui
 
@@ -162,6 +162,8 @@ end
 
 local coinText, coinBox, coinRate, coinStroke = counter(Icons.coin, Ui.COLORS.Gold, 0)
 local diamondText, diamondBox, diamondRate, diamondStroke = counter(Icons.gem, Ui.COLORS.Gem, 56)
+local TOKEN_COLOR = Color3.fromRGB(175, 95, 255)
+local tokenText, _, tokenRate, tokenStroke = counter(Icons.token, TOKEN_COLOR, 112)
 Fx.targets.Coins = coinBox
 Fx.targets.Diamonds = diamondBox
 
@@ -175,6 +177,24 @@ player:GetAttributeChangedSignal("Coins"):Connect(rollCoins)
 player:GetAttributeChangedSignal("Diamonds"):Connect(rollDiamonds)
 incomeRate("Coins", coinRate, coinStroke, Ui.COLORS.Gold)
 incomeRate("Diamonds", diamondRate, diamondStroke, Ui.COLORS.Gem)
+
+-- tokens: 1 for every minute you play; the pill counts down to the next one
+local rollTokens = rollingNumber(tokenText, function()
+	return player:GetAttribute("Tokens") or 0
+end)
+player:GetAttributeChangedSignal("Tokens"):Connect(function()
+	rollTokens()
+	tokenStroke.Color = TOKEN_COLOR
+	tokenStroke.Thickness = 2.5
+	TweenService:Create(tokenStroke, TweenInfo.new(0.8), { Color = Ui.COLORS.Line, Thickness = 1.5 }):Play()
+end)
+task.spawn(function()
+	while true do
+		local left = math.max(0, math.ceil((player:GetAttribute("NextToken") or 0) - workspace:GetServerTimeNow()))
+		tokenRate.Text = ("%d:%02d"):format(left // 60, left % 60)
+		task.wait(0.5)
+	end
+end)
 
 -- the shine sweeps across both pills every few seconds
 task.spawn(function()
@@ -190,7 +210,7 @@ end)
 -- Rebirth reminder: a glowing button under the counters when you can rebirth --
 
 local reminder = Instance.new("TextButton")
-reminder.Position = UDim2.fromOffset(14, 176)
+reminder.Position = UDim2.fromOffset(14, 232)
 reminder.Size = UDim2.fromOffset(230, 44)
 reminder.BackgroundColor3 = Color3.new(1, 1, 1)
 reminder.Text = ""
@@ -377,10 +397,10 @@ giftsCell.LayoutOrder = 5
 gifts.Activated:Connect(Gifts.toggle)
 Gifts.attach(gifts)
 
--- the Robux shop, with a little bouncing "NEW" tag so it gets noticed
+-- the token shop, with a little bouncing "NEW" tag so it gets noticed
 local shop, _, _, shopCell = sideButton(Icons.shop, "Shop", Color3.fromRGB(255, 80, 170))
 shopCell.LayoutOrder = 6
-shop.Activated:Connect(RobuxShop.toggle)
+shop.Activated:Connect(TokenShop.toggle)
 local shopTag = Ui.label(shop, {
 	Text = "NEW",
 	TextColor3 = Ui.COLORS.White,

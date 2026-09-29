@@ -15,7 +15,7 @@ local Inventory = require(script.Inventory)
 local Gifts = require(script.Gifts)
 local Pickups = require(script.Pickups)
 local Leaderboards = require(script.Leaderboards)
-local Robux = require(script.Robux)
+local TokenShop = require(script.TokenShop)
 
 -- Remotes the client talks to
 local remotes = Instance.new("Folder")
@@ -47,7 +47,7 @@ remote("RemoteFunction", "BuyMerchant") -- client -> server: offer slot (pets fo
 remote("RemoteFunction", "SetAutoBuy") -- client -> server: on (the board's Auto Buy switch)
 local SetGuideStep = remote("RemoteEvent", "SetGuideStep") -- client -> server: new-player guide step (0 = done)
 remote("RemoteFunction", "BuyBoost") -- client -> server: potion id (costs diamonds)
-remote("RemoteEvent", "BuyRobux") -- client -> server: "Product" | "Pass", key (see Config.ROBUX)
+remote("RemoteFunction", "BuyTokenItem") -- client -> server: "Product" | "Pass", key (see Config.TOKEN_SHOP), returns ok, message
 remote("RemoteFunction", "RedeemCode") -- client -> server: promo code, returns ok, message
 local ChooseStarter = remote("RemoteFunction", "ChooseStarter") -- client -> server: "Dog" | "Cat"
 
@@ -65,7 +65,7 @@ Inventory.start(remotes)
 Gifts.start(remotes)
 Pickups.start(remotes)
 Leaderboards.start()
-Robux.start(remotes)
+TokenShop.start(remotes)
 
 -- The new-player guide remembers which step you're on (0 = done or skipped)
 SetGuideStep.OnServerEvent:Connect(function(player, step)

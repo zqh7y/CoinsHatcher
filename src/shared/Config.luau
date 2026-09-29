@@ -113,6 +113,7 @@ Config.DEV_MONEY = {
 	Enabled = true,
 	Coins = 1e15, -- 1Qd
 	Diamonds = 1e9, -- 1B
+	Tokens = 100000,
 	UserIds = {}, -- e.g. { 123456789 } to also get it in the live game
 	Huges = { "Huge Mythic Dragon", "Huge Present" }, -- developers also get these once, to see them
 }
@@ -438,7 +439,7 @@ for _, petName in ipairs(basePets) do
 	end
 end
 
--- Exclusive pets (the Robux shop's Exclusive Egg) --------------------------
+-- Exclusive pets (the token shop's Exclusive Egg) --------------------------
 -- They follow your progress: each design is a set % as strong as your best
 -- pet (Strength) with its chance in %. Every design comes in levels (power
 -- x1.25 per level, "Neon Dragon Lv40") and you get the level closest to that
@@ -487,32 +488,34 @@ function Config.rollExclusive(data): string
 	return Config.exclusivePet(Config.rollWeighted(Config.EXCLUSIVE_PETS), Config.bestPetPower(data))
 end
 
--- Robux shop -----------------------------------------------------------------
--- Make these on the Creator Dashboard (your game > Monetization) and paste
--- their ids here. Id = 0 means "not made yet": in Studio the buttons then
--- give the item for free so you can test; in the live game they're off.
-Config.ROBUX = {
-	-- Developer Products (can be bought again and again)
+-- Token shop -----------------------------------------------------------------
+-- The game is free to play: nothing is sold for Robux. Instead you earn
+-- Tokens just by playing (TOKENS_PER_MINUTE, counted while you're in the
+-- game) and spend them in the Shop.
+Config.TOKENS_PER_MINUTE = 1
+Config.TOKEN_ICON = "🎟️"
+Config.TOKEN_SHOP = {
+	-- Exclusive Eggs (buy as many as you like)
 	Products = {
-		{ Id = 0, Key = "Egg1", Eggs = 1, Price = 39 },
-		{ Id = 0, Key = "Egg3", Eggs = 3, Price = 100 },
-		{ Id = 0, Key = "Egg10", Eggs = 10, Price = 339 },
+		{ Key = "Egg1", Eggs = 1, Price = 39 },
+		{ Key = "Egg3", Eggs = 3, Price = 100 },
+		{ Key = "Egg10", Eggs = 10, Price = 339 },
 	},
-	-- Game Passes (bought once, kept forever)
+	-- Passes (bought once, kept forever)
 	Passes = {
-		{ Id = 0, Key = "HatchSpeed", Name = "2x Hatch Speed", Icon = "⚡", Price = 99, Info = "Eggs hatch twice as fast", Color = Color3.fromRGB(255, 180, 40) },
-		{ Id = 0, Key = "Mutation", Name = "2x Mutations", Icon = "🌈", Price = 99, Info = "Shiny, Rainbow & Galaxy twice as often", Color = Color3.fromRGB(255, 100, 190) },
-		{ Id = 0, Key = "MoreEggs", Name = "+6 Eggs", Icon = "🥚", Price = 199, Info = "Open 6 more eggs at once", Color = Color3.fromRGB(80, 190, 255) },
-		{ Id = 0, Key = "Luck", Name = "2x Luck", Icon = "🍀", Price = 199, Info = "Double luck on every egg", Color = Color3.fromRGB(80, 210, 110) },
+		{ Key = "HatchSpeed", Name = "2x Hatch Speed", Icon = "⚡", Price = 99, Info = "Eggs hatch twice as fast", Color = Color3.fromRGB(255, 180, 40) },
+		{ Key = "Mutation", Name = "2x Mutations", Icon = "🌈", Price = 99, Info = "Shiny, Rainbow & Galaxy twice as often", Color = Color3.fromRGB(255, 100, 190) },
+		{ Key = "MoreEggs", Name = "+6 Eggs", Icon = "🥚", Price = 199, Info = "Open 6 more eggs at once", Color = Color3.fromRGB(80, 190, 255) },
+		{ Key = "Luck", Name = "2x Luck", Icon = "🍀", Price = 199, Info = "Double luck on every egg", Color = Color3.fromRGB(80, 210, 110) },
 	},
 	-- gives every pass above (not the Exclusive Eggs)
-	All = { Id = 0, Key = "All", Name = "ALL GAMEPASSES", Icon = "👑", Price = 450 },
+	All = { Key = "All", Name = "ALL PASSES", Icon = "👑", Price = 450 },
 }
 
 -- Promo codes: typed at the bottom of the shop, once per player.
---   { "Diamonds", n }  { "AllPotions", minutes }  { "ExclusiveEggs", n }
+--   { "Diamonds", n }  { "Tokens", n }  { "AllPotions", minutes }  { "ExclusiveEggs", n }
 Config.CODES = {
-	RELEASE = { Text = "+2,500 💎, 15 min of every potion and a free Exclusive Egg!", Rewards = { { "Diamonds", 2500 }, { "AllPotions", 15 }, { "ExclusiveEggs", 1 } } },
+	RELEASE = { Text = "+2,500 💎, +50 🎟️, 15 min of every potion and a free Exclusive Egg!", Rewards = { { "Diamonds", 2500 }, { "Tokens", 50 }, { "AllPotions", 15 }, { "ExclusiveEggs", 1 } } },
 }
 
 local function hasPass(data, key)

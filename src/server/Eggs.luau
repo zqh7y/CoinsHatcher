@@ -145,7 +145,7 @@ function Eggs.giveSpecial(player, petName)
 	giveHatch(player, { petName })
 end
 
--- Opens Exclusive Eggs (bought with Robux or from a code). They always go in,
+-- Opens Exclusive Eggs (bought with tokens or from a code). They always go in,
 -- even if the inventory is full.
 function Eggs.giveExclusive(player, count)
 	local data = PlayerData.get(player)

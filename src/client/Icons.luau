@@ -109,7 +109,16 @@ function Icons.gem(parent, color)
 	shine.BackgroundTransparency = 0.35
 end
 
--- a shopping bag with a handle and a star (for the Robux shop)
+-- a ticket-like token: a round coin with a white star (Tokens)
+function Icons.token(parent, color)
+	shape(parent, color, 0.5, 0.5, 0.84, 0.84, true)
+	local star1 = shape(parent, Color3.new(1, 1, 1), 0.5, 0.5, 0.36, 0.36, 0.15, 0)
+	star1.ZIndex = 2
+	local star2 = shape(parent, Color3.new(1, 1, 1), 0.5, 0.5, 0.36, 0.36, 0.15, 45)
+	star2.ZIndex = 2
+end
+
+-- a shopping bag with a handle and a star (for the token shop)
 function Icons.shop(parent, color)
 	local handle = Instance.new("Frame")
 	handle.AnchorPoint = Vector2.new(0.5, 0.5)

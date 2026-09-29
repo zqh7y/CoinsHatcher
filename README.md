@@ -118,20 +118,23 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Rebirth**: big reward cards (x4 coin value / +300%, diamonds, the new
   egg, 100% pets kept) and a coin progress bar. Resets coins and the upgrade board; keeps pets, index, diamonds and perks. 10 rebirths, each unlocking a new egg (11 eggs, plus the Release Egg).
 
-- **🛒 Robux shop** (Shop button on the left):
-  - **Exclusive Egg** (1 for R$ 39, 3 for R$ 100, 10 for R$ 339): its pets
-    grow with you. 50% a pet 50% as strong as your best pet, 30% → 75%,
+- **🎟️ Tokens and the token shop** (free to play, nothing sold for Robux):
+  you earn 1 token for every minute you play (the Tokens counter under the
+  diamonds counts down to the next one). Spend them in the Shop (button on the
+  left):
+  - **Exclusive Egg** (1 for 39 🎟️, 3 for 100, 10 for 339): its pets grow
+    with you. 50% a pet 50% as strong as your best pet, 30% → 75%,
     15% → 100%, 4% → 125%, 1% → 200% (Neon Kitty, Puppy, Bunny, Fox, Dragon,
     in levels like "Neon Dragon Lv40"). No mutations, never sold by the
     merchant; they always go in, even with a full inventory.
-  - **Gamepasses**: 2x Hatch Speed (R$ 99), 2x Mutations (R$ 99), +6 Eggs
-    per hatch (R$ 199), 2x Luck (R$ 199), and **ALL GAMEPASSES** (R$ 450)
-    with all four (not the Exclusive Eggs).
+  - **Passes** (kept forever): 2x Hatch Speed (99 🎟️), 2x Mutations (99),
+    +6 Eggs per hatch (199), 2x Luck (199), and **ALL PASSES** (450) with all
+    four (not the Exclusive Eggs).
   - **Promo codes** at the bottom, once per player. `RELEASE` gives
-    2,500 💎, 15 minutes of every potion and a free Exclusive Egg. Add more
-    in `Config.CODES`.
-  - Ids and prices are in `Config.ROBUX`. While an id is 0 the button gives
-    the item for free in Studio (to test) and says "Coming soon" live.
+    2,500 💎, 50 🎟️, 15 minutes of every potion and a free Exclusive Egg.
+    Add more in `Config.CODES`.
+  - Prices and the token rate are in `Config.TOKEN_SHOP` /
+    `Config.TOKENS_PER_MINUTE`.
 
 All numbers (costs, coin health, pet power, chances, upgrades, pet looks)
 are in `src/shared/Config.luau`.
@@ -151,7 +154,7 @@ are in `src/shared/Config.luau`.
 - `src/server/Pickups.luau`: combos and boost orbs
 - `src/server/Leaderboards.luau`: the three leaderboards in the main area
 - `src/server/Access.luau`: the coming-soon lock (who can play before release)
-- `src/server/Robux.luau`: Robux purchases (Exclusive Eggs, gamepasses) and promo codes
+- `src/server/TokenShop.luau`: tokens for playtime, the token shop (Exclusive Eggs, passes) and promo codes
 - `src/server/init.server.luau`: starts everything, handles teleport/rebirth/equip
 - `src/client/`: UI (buttons, pets, shop, index, rebirth, egg popup,
   hatch animation) and breakable effects
@@ -176,10 +179,3 @@ are in `src/shared/Config.luau`.
    max players, and a thumbnail/icon.
 5. Play the published game once and check that coins save after rejoining
    and that the leaderboards fill in within a minute.
-6. **Robux shop**: on the Creator Dashboard (your game → Monetization) create
-   - 3 **Developer Products**: "Exclusive Egg" R$ 39, "3 Exclusive Eggs"
-     R$ 100, "10 Exclusive Eggs" R$ 339;
-   - 5 **Passes**: 2x Hatch Speed R$ 99, 2x Mutations R$ 99, +6 Eggs R$ 199,
-     2x Luck R$ 199, All Gamepasses R$ 450 (put them on sale).
-   Then paste each one's id into `Config.ROBUX` (the `Id = 0` spots) and
-   publish again.
