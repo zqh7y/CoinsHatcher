@@ -177,4 +177,10 @@ task.spawn(function()
 	end
 end)
 
+-- What an upgrade gives at `level` (e.g. "x4.0" or "+20%"), for the shop.
+function Boosts.upgradeText(id, level)
+	local f = TEXT[id]
+	return if f then f({ [id] = level }) else nil
+end
+
 return Boosts

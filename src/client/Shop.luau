@@ -8,6 +8,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
 local State = require(script.Parent.State)
 local Fx = require(script.Parent.Fx)
+local Boosts = require(script.Parent.Boosts)
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local player = Players.LocalPlayer
@@ -105,8 +106,8 @@ local function row(order, item)
 	Ui.label(r, {
 		Text = item.Info,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Font = Ui.FONT_BODY,
-		TextColor3 = Ui.COLORS.SubText,
+		Font = if item.InfoColor then Ui.FONT else Ui.FONT_BODY,
+		TextColor3 = item.InfoColor or Ui.COLORS.SubText,
 		Size = UDim2.new(1, -230, 0, 22),
 		Position = UDim2.fromOffset(76, 42),
 	})
@@ -159,11 +160,20 @@ local function upgradesTab(data)
 	for order, upgrade in ipairs(Config.UPGRADES) do
 		local level = data.Upgrades[upgrade.Id] or 0
 		local cost = Config.upgradeCost(upgrade, level, data.Rebirths)
+		-- show the real value: "x2.5 ➜ x4.0", or "x100 MAX" when maxed
+		local now = Boosts.upgradeText(upgrade.Id, level)
+		local info = upgrade.Info
+		if now then
+			info = if level >= upgrade.Max
+				then now .. "  MAX"
+				else now .. "  ➜  " .. Boosts.upgradeText(upgrade.Id, level + 1)
+		end
 		row(order, {
 			Icon = upgrade.Icon,
 			Name = upgrade.Name,
 			Extra = if upgrade.Max > 1 then ("Lv %d/%d"):format(level, upgrade.Max) else nil,
-			Info = upgrade.Info,
+			Info = info,
+			InfoColor = if now then Ui.COLORS.Green else nil,
 			Level = level,
 			Max = upgrade.Max,
 			PipColor = Ui.COLORS.Gold,

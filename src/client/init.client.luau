@@ -451,7 +451,7 @@ local function updateWorld()
 	end
 	local coinZone = mainArea and mainArea:FindFirstChild("CoinZone")
 	if coinZone then
-		coinZone.Color = Config.areaColor(data.Rebirths):Lerp(Color3.new(1, 1, 1), 0.35)
+		coinZone.Color = Config.areaColor(data.Rebirths):Lerp(Color3.new(1, 1, 1), 0.2)
 	end
 	-- grass patches and tufts follow the floor color (darker/lighter shades)
 	local floorColor = Config.areaColor(data.Rebirths)

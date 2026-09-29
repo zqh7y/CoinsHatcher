@@ -43,18 +43,18 @@ function Config.rollBreakable(data): number
 end
 
 -- Floor color of the main area at each rebirth level (last one repeats).
-Config.AREA_COLORS = {
+Config.AREA_COLORS = { -- kept mid-bright like the grass so nothing glares
 	Color3.fromRGB(120, 210, 90), -- grass
-	Color3.fromRGB(250, 215, 130), -- sand
-	Color3.fromRGB(215, 235, 255), -- snow
-	Color3.fromRGB(255, 180, 215), -- candy
-	Color3.fromRGB(120, 200, 240), -- ocean
+	Color3.fromRGB(215, 175, 90), -- sand
+	Color3.fromRGB(140, 185, 225), -- ice
+	Color3.fromRGB(235, 130, 185), -- candy
+	Color3.fromRGB(70, 160, 215), -- ocean
 	Color3.fromRGB(70, 160, 90), -- jungle
-	Color3.fromRGB(255, 170, 110), -- sunset
-	Color3.fromRGB(190, 160, 255), -- magic
-	Color3.fromRGB(150, 235, 200), -- mint
-	Color3.fromRGB(90, 80, 170), -- space
-	Color3.fromRGB(255, 215, 90), -- gold
+	Color3.fromRGB(240, 140, 80), -- sunset
+	Color3.fromRGB(160, 120, 235), -- magic
+	Color3.fromRGB(90, 200, 160), -- mint
+	Color3.fromRGB(100, 90, 190), -- space
+	Color3.fromRGB(230, 180, 50), -- gold
 }
 
 function Config.areaColor(rebirths: number): Color3
