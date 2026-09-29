@@ -30,9 +30,11 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Juice**: breakables pop in, flash on hit and burst into coins; coins and
   diamonds fly into rolling counters; confetti for purchases, new pets,
   gifts and rare hatches; a big celebration on rebirth.
-- **Hatchery** (round egg area): eggs in a half circle on glowing pedestals,
-  candy gate, big spotted eggs, balloons, lamps and sparkles. Walk up to an
-  egg to see what's inside, press E to hatch.
+- **Hatchery** (round egg area): a clean plaza with a walkway ring, a
+  floating crystal egg with orbiting mini eggs in the middle, and a themed
+  **shrine** for every egg (meadow, forest, ocean, lava, candy, snow,
+  jungle, desert, space, magic, mythic) with a name plaque. Locked eggs sit
+  under a frosted dome. Walk up to an egg to see what's inside.
   Each rebirth unlocks a new egg. Every egg has a super rare **Huge** pet.
 - **Hatching**: Hatch 1, Hatch 3 or Auto from the egg popup. Any pet can
   come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy; not huges) for extra power. Every
@@ -64,6 +66,7 @@ are in `src/shared/Config.luau`.
 - `src/server/Coins.luau`: each player's breakables in the coin zone
 - `src/server/Pets.luau`: pets following you and breaking things
 - `src/server/Eggs.luau`: egg stands and hatching
+- `src/server/Shrines.luau`: themed shrine around each egg
 - `src/server/Shop.luau`: shop stall, upgrades, walk speed, hoverboard
 - `src/server/Inventory.luau`: equip, equip best, delete pets
 - `src/server/Gifts.luau`: playtime mystery gifts

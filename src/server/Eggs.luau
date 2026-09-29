@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PlayerData = require(script.Parent.PlayerData)
 local World = require(script.Parent.World)
+local Shrines = require(script.Parent.Shrines)
 
 local Eggs = {}
 
@@ -195,35 +196,8 @@ local function setupEgg(eggIndex, parent)
 	model:SetAttribute("EggIndex", eggIndex)
 	model:SetAttribute("RequiredRebirths", Config.eggRequiredRebirths(eggIndex))
 
-	local sign = Instance.new("BillboardGui")
-	sign.Name = "Sign"
-	sign.Size = UDim2.fromOffset(220, 90)
-	sign.StudsOffset = Vector3.new(0, 6, 0)
-	sign.MaxDistance = 100
-	sign.Parent = shell
-
-	local layout = Instance.new("UIListLayout")
-	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	layout.Parent = sign
-
-	local function line(name, text, color, height)
-		local label = Instance.new("TextLabel")
-		label.Name = name
-		label.Size = UDim2.new(1, 0, 0, height)
-		label.BackgroundTransparency = 1
-		label.Text = text
-		label.TextColor3 = color
-		label.TextStrokeTransparency = 0.2
-		label.Font = Enum.Font.FredokaOne
-		label.TextScaled = true
-		label.Parent = sign
-		return label
-	end
-	line("Title", egg.Name, Color3.new(1, 1, 1), 32)
-	line("Cost", "💰 " .. Config.formatNumber(Config.eggCost(eggIndex)), Color3.fromRGB(255, 210, 60), 26)
-	-- the client shows/hides this depending on the player's rebirths
-	line("Lock", "🔒 Rebirth " .. Config.eggRequiredRebirths(eggIndex), Color3.fromRGB(255, 90, 90), 26)
-
+	-- themed shrine around the pedestal, name plaque and lock dome
+	Shrines.build(model, eggIndex, Eggs.position(eggIndex))
 
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Hatch"
@@ -235,7 +209,6 @@ local function setupEgg(eggIndex, parent)
 		hatch(player, eggIndex, 1)
 	end)
 	eggModels[eggIndex] = model
-
 end
 
 function Eggs.start(remoteFolder)

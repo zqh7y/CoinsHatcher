@@ -1300,7 +1300,7 @@
         },
         "FloorRings": {
           "$className": "Folder",
-          "Ring1": {
+          "Walkway": {
             "$className": "Part",
             "$properties": {
               "Anchored": true,
@@ -1310,8 +1310,8 @@
               "Shape": "Cylinder",
               "Size": [
                 0.05,
-                100,
-                100
+                78,
+                78
               ],
               "CFrame": {
                 "CFrame": {
@@ -1341,12 +1341,12 @@
               },
               "Color": [
                 1.0,
-                0.84314,
-                0.92157
+                0.95686,
+                0.88235
               ]
             }
           },
-          "Ring2": {
+          "Lawn": {
             "$className": "Part",
             "$properties": {
               "Anchored": true,
@@ -1356,8 +1356,8 @@
               "Shape": "Cylinder",
               "Size": [
                 0.05,
-                80,
-                80
+                58,
+                58
               ],
               "CFrame": {
                 "CFrame": {
@@ -1386,13 +1386,13 @@
                 }
               },
               "Color": [
-                0.92157,
-                0.86275,
-                1.0
+                0.78431,
+                0.93333,
+                0.82353
               ]
             }
           },
-          "Ring3": {
+          "Plaza": {
             "$className": "Part",
             "$properties": {
               "Anchored": true,
@@ -1402,8 +1402,8 @@
               "Shape": "Cylinder",
               "Size": [
                 0.05,
-                60,
-                60
+                24,
+                24
               ],
               "CFrame": {
                 "CFrame": {
@@ -1433,100 +1433,8 @@
               },
               "Color": [
                 1.0,
-                0.96078,
+                0.95686,
                 0.88235
-              ]
-            }
-          },
-          "Ring4": {
-            "$className": "Part",
-            "$properties": {
-              "Anchored": true,
-              "Material": "SmoothPlastic",
-              "TopSurface": "Smooth",
-              "BottomSurface": "Smooth",
-              "Shape": "Cylinder",
-              "Size": [
-                0.05,
-                40,
-                40
-              ],
-              "CFrame": {
-                "CFrame": {
-                  "position": [
-                    0,
-                    1.12,
-                    1000
-                  ],
-                  "orientation": [
-                    [
-                      0,
-                      -1,
-                      0
-                    ],
-                    [
-                      1,
-                      0,
-                      0
-                    ],
-                    [
-                      0,
-                      0,
-                      1
-                    ]
-                  ]
-                }
-              },
-              "Color": [
-                0.84314,
-                0.96078,
-                0.90196
-              ]
-            }
-          },
-          "Ring5": {
-            "$className": "Part",
-            "$properties": {
-              "Anchored": true,
-              "Material": "SmoothPlastic",
-              "TopSurface": "Smooth",
-              "BottomSurface": "Smooth",
-              "Shape": "Cylinder",
-              "Size": [
-                0.05,
-                20,
-                20
-              ],
-              "CFrame": {
-                "CFrame": {
-                  "position": [
-                    0,
-                    1.15,
-                    1000
-                  ],
-                  "orientation": [
-                    [
-                      0,
-                      -1,
-                      0
-                    ],
-                    [
-                      1,
-                      0,
-                      0
-                    ],
-                    [
-                      0,
-                      0,
-                      1
-                    ]
-                  ]
-                }
-              },
-              "Color": [
-                1.0,
-                0.84314,
-                0.92157
               ]
             }
           }

@@ -245,9 +245,15 @@ local function updateWorld()
 	if eggs then
 		for _, egg in ipairs(eggs:GetChildren()) do
 			local lock = egg:FindFirstChild("Lock", true)
+			local cost = egg:FindFirstChild("Cost", true)
 			local required = egg:GetAttribute("RequiredRebirths")
 			if lock and required then
-				lock.Visible = data.Rebirths < required
+				local locked = data.Rebirths < required
+				lock.Visible = locked
+				-- the plaque shows the price once it's unlocked
+				if cost then
+					cost.Visible = not locked
+				end
 			end
 		end
 	end

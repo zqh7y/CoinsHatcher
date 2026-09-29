@@ -80,19 +80,20 @@ Config.RARITIES = {
 }
 
 -- Eggs: egg N unlocks at rebirth N-1. Each egg has one pet per rarity,
--- listed in the same order as RARITIES.
+-- listed in the same order as RARITIES. Theme picks the egg's shrine in the
+-- hatchery (see src/server/Shrines.luau).
 Config.EGGS = {
-	{ Name = "Basic Egg", Color = Color3.fromRGB(245, 240, 225), Pets = { "Dog", "Cat", "Bunny", "Bear" } },
-	{ Name = "Forest Egg", Color = Color3.fromRGB(90, 150, 70), Pets = { "Fox", "Deer", "Owl", "Wolf" } },
-	{ Name = "Ocean Egg", Color = Color3.fromRGB(60, 140, 210), Pets = { "Fish", "Crab", "Turtle", "Shark" } },
-	{ Name = "Lava Egg", Color = Color3.fromRGB(220, 80, 30), Pets = { "Salamander", "Magma Golem", "Phoenix", "Dragon" } },
-	{ Name = "Candy Egg", Color = Color3.fromRGB(255, 150, 200), Pets = { "Gummy Bear", "Candy Cat", "Jelly Bunny", "Unicorn" } },
-	{ Name = "Snow Egg", Color = Color3.fromRGB(200, 230, 255), Pets = { "Penguin", "Snow Fox", "Polar Bear", "Yeti" } },
-	{ Name = "Jungle Egg", Color = Color3.fromRGB(60, 170, 80), Pets = { "Monkey", "Parrot", "Tiger", "Lion" } },
-	{ Name = "Desert Egg", Color = Color3.fromRGB(240, 200, 120), Pets = { "Fennec", "Camel", "Scorpion", "Sphinx Cat" } },
-	{ Name = "Space Egg", Color = Color3.fromRGB(80, 60, 160), Pets = { "Alien", "Robot Dog", "Star Bunny", "Cosmic Whale" } },
-	{ Name = "Magic Egg", Color = Color3.fromRGB(180, 110, 255), Pets = { "Pixie", "Wizard Cat", "Crystal Bunny", "Griffin" } },
-	{ Name = "Mythic Egg", Color = Color3.fromRGB(255, 215, 80), Pets = { "Kitsune", "Pegasus", "Hydra", "Mythic Dragon" } },
+	{ Name = "Basic Egg", Theme = "Meadow", Color = Color3.fromRGB(245, 240, 225), Pets = { "Dog", "Cat", "Bunny", "Bear" } },
+	{ Name = "Forest Egg", Theme = "Forest", Color = Color3.fromRGB(90, 150, 70), Pets = { "Fox", "Deer", "Owl", "Wolf" } },
+	{ Name = "Ocean Egg", Theme = "Ocean", Color = Color3.fromRGB(60, 140, 210), Pets = { "Fish", "Crab", "Turtle", "Shark" } },
+	{ Name = "Lava Egg", Theme = "Lava", Color = Color3.fromRGB(220, 80, 30), Pets = { "Salamander", "Magma Golem", "Phoenix", "Dragon" } },
+	{ Name = "Candy Egg", Theme = "Candy", Color = Color3.fromRGB(255, 150, 200), Pets = { "Gummy Bear", "Candy Cat", "Jelly Bunny", "Unicorn" } },
+	{ Name = "Snow Egg", Theme = "Snow", Color = Color3.fromRGB(200, 230, 255), Pets = { "Penguin", "Snow Fox", "Polar Bear", "Yeti" } },
+	{ Name = "Jungle Egg", Theme = "Jungle", Color = Color3.fromRGB(60, 170, 80), Pets = { "Monkey", "Parrot", "Tiger", "Lion" } },
+	{ Name = "Desert Egg", Theme = "Desert", Color = Color3.fromRGB(240, 200, 120), Pets = { "Fennec", "Camel", "Scorpion", "Sphinx Cat" } },
+	{ Name = "Space Egg", Theme = "Space", Color = Color3.fromRGB(80, 60, 160), Pets = { "Alien", "Robot Dog", "Star Bunny", "Cosmic Whale" } },
+	{ Name = "Magic Egg", Theme = "Magic", Color = Color3.fromRGB(180, 110, 255), Pets = { "Pixie", "Wizard Cat", "Crystal Bunny", "Griffin" } },
+	{ Name = "Mythic Egg", Theme = "Mythic", Color = Color3.fromRGB(255, 215, 80), Pets = { "Kitsune", "Pegasus", "Hydra", "Mythic Dragon" } },
 }
 
 -- Body color of each pet (the name tag uses the rarity color)

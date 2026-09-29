@@ -656,109 +656,118 @@ local function hatcherySpot(angleDegrees, dist, y)
 	return World.EGG_CENTER + Vector3.new(math.cos(a) * dist, y or World.FLOOR_Y, math.sin(a) * dist)
 end
 
--- A big spotted decoration egg.
-local function bigEgg(pos, size, color)
-	local tilt = CFrame.Angles(rng:NextNumber(-0.25, 0.25), rng:NextNumber(0, math.pi * 2), rng:NextNumber(-0.25, 0.25))
-	local center = CFrame.new(pos + Vector3.new(0, size * 0.5, 0)) * tilt
-	local egg = part({
-		Name = "BigEgg",
-		Shape = Enum.PartType.Ball,
-		Size = Vector3.one * size,
-		CFrame = center,
-		Color = color,
-	})
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.Sphere
-	mesh.Scale = Vector3.new(0.85, 1.15, 0.85)
-	mesh.Parent = egg
-
-	-- spots on the shell
-	local spotColor = color:Lerp(Color3.new(1, 1, 1), 0.6)
-	for _ = 1, 6 do
-		local dir = Vector3.new(rng:NextNumber(-1, 1), rng:NextNumber(-0.3, 1), rng:NextNumber(-1, 1)).Unit
-		local onShell = Vector3.new(dir.X * 0.85, dir.Y * 1.15, dir.Z * 0.85) * size * 0.47
+-- The hatchery's centerpiece: a giant glowing crystal egg floating over a
+-- tiered pedestal, with little eggs orbiting it.
+local function crystalEgg(base)
+	local function tier(height, width, y, color, material)
 		part({
-			Name = "Spot",
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * rng:NextNumber(0.9, 1.4) * size / 6,
-			CFrame = center * CFrame.new(onShell),
-			Color = spotColor,
-			CastShadow = false,
+			Name = "CenterTier",
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(height, width, width),
+			CFrame = CFrame.new(base + Vector3.new(0, y, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+			Color = color,
+			Material = material,
 		})
 	end
-end
+	tier(1, 11, 0.5, Color3.fromRGB(215, 195, 255))
+	tier(0.3, 11.6, 1.05, Color3.fromRGB(255, 160, 215), Enum.Material.Neon)
+	tier(1, 8, 1.6, Color3.fromRGB(255, 250, 245))
+	tier(0.8, 5, 2.5, Color3.fromRGB(255, 225, 240))
 
-local function balloon(anchor, height, color)
-	local top = anchor + Vector3.new(rng:NextNumber(-1.2, 1.2), height, rng:NextNumber(-1.2, 1.2))
-	local ball = part({
-		Name = "Balloon",
+	local center = base + Vector3.new(0, 8.5, 0)
+	local shell = part({
+		Name = "CrystalEgg",
 		Shape = Enum.PartType.Ball,
-		Size = Vector3.one * 2.4,
-		Position = top,
-		Color = color,
-		CanCollide = false,
-	})
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.Sphere
-	mesh.Scale = Vector3.new(1, 1.2, 1)
-	mesh.Parent = ball
-
-	local bottom = top - Vector3.new(0, 1.4, 0)
-	local length = (bottom - anchor).Magnitude
-	part({
-		Name = "String",
-		Size = Vector3.new(0.08, 0.08, length),
-		CFrame = CFrame.lookAt((bottom + anchor) / 2, bottom),
-		Color = Color3.new(1, 1, 1),
+		Size = Vector3.one * 7,
+		Position = center,
+		Color = Color3.fromRGB(255, 195, 235),
+		Material = Enum.Material.Glass,
+		Transparency = 0.3,
 		CanCollide = false,
 		CastShadow = false,
 	})
+	local core = part({
+		Name = "CrystalCore",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * 3.4,
+		Position = center,
+		Color = Color3.fromRGB(255, 150, 215),
+		Material = Enum.Material.Neon,
+		CanCollide = false,
+		CastShadow = false,
+	})
+	for _, p in ipairs({ shell, core }) do
+		local mesh = Instance.new("SpecialMesh")
+		mesh.MeshType = Enum.MeshType.Sphere
+		mesh.Scale = Vector3.new(0.85, 1.15, 0.85)
+		mesh.Parent = p
+		CollectionService:AddTag(p, "Bob") -- the client floats them
+	end
+	local light = Instance.new("PointLight")
+	light.Color = Color3.fromRGB(255, 180, 230)
+	light.Range = 22
+	light.Brightness = 1.5
+	light.Parent = core
+	local sparkles = Instance.new("Sparkles")
+	sparkles.SparkleColor = Color3.fromRGB(255, 220, 245)
+	sparkles.Parent = core
+
+	-- mini eggs orbiting around it (spun by the client)
+	local orbit = Instance.new("Model")
+	orbit.Name = "EggOrbit"
+	local hubCFrame = CFrame.new(center) * CFrame.Angles(-math.pi / 2, 0, 0) -- local Z points up
+	local hub = part({ Name = "Hub", Size = Vector3.one * 0.2, CFrame = hubCFrame, Transparency = 1, CanCollide = false, Parent = orbit })
+	for i = 1, 6 do
+		local a = i / 6 * math.pi * 2
+		local mini = part({
+			Name = "MiniEgg",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * 1.4,
+			CFrame = hubCFrame * CFrame.new(math.cos(a) * 5.5, math.sin(a) * 5.5, math.sin(a * 2) * 0.6),
+			Color = PASTELS[(i - 1) % #PASTELS + 1],
+			CanCollide = false,
+			Parent = orbit,
+		})
+		local mesh = Instance.new("SpecialMesh")
+		mesh.MeshType = Enum.MeshType.Sphere
+		mesh.Scale = Vector3.new(0.85, 1.15, 0.85)
+		mesh.Parent = mini
+	end
+	orbit.PrimaryPart = hub
+	orbit:SetAttribute("SpinSpeed", 0.5)
+	orbit.Parent = folder
+	CollectionService:AddTag(orbit, "Spin")
 end
 
 local function hatchery()
 	-- candy gate over the arrival spot with a sign
 	gate(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 47), "🥚 HATCHERY 🥚", Color3.fromRGB(255, 120, 160), Color3.fromRGB(200, 170, 255))
 
-	-- giant spotted eggs around the edge
-	for _, angle in ipairs({ 0, 25, 155, 180, 205, 335 }) do
-		bigEgg(hatcherySpot(angle, rng:NextNumber(44, 46.5)), rng:NextNumber(5, 7.5), pick(PASTELS))
-	end
+	-- the crystal egg in the middle, and a path to it from the gate
+	crystalEgg(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 0))
+	stonePath(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 45), World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 13))
 
-	-- balloon bunches by the gate
-	for _, angle in ipairs({ 55, 125 }) do
-		local anchor = hatcherySpot(angle, 47)
-		part({
-			Name = "BalloonWeight",
-			Size = Vector3.new(1, 1, 1),
-			Position = anchor + Vector3.new(0, 0.5, 0),
-			Color = Color3.fromRGB(255, 120, 160),
-		})
-		for i = 1, 4 do
-			balloon(anchor + Vector3.new(0, 1, 0), 8 + i * 1.3, PASTELS[i])
+	-- neat round hedges evenly spaced along the fence (gate kept clear)
+	for angle = 0, 345, 15 do
+		if math.abs(angle - 90) > 20 then
+			local base = hatcherySpot(angle, 48.5)
+			part({
+				Name = "Hedge",
+				Shape = Enum.PartType.Ball,
+				Size = Vector3.one * 3.6,
+				Position = base + Vector3.new(0, 1.6, 0),
+				Color = Color3.fromRGB(100, 185, 95),
+				CanCollide = false,
+			})
 		end
 	end
 
-	-- candy lamp posts with a warm glow
-	for _, angle in ipairs({ 40, 140, 228, 312 }) do
-		lamp(hatcherySpot(angle, 48.5))
+	-- lamps between the shrines, just outside the walkway
+	for _, angle in ipairs({ 45, 135, 225, 315 }) do
+		lamp(hatcherySpot(angle, 44))
 	end
 
-	-- bushes and mushrooms along the fence, a stone path from the gate
-	for _ = 1, 20 do
-		local angle = rng:NextNumber(0, 360)
-		if math.abs(angle - 90) > 22 then -- keep the gate clear
-			bush(hatcherySpot(angle, rng:NextNumber(48.5, 49.5)))
-		end
-	end
-	for _ = 1, 10 do
-		local angle = rng:NextNumber(0, 360)
-		if math.abs(angle - 90) > 22 then
-			mushroom(hatcherySpot(angle, rng:NextNumber(42, 46)), rng:NextNumber(0.8, 1.3))
-		end
-	end
-	stonePath(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 45), World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 8))
-
-	-- soft sparkles floating in the air
+	-- a few soft sparkles floating in the air
 	local air = part({
 		Name = "SparkleAir",
 		Size = Vector3.new(90, 10, 90),
@@ -772,14 +781,14 @@ local function hatchery()
 	local sparkles = Instance.new("ParticleEmitter")
 	sparkles.Shape = Enum.ParticleEmitterShape.Box
 	sparkles.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
-	sparkles.Rate = 10
+	sparkles.Rate = 6
 	sparkles.Lifetime = NumberRange.new(3, 5)
 	sparkles.Speed = NumberRange.new(0.5, 1.2)
 	sparkles.SpreadAngle = Vector2.new(180, 180)
 	sparkles.LightEmission = 1
 	sparkles.Size = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0),
-		NumberSequenceKeypoint.new(0.3, 0.45),
+		NumberSequenceKeypoint.new(0.3, 0.4),
 		NumberSequenceKeypoint.new(1, 0),
 	})
 	sparkles.Color = ColorSequence.new({
@@ -820,8 +829,10 @@ function Decor.build()
 			flower(spotNearWall(area, 3, 30, 0))
 		end
 		-- inside, along the fence
-		for _ = 1, if index == 1 then 60 else 30 do
-			flower(spotNearWall(area, if index == 1 then -12 else -9, -3, World.FLOOR_Y))
+		if index == 1 then
+			for _ = 1, 60 do
+				flower(spotNearWall(area, -12, -3, World.FLOOR_Y))
+			end
 		end
 
 		-- clouds

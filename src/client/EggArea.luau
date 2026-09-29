@@ -32,6 +32,11 @@ local function refreshLocks()
 		if light then
 			light.Enabled = not locked
 		end
+		-- frosted glass dome over eggs you can't open yet
+		local dome = egg.Model:FindFirstChild("LockDome")
+		if dome then
+			dome.Transparency = if locked then 0.45 else 1
+		end
 	end
 end
 
