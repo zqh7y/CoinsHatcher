@@ -80,6 +80,53 @@ layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.Parent = grid
 
+-- the egg's huge gets its own wide banner under the grid: a bigger pet, a big
+-- HUGE tag and its chance
+local HUGE_H = 104
+local hugeRow = Instance.new("Frame")
+hugeRow.BackgroundColor3 = Color3.fromRGB(255, 236, 249)
+hugeRow.Size = UDim2.new(1, -24, 0, HUGE_H)
+hugeRow.Visible = false
+hugeRow.Parent = popup
+Ui.corner(hugeRow, 14)
+local hugeStroke = Ui.stroke(hugeRow, Color3.new(1, 1, 1), 3)
+local hugeShimmer = Instance.new("UIGradient")
+hugeShimmer.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 200)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 110, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 90, 200)),
+})
+hugeShimmer.Parent = hugeStroke
+local hugeView = Instance.new("Frame")
+hugeView.BackgroundTransparency = 1
+hugeView.Position = UDim2.fromOffset(6, 4)
+hugeView.Size = UDim2.fromOffset(HUGE_H - 8, HUGE_H - 8)
+hugeView.Parent = hugeRow
+local hugeTag = Ui.label(hugeRow, {
+	Text = "HUGE",
+	TextColor3 = Color3.new(1, 1, 1),
+	BackgroundTransparency = 0,
+	BackgroundColor3 = Color3.fromRGB(245, 70, 185),
+	Position = UDim2.fromOffset(HUGE_H + 4, 12),
+	Size = UDim2.fromOffset(84, 26),
+})
+Ui.corner(hugeTag, 0.5)
+local hugeTagPad = Instance.new("UIPadding")
+hugeTagPad.PaddingTop = UDim.new(0, 4)
+hugeTagPad.PaddingBottom = UDim.new(0, 4)
+hugeTagPad.Parent = hugeTag
+local hugeName = Ui.label(hugeRow, {
+	TextXAlignment = Enum.TextXAlignment.Left,
+	Position = UDim2.fromOffset(HUGE_H + 4, 42),
+	Size = UDim2.new(1, -HUGE_H - 12, 0, 24),
+})
+local hugeChance = Ui.label(hugeRow, {
+	TextXAlignment = Enum.TextXAlignment.Left,
+	TextColor3 = Color3.fromRGB(220, 50, 160),
+	Position = UDim2.fromOffset(HUGE_H + 4, 70),
+	Size = UDim2.new(1, -HUGE_H - 12, 0, 22),
+})
+
 -- the three buttons: a key letter badge, then what it does and the price
 local buttonRow = Instance.new("Frame")
 buttonRow.BackgroundTransparency = 1
@@ -346,11 +393,35 @@ local function show(eggIndex)
 	setAuto(auto)
 
 	local chances = Config.eggChances(eggIndex, data)
+	local huge = nil
+	local count = 0
 	for order, entry in ipairs(chances) do
-		petTile(entry, order, data and data.Index[entry.Pet], data and data.AutoDelete and data.AutoDelete[entry.Pet] == true)
+		if Config.PETS[entry.Pet].Rarity == "Huge" then
+			huge = entry
+		else
+			count += 1
+			petTile(entry, order, data and data.Index[entry.Pet], data and data.AutoDelete and data.AutoDelete[entry.Pet] == true)
+		end
 	end
-	local rows = math.ceil(#chances / 3)
-	board.Size = UDim2.fromOffset(WIDTH, 38 + rows * CELL.Y + (rows - 1) * GAP + 10 + 46 + 10)
+	local rows = math.ceil(count / 3)
+	local gridBottom = 38 + rows * CELL.Y + (rows - 1) * GAP
+
+	-- the huge banner
+	for _, child in ipairs(hugeView:GetChildren()) do
+		child:Destroy()
+	end
+	hugeRow.Visible = huge ~= nil
+	local extra = 0
+	if huge then
+		local known = data and data.Index[huge.Pet]
+		local _, model = Viewport.pet(hugeView, huge.Pet, not known)
+		table.insert(stopSpins, Viewport.spin(model, 1))
+		hugeName.Text = if known then huge.Pet else "Mystery Huge"
+		hugeChance.Text = Config.chanceLabel(huge.Chance)
+		hugeRow.Position = UDim2.fromOffset(12, gridBottom + GAP + 2)
+		extra = HUGE_H + GAP + 2
+	end
+	board.Size = UDim2.fromOffset(WIDTH, gridBottom + extra + 10 + 46 + 10)
 
 	if not board.Enabled then
 		board.Enabled = true
@@ -400,6 +471,7 @@ end)
 RunService.RenderStepped:Connect(function()
 	if board.Enabled then
 		popupGradient.Rotation = (os.clock() * 40) % 360
+		hugeShimmer.Rotation = (os.clock() * 90) % 360
 	end
 end)
 

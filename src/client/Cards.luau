@@ -113,10 +113,36 @@ function Cards.pet(parent, petName, options)
 	end
 	if not hidden and info.Mutation then
 		badge(card, MUTATION_ICONS[info.Mutation], Color3.fromRGB(120, 90, 220), Vector2.new(0, 1), UDim2.new(0, 5, if compact then 0.8 else 0.56, 0))
-	elseif not hidden and info.Rarity == "Huge" then
-		badge(card, "💎", Color3.fromRGB(230, 70, 170), Vector2.new(0, 1), UDim2.new(0, 5, if compact then 0.8 else 0.56, 0))
+	elseif info.Rarity == "Huge" then
+		-- a clear HUGE tag (shown even before you've found it)
+		Cards.hugeTag(card, UDim2.new(0, 6, if compact then 0.8 else 0.56, 0), Vector2.new(0, 1))
 	end
 	return card
+end
+
+-- A pink "HUGE" tag with a white outline, so huge pets stand out everywhere.
+function Cards.hugeTag(parent, position, anchor)
+	local tag = Ui.label(parent, {
+		Text = "HUGE",
+		TextColor3 = Ui.COLORS.White,
+		AnchorPoint = anchor or Vector2.new(0, 0),
+		Position = position,
+		Size = UDim2.new(0.34, 0, 0.12, 0),
+		BackgroundTransparency = 0,
+		BackgroundColor3 = Color3.fromRGB(245, 70, 185),
+		ZIndex = 5,
+	})
+	Ui.corner(tag, 0.5)
+	Ui.stroke(tag, Color3.new(1, 1, 1), 2)
+	local limit = Instance.new("UISizeConstraint")
+	limit.MinSize = Vector2.new(44, 18)
+	limit.MaxSize = Vector2.new(90, 30)
+	limit.Parent = tag
+	local pad = Instance.new("UIPadding")
+	pad.PaddingTop = UDim.new(0, 3)
+	pad.PaddingBottom = UDim.new(0, 3)
+	pad.Parent = tag
+	return tag
 end
 
 return Cards

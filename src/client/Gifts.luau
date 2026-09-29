@@ -1,6 +1,7 @@
 -- Playtime gifts menu: a mystery gift unlocks after 1, 3, 5, 10, 15 and 20
 -- minutes of play (free pets, potions, diamonds or coins; the last is a MEGA
--- gift). Clean white tiles with a drawn gift, a progress bar and a timer;
+-- gift), and every gift has a tiny chance to be the Huge Present (shown in a
+-- banner at the top). Clean white tiles with a drawn gift, a progress bar and a timer;
 -- ready gifts bounce and glow with a spinning colored border, and burst open
 -- to show the prize. The side button gets a badge when one is ready.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,6 +12,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
 local Icons = require(script.Parent.Icons)
 local Fx = require(script.Parent.Fx)
+local Viewport = require(script.Parent.Viewport)
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 
@@ -29,10 +31,58 @@ Ui.label(panel.Content, {
 	TextXAlignment = Enum.TextXAlignment.Left,
 	Size = UDim2.new(1, 0, 0, 18),
 })
+-- the huge chance banner: the Huge Present spinning next to its odds
+local hugeBanner = Instance.new("Frame")
+hugeBanner.BackgroundColor3 = Color3.fromRGB(255, 236, 249)
+hugeBanner.Position = UDim2.fromOffset(0, 26)
+hugeBanner.Size = UDim2.new(1, -8, 0, 66)
+hugeBanner.Parent = panel.Content
+Ui.corner(hugeBanner, 16)
+local bannerStroke = Ui.stroke(hugeBanner, Color3.new(1, 1, 1), 2.5)
+local bannerShimmer = Instance.new("UIGradient")
+bannerShimmer.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 200)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 110, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 90, 200)),
+})
+bannerShimmer.Parent = bannerStroke
+local bannerView = Instance.new("Frame")
+bannerView.BackgroundTransparency = 1
+bannerView.Position = UDim2.fromOffset(8, 2)
+bannerView.Size = UDim2.fromOffset(62, 62)
+bannerView.Parent = hugeBanner
+local _, presentModel = Viewport.pet(bannerView, Config.GIFT_HUGE)
+Viewport.spin(presentModel, 1.2)
+local hugeTag = Ui.label(hugeBanner, {
+	Text = "HUGE",
+	TextColor3 = Ui.COLORS.White,
+	BackgroundTransparency = 0,
+	BackgroundColor3 = Color3.fromRGB(245, 70, 185),
+	AnchorPoint = Vector2.new(0, 0.5),
+	Position = UDim2.new(0, 80, 0.5, 0),
+	Size = UDim2.fromOffset(70, 26),
+})
+Ui.corner(hugeTag, 0.5)
+local tagPad = Instance.new("UIPadding")
+tagPad.PaddingTop = UDim.new(0, 4)
+tagPad.PaddingBottom = UDim.new(0, 4)
+tagPad.Parent = hugeTag
+Ui.label(hugeBanner, {
+	Text = ("Every gift has a 1 in %s chance to be the %s!"):format(
+		Config.formatNumber(Config.PETS[Config.GIFT_HUGE].Odds),
+		Config.GIFT_HUGE
+	),
+	TextXAlignment = Enum.TextXAlignment.Left,
+	TextColor3 = Color3.fromRGB(200, 50, 150),
+	AnchorPoint = Vector2.new(0, 0.5),
+	Position = UDim2.new(0, 160, 0.5, 0),
+	Size = UDim2.new(1, -172, 0, 22),
+})
+
 local holder = Instance.new("Frame")
 holder.BackgroundTransparency = 1
-holder.Position = UDim2.fromOffset(0, 30)
-holder.Size = UDim2.new(1, 0, 1, -30)
+holder.Position = UDim2.fromOffset(0, 104)
+holder.Size = UDim2.new(1, 0, 1, -104)
 holder.Parent = panel.Content
 local list = Ui.grid(holder, UDim2.fromOffset(186, 196), UDim2.fromOffset(12, 12))
 
@@ -200,6 +250,7 @@ RunService.RenderStepped:Connect(function()
 		return
 	end
 	local t = os.clock()
+	bannerShimmer.Rotation = (t * 90) % 360
 	for i, tile in ipairs(tiles) do
 		local ready = not claimed[i] and secondsLeft(i) == 0
 		tile.Glow.Enabled = ready

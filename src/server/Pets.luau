@@ -228,6 +228,12 @@ local function update(dt)
 				else
 					moveTowards(part, goal, math.max(speed, dist * 6), dt)
 				end
+				-- always face the way the owner faces (forward), not sideways
+				local forward = root.CFrame.LookVector * Vector3.new(1, 0, 1)
+				if forward.Magnitude > 0.01 then
+					local pos = part.Position
+					part.CFrame = CFrame.lookAt(pos, pos + forward.Unit)
+				end
 			end
 		end
 	end

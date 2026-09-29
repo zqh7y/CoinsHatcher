@@ -1,5 +1,5 @@
--- The pets menu: a clean grid of square pet icons, 4 per row. Tap a pet to
--- equip or unequip it. Filter tabs, Equip Best, and a delete mode (tap pets
+-- The pets menu: huge pets first in their own row of big tiles, then a clean
+-- grid of square pet icons, 4 per row. Tap a pet to equip or unequip it. Filter tabs, Equip Best, and a delete mode (tap pets
 -- to pick them, then delete).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -74,7 +74,42 @@ listHolder.BackgroundTransparency = 1
 listHolder.Position = UDim2.fromOffset(0, 48)
 listHolder.Size = UDim2.new(1, 0, 1, -48)
 listHolder.Parent = panel.Content
-local list = Ui.grid(listHolder, UDim2.fromOffset(140, 140), UDim2.fromOffset(12, 12))
+-- one scrolling list: a grid of big huge tiles on top, the normal grid under it
+local scroller = Instance.new("ScrollingFrame")
+scroller.Size = UDim2.fromScale(1, 1)
+scroller.BackgroundTransparency = 1
+scroller.BorderSizePixel = 0
+scroller.ScrollBarThickness = 5
+scroller.ScrollBarImageColor3 = Ui.COLORS.Disabled
+scroller.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scroller.CanvasSize = UDim2.new()
+scroller.Parent = listHolder
+local scrollLayout = Instance.new("UIListLayout")
+scrollLayout.Padding = UDim.new(0, 12)
+scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+scrollLayout.Parent = scroller
+local scrollPad = Instance.new("UIPadding")
+scrollPad.PaddingTop = UDim.new(0, 4)
+scrollPad.PaddingBottom = UDim.new(0, 8)
+scrollPad.Parent = scroller
+
+local function section(order, cell)
+	local frame = Instance.new("Frame")
+	frame.BackgroundTransparency = 1
+	frame.Size = UDim2.new(1, -8, 0, 0)
+	frame.AutomaticSize = Enum.AutomaticSize.Y
+	frame.LayoutOrder = order
+	frame.Parent = scroller
+	local grid = Instance.new("UIGridLayout")
+	grid.CellSize = cell
+	grid.CellPadding = UDim2.fromOffset(12, 12)
+	grid.SortOrder = Enum.SortOrder.LayoutOrder
+	grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	grid.Parent = frame
+	return frame
+end
+local hugeList = section(1, UDim2.fromOffset(292, 230)) -- huges: two big tiles per row
+local list = section(2, UDim2.fromOffset(140, 140))
 
 local filter = nil -- current tab's filter
 local deleting = false
@@ -143,6 +178,7 @@ end
 
 render = function()
 	Ui.clear(list)
+	Ui.clear(hugeList)
 	local data = State.Data
 	if not data then
 		return
@@ -189,6 +225,7 @@ render = function()
 	if #order == 0 then
 		Ui.label(list, { Text = "No pets here yet", TextColor3 = Ui.COLORS.SubText, LayoutOrder = 1 })
 	end
+	hugeList.Visible = false
 
 	for rank, index in ipairs(order) do
 		local petName = data.Pets[index]
@@ -197,7 +234,11 @@ render = function()
 		local picked = selected[index] == true
 
 		-- tap the pet itself: equip/unequip (or pick it in delete mode)
-		local card = Cards.pet(list, petName, {
+		local huge = info.Rarity == "Huge"
+		if huge then
+			hugeList.Visible = true
+		end
+		local card = Cards.pet(if huge then hugeList else list, petName, {
 			Compact = true,
 			Button = true,
 			Detail = "⚔ " .. Config.formatNumber(info.Power),
