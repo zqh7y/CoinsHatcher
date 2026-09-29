@@ -8,9 +8,10 @@ local Decor = {}
 local rng = Random.new(2024)
 local folder
 
--- Each area's wall half-sizes (walls are in default.project.json)
+-- Where each area's walls are (walls are in default.project.json).
+-- The main area is round; the egg area is a rectangle.
 local AREAS = {
-	{ Center = World.MAIN_CENTER, HalfX = 131, HalfZ = 131 },
+	{ Center = World.MAIN_CENTER, Radius = World.MAIN_RADIUS },
 	{ Center = World.EGG_CENTER, HalfX = 61, HalfZ = 36 },
 }
 
@@ -59,6 +60,9 @@ end
 
 -- How far from the area's center its wall is, in direction (dx, dz).
 local function wallDistance(area, dx, dz)
+	if area.Radius then
+		return area.Radius
+	end
 	local x = if math.abs(dx) > 1e-4 then area.HalfX / math.abs(dx) else math.huge
 	local z = if math.abs(dz) > 1e-4 then area.HalfZ / math.abs(dz) else math.huge
 	return math.min(x, z)
@@ -68,7 +72,7 @@ end
 local function clearOfOtherAreas(pos, radius, selfIndex)
 	for i, area in ipairs(AREAS) do
 		if i ~= selfIndex then
-			local keepOut = math.max(area.HalfX, area.HalfZ) * 1.42 + 20
+			local keepOut = (area.Radius or math.max(area.HalfX, area.HalfZ) * 1.42) + 20
 			if (pos - area.Center).Magnitude - radius < keepOut then
 				return false
 			end
@@ -169,6 +173,15 @@ local function fencePosts(area)
 		})
 	end
 
+	if area.Radius then
+		-- one post between each of the 24 wall pieces
+		for i = 0, 23 do
+			local angle = (i + 0.5) / 24 * math.pi * 2
+			post(math.cos(angle) * area.Radius, math.sin(angle) * area.Radius)
+		end
+		return
+	end
+
 	local step = 12
 	for x = -area.HalfX, area.HalfX, step do
 		post(x, -area.HalfZ)
@@ -201,9 +214,9 @@ function Decor.build()
 	folder.Parent = workspace
 
 	-- hills: a close ring, a bigger ring behind it, and huge hazy ones far away
-	hillRing(1, 34, 50, 110, 12, NEAR_HILL_COLORS)
-	hillRing(1, 26, 90, 160, 50, NEAR_HILL_COLORS)
-	hillRing(1, 22, 180, 340, 180, FAR_HILL_COLORS)
+	hillRing(1, 18, 45, 90, 14, NEAR_HILL_COLORS)
+	hillRing(1, 18, 90, 150, 50, NEAR_HILL_COLORS)
+	hillRing(1, 18, 180, 320, 150, FAR_HILL_COLORS)
 	hillRing(2, 20, 40, 90, 10, NEAR_HILL_COLORS)
 	hillRing(2, 16, 80, 140, 45, NEAR_HILL_COLORS)
 	hillRing(2, 16, 160, 300, 150, FAR_HILL_COLORS)
@@ -212,16 +225,17 @@ function Decor.build()
 		fencePosts(area)
 
 		-- trees between the fence and the hills
-		for _ = 1, if index == 1 then 50 else 24 do
-			tree(spotNearWall(area, 6, 28, 0))
+		for _ = 1, if index == 1 then 30 else 24 do
+			tree(spotNearWall(area, 6, 24, 0))
 		end
 
 		-- flowers outside the fence, and inside along the edges
-		for _ = 1, if index == 1 then 120 else 50 do
+		for _ = 1, if index == 1 then 70 else 50 do
 			flower(spotNearWall(area, 3, 30, 0))
 		end
-		for _ = 1, if index == 1 then 90 else 30 do
-			flower(spotNearWall(area, -8, -3, World.FLOOR_Y))
+		-- inside, between the coin zone and the fence
+		for _ = 1, if index == 1 then 60 else 30 do
+			flower(spotNearWall(area, -12, -3, World.FLOOR_Y))
 		end
 
 		-- clouds

@@ -289,9 +289,14 @@ local function updateWorld()
 	end
 
 	-- recolor the main area for our rebirth level
-	local floor = workspace:FindFirstChild("MainArea") and workspace.MainArea:FindFirstChild("Floor")
+	local mainArea = workspace:FindFirstChild("MainArea")
+	local floor = mainArea and mainArea:FindFirstChild("Floor")
 	if floor then
 		floor.Color = Config.areaColor(data.Rebirths)
+	end
+	local coinZone = mainArea and mainArea:FindFirstChild("CoinZone")
+	if coinZone then
+		coinZone.Color = Config.areaColor(data.Rebirths):Lerp(Color3.new(1, 1, 1), 0.35)
 	end
 
 	-- show a lock on eggs we haven't unlocked yet

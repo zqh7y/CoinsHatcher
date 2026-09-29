@@ -83,6 +83,30 @@ Config.PET_COLORS = {
 	Dragon = Color3.fromRGB(190, 110, 255),
 }
 
+-- What each pet looks like. Pets are little cubes with a face plus:
+--   Ears: "pointy", "round", "long", "floppy" or nil
+--   Tail: "short", "long", "fluffy", "fin" or nil
+--   Extras: any of "wings", "beak", "horns", "antlers", "shell", "claws",
+--           "topfin", "fire", "nofeet"
+Config.PET_LOOKS = {
+	Dog = { Ears = "floppy", Tail = "short" },
+	Cat = { Ears = "pointy", Tail = "long" },
+	Bunny = { Ears = "long", Tail = "fluffy" },
+	Bear = { Ears = "round", Tail = "short" },
+	Fox = { Ears = "pointy", Tail = "fluffy" },
+	Deer = { Ears = "pointy", Tail = "short", Extras = { "antlers" } },
+	Owl = { Ears = "pointy", Extras = { "beak", "wings" } },
+	Wolf = { Ears = "pointy", Tail = "fluffy" },
+	Fish = { Tail = "fin", Extras = { "topfin", "nofeet" } },
+	Crab = { Extras = { "claws" } },
+	Turtle = { Tail = "short", Extras = { "shell" } },
+	Shark = { Tail = "fin", Extras = { "topfin", "nofeet" } },
+	Salamander = { Tail = "long", Extras = { "fire" } },
+	["Magma Golem"] = { Extras = { "horns", "fire" } },
+	Phoenix = { Tail = "long", Extras = { "beak", "wings", "fire" } },
+	Dragon = { Tail = "long", Extras = { "horns", "wings" } },
+}
+
 Config.EGG_COUNT = math.min(#Config.EGGS, Config.MAX_REBIRTHS + 1)
 
 function Config.eggCost(eggIndex: number): number

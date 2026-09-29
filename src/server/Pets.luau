@@ -12,7 +12,8 @@ local Coins = require(script.Parent.Coins)
 
 local Pets = {}
 
-local PET_SIZE = 2
+local PET_SIZE = 2.2
+local PET_LIFT = PET_SIZE / 2 + 0.3 -- body height above the ground (feet underneath)
 local SEARCH_RADIUS = 70 -- pets only go for coins this close to their owner
 local ATTACK_RANGE = 1
 
@@ -67,21 +68,163 @@ local function makeFace(body)
 	mouth.Parent = gui
 end
 
+-- Adds a decoration part welded to the body, placed at offset (body space:
+-- -Z is the front where the face is, +Z is the back, +Y is up).
+local function attach(body, offset, size, color, shape)
+	local p = Instance.new("Part")
+	p.Shape = shape or Enum.PartType.Block
+	p.Size = size
+	p.Color = color
+	p.Material = Enum.Material.SmoothPlastic
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	p.Anchored = false
+	p.Massless = true
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.CFrame = body.CFrame * offset
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = body
+	weld.Part1 = p
+	weld.Parent = p
+	p.Parent = body
+	return p
+end
+
+local BALL = Enum.PartType.Ball
+local function mirror(fn)
+	fn(1)
+	fn(-1)
+end
+
+local EARS = {
+	pointy = function(body, color)
+		mirror(function(side)
+			attach(body, CFrame.new(side * 0.6, 1.35, -0.2) * CFrame.Angles(0, 0, side * -0.35), Vector3.new(0.55, 0.8, 0.3), color)
+		end)
+	end,
+	round = function(body, color)
+		mirror(function(side)
+			attach(body, CFrame.new(side * 0.7, 1.15, -0.1), Vector3.one * 0.75, color, BALL)
+		end)
+	end,
+	long = function(body, color)
+		mirror(function(side)
+			attach(body, CFrame.new(side * 0.45, 1.85, 0) * CFrame.Angles(0, 0, side * -0.15), Vector3.new(0.45, 1.6, 0.3), color)
+		end)
+	end,
+	floppy = function(body, color)
+		mirror(function(side)
+			attach(body, CFrame.new(side * 1.25, 0.45, -0.1) * CFrame.Angles(0, 0, side * 0.25), Vector3.new(0.3, 1, 0.7), color)
+		end)
+	end,
+}
+
+local TAILS = {
+	short = function(body, color)
+		attach(body, CFrame.new(0, 0.3, 1.25), Vector3.one * 0.6, color, BALL)
+	end,
+	long = function(body, color)
+		attach(body, CFrame.new(0, 0.45, 1.65) * CFrame.Angles(0.5, 0, 0), Vector3.new(0.35, 0.35, 1.5), color)
+	end,
+	fluffy = function(body, color)
+		attach(body, CFrame.new(0, 0.4, 1.45), Vector3.one * 1.1, color:Lerp(Color3.new(1, 1, 1), 0.4), BALL)
+	end,
+	fin = function(body, color)
+		attach(body, CFrame.new(0, 0, 1.5), Vector3.new(0.2, 1.4, 0.9), color)
+	end,
+}
+
+local EXTRAS = {
+	wings = function(body, color)
+		mirror(function(side)
+			attach(
+				body,
+				CFrame.new(side * 1.55, 0.35, 0.15) * CFrame.Angles(0, 0, side * 0.45),
+				Vector3.new(1.1, 0.18, 1),
+				color:Lerp(Color3.new(1, 1, 1), 0.3)
+			)
+		end)
+	end,
+	beak = function(body)
+		attach(body, CFrame.new(0, -0.15, -1.25), Vector3.new(0.5, 0.35, 0.4), Color3.fromRGB(255, 170, 40))
+	end,
+	horns = function(body)
+		mirror(function(side)
+			attach(body, CFrame.new(side * 0.55, 1.4, -0.3) * CFrame.Angles(0, 0, side * -0.3), Vector3.new(0.3, 0.8, 0.3), Color3.fromRGB(255, 245, 215))
+		end)
+	end,
+	antlers = function(body)
+		local brown = Color3.fromRGB(150, 100, 60)
+		mirror(function(side)
+			attach(body, CFrame.new(side * 0.55, 1.6, 0) * CFrame.Angles(0, 0, side * -0.35), Vector3.new(0.22, 1.2, 0.22), brown)
+			attach(body, CFrame.new(side * 0.95, 1.85, 0) * CFrame.Angles(0, 0, side * 0.6), Vector3.new(0.2, 0.6, 0.2), brown)
+		end)
+	end,
+	shell = function(body)
+		local green = Color3.fromRGB(70, 150, 80)
+		attach(body, CFrame.new(0, 1.3, 0.1), Vector3.new(2.5, 0.5, 2.5), green)
+		attach(body, CFrame.new(0, 1.7, 0.1), Vector3.new(1.7, 0.4, 1.7), green:Lerp(Color3.new(1, 1, 1), 0.2))
+	end,
+	claws = function(body, color)
+		mirror(function(side)
+			attach(body, CFrame.new(side * 1.5, -0.2, -0.7), Vector3.one * 0.9, color:Lerp(Color3.new(0, 0, 0), 0.15), BALL)
+		end)
+	end,
+	topfin = function(body, color)
+		attach(body, CFrame.new(0, 1.45, 0.3) * CFrame.Angles(-0.35, 0, 0), Vector3.new(0.2, 0.9, 1), color)
+	end,
+	fire = function(body)
+		local fire = Instance.new("Fire")
+		fire.Size = 3
+		fire.Heat = 2
+		fire.Color = Color3.fromRGB(255, 140, 40)
+		fire.SecondaryColor = Color3.fromRGB(255, 230, 90)
+		fire.Parent = body
+	end,
+}
+
 local function makePet(petName, parent)
 	local info = Config.PETS[petName]
+	local look = Config.PET_LOOKS[petName] or {}
+	local extras = look.Extras or {}
+	local color = info.BodyColor
+	local darker = color:Lerp(Color3.new(0, 0, 0), 0.15)
 
+	-- a cute little cube
 	local body = Instance.new("Part")
 	body.Name = petName
-	body.Shape = Enum.PartType.Ball
 	body.Size = Vector3.one * PET_SIZE
-	body.Color = info.BodyColor
+	body.Color = color
 	body.Material = Enum.Material.SmoothPlastic
+	body.TopSurface = Enum.SurfaceType.Smooth
+	body.BottomSurface = Enum.SurfaceType.Smooth
 	body.Anchored = true
 	body.CanCollide = false
 	body.CanQuery = false
 	body.CanTouch = false
 
 	makeFace(body)
+
+	if look.Ears then
+		EARS[look.Ears](body, darker)
+	end
+	if look.Tail then
+		TAILS[look.Tail](body, darker)
+	end
+	for _, extra in ipairs(extras) do
+		if EXTRAS[extra] then
+			EXTRAS[extra](body, color)
+		end
+	end
+	if not table.find(extras, "nofeet") then
+		for _, x in ipairs({ -0.6, 0.6 }) do
+			for _, z in ipairs({ -0.6, 0.6 }) do
+				attach(body, CFrame.new(x, -1.25, z), Vector3.new(0.6, 0.3, 0.6), darker)
+			end
+		end
+	end
 
 	if info.Rarity == "Legendary" then
 		local sparkles = Instance.new("Sparkles")
@@ -91,7 +234,7 @@ local function makePet(petName, parent)
 
 	local label = Instance.new("BillboardGui")
 	label.Size = UDim2.fromOffset(120, 24)
-	label.StudsOffset = Vector3.new(0, 2, 0)
+	label.StudsOffset = Vector3.new(0, 3, 0)
 	label.MaxDistance = 60
 	label.Parent = body
 
@@ -212,7 +355,7 @@ local function update(dt)
 				local ring = target.Size.Y / 2 + 0.5
 				local goal = Vector3.new(
 					target.Position.X + math.cos(angle) * ring,
-					World.FLOOR_Y + PET_SIZE / 2,
+					World.FLOOR_Y + PET_LIFT,
 					target.Position.Z + math.sin(angle) * ring
 				)
 				local left = moveTowards(part, goal, Config.PET_SPEED, dt)
@@ -225,7 +368,7 @@ local function update(dt)
 				-- follow behind the owner in a little arc, bobbing up and down
 				local spread = (i - (#pets + 1) / 2) * 3.5
 				local behind = root.CFrame * CFrame.new(spread, 0, 5 + math.abs(spread) * 0.3)
-				local groundY = rootPos.Y - 3 + PET_SIZE / 2
+				local groundY = rootPos.Y - 3 + PET_LIFT
 				local goal = Vector3.new(behind.X, groundY + math.abs(math.sin(t * 4 + i)) * 0.6, behind.Z)
 				local dist = (goal - part.Position).Magnitude
 				if dist > 80 then

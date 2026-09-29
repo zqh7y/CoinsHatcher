@@ -3,7 +3,9 @@
 local World = {}
 
 World.MAIN_CENTER = Vector3.new(0, 0, 0)
-World.MAIN_SIZE = 240 -- coins spawn inside this square
+World.MAIN_RADIUS = 51 -- the round main area's wall (floor is 104 wide)
+World.COIN_ZONE = 50 -- coins spawn in this square in the middle
+World.MAIN_SPAWN = Vector3.new(0, 0, 38) -- spawn pad, between the coins and the wall
 World.EGG_CENTER = Vector3.new(0, 0, 1000)
 World.FLOOR_Y = 1 -- top of both floors
 
@@ -38,8 +40,10 @@ function World.build()
 	if not main:FindFirstChild("Floor") then
 		part({
 			Name = "Floor",
-			Size = Vector3.new(World.MAIN_SIZE + 20, 1, World.MAIN_SIZE + 20),
-			Position = World.MAIN_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0),
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(1, World.MAIN_RADIUS * 2 + 2, World.MAIN_RADIUS * 2 + 2),
+			CFrame = CFrame.new(World.MAIN_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0))
+				* CFrame.Angles(0, 0, math.rad(90)),
 			Color = Color3.fromRGB(120, 210, 90), -- the client recolors this by rebirth
 			Material = Enum.Material.SmoothPlastic,
 			Parent = main,
@@ -50,7 +54,7 @@ function World.build()
 			ClassName = "SpawnLocation",
 			Name = "Spawn",
 			Size = Vector3.new(8, 1, 8),
-			Position = World.MAIN_CENTER + Vector3.new(0, World.FLOOR_Y + 0.5, 0),
+			Position = World.MAIN_CENTER + World.MAIN_SPAWN + Vector3.new(0, World.FLOOR_Y + 0.5, 0),
 			Duration = 0,
 			Parent = main,
 		})
@@ -71,23 +75,22 @@ end
 
 -- Where a player lands when they teleport to an area.
 function World.spawnCFrame(area: string): CFrame
-	local center = if area == "Eggs" then World.EGG_CENTER + Vector3.new(0, 0, 20) else World.MAIN_CENTER
+	local center = if area == "Eggs"
+		then World.EGG_CENTER + Vector3.new(0, 0, 20)
+		else World.MAIN_CENTER + World.MAIN_SPAWN
 	return CFrame.new(center + Vector3.new(0, World.FLOOR_Y + 3, 0))
 end
 
 function World.isInMainArea(position: Vector3): boolean
 	local offset = position - World.MAIN_CENTER
-	local half = World.MAIN_SIZE / 2 + 10
-	return math.abs(offset.X) <= half and math.abs(offset.Z) <= half and offset.Y < 50
+	local flat = Vector3.new(offset.X, 0, offset.Z).Magnitude
+	return flat <= World.MAIN_RADIUS + 5 and offset.Y < 50
 end
 
 function World.randomCoinPosition(): Vector3
-	local half = World.MAIN_SIZE / 2
-	local x, z
-	repeat
-		x = math.random(-half, half)
-		z = math.random(-half, half)
-	until math.abs(x) > 12 or math.abs(z) > 12 -- keep the spawn pad clear
+	local half = World.COIN_ZONE / 2 - 3 -- keep big coins inside the zone
+	local x = math.random(-half, half)
+	local z = math.random(-half, half)
 	return World.MAIN_CENTER + Vector3.new(x, World.FLOOR_Y, z)
 end
 
