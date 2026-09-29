@@ -192,10 +192,10 @@ render = function()
 			best = petName
 		end
 	end
-	countStat.Text = ("🐾 %d/%d"):format(#data.Pets, Config.MAX_PETS)
-	powerStat.Text = "⚔️ Team " .. Config.formatNumber(teamPower * Config.damageMult(data.Upgrades))
+	countStat.Text = ("🐾 %d/%d"):format(#data.Pets, Config.maxPets(data))
+	powerStat.Text = "⚔️ Team " .. Config.formatNumber(teamPower * Config.totalDamage(data))
 	bestStat.Text = "🏆 " .. (best or "-")
-	panel.Title.Text = ("🐾 Pets   ·   Equipped %d/%d"):format(#data.Equipped, Config.maxEquipped(data.Upgrades))
+	panel.Title.Text = ("🐾 Pets   ·   Equipped %d/%d"):format(#data.Equipped, Config.totalSlots(data))
 
 	-- equipped first, then strongest first
 	local order = {}

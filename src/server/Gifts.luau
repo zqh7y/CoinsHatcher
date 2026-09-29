@@ -1,4 +1,5 @@
--- Playtime gifts: free coins after 1, 3, 5, 10, 15 and 20 minutes of play.
+-- Playtime gifts: free coins and diamonds after 1, 3, 5, 10, 15 and 20
+-- minutes of play.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -25,8 +26,10 @@ local function claim(player, giftIndex)
 
 	claimed[player][giftIndex] = true
 	local reward = Config.giftReward(giftIndex, data.Rebirths)
+	local diamonds = Config.giftDiamonds(giftIndex)
 	PlayerData.addCoins(player, reward)
-	return true, "🎁 You got " .. Config.formatNumber(reward) .. " coins!"
+	PlayerData.addDiamonds(player, diamonds)
+	return true, ("🎁 You got %s coins and %d 💎!"):format(Config.formatNumber(reward), diamonds)
 end
 
 function Gifts.start(remotes)

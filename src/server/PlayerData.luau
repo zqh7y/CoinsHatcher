@@ -20,6 +20,9 @@ local DEFAULT = {
 	Upgrades = {}, -- [upgrade id] = level, bought in the shop
 	Index = {}, -- [pet name] = true for every pet ever hatched
 	Hatched = 0, -- eggs hatched, shown on the player list for flexing
+	Diamonds = 0, -- never reset
+	Perks = {}, -- [perk id] = level, bought with diamonds, never reset
+	Boosts = {}, -- [boost id] = seconds left on a potion (counts down while online)
 }
 
 local sessionData = {} -- [player] = data table while they're in game
@@ -40,6 +43,10 @@ local function showCoins(player, coins)
 	player:SetAttribute("Coins", coins)
 end
 
+local function showDiamonds(player, diamonds)
+	player:SetAttribute("Diamonds", diamonds)
+end
+
 local function load(player)
 	local ok, saved = pcall(function()
 		return store:GetAsync("user_" .. player.UserId)
@@ -54,6 +61,8 @@ local function load(player)
 	data.Equipped = {}
 	data.Upgrades = {}
 	data.Index = {}
+	data.Perks = {}
+	data.Boosts = {}
 	if ok and saved then
 		for k, v in pairs(saved) do
 			data[k] = v
@@ -95,6 +104,7 @@ local function load(player)
 
 	stats.Parent = player
 	showCoins(player, data.Coins)
+	showDiamonds(player, data.Diamonds)
 
 	if player.Parent then
 		sessionData[player] = data
@@ -138,7 +148,36 @@ function PlayerData.addCoins(player, amount)
 	showCoins(player, data.Coins)
 end
 
--- Rebirth resets everything except pets (and the index of pets found).
+function PlayerData.addDiamonds(player, amount)
+	local data = sessionData[player]
+	if not data then
+		return
+	end
+	data.Diamonds = math.floor(data.Diamonds + amount)
+	showDiamonds(player, data.Diamonds)
+end
+
+function PlayerData.setPerk(player, id, level)
+	local data = sessionData[player]
+	if not data then
+		return
+	end
+	data.Perks[id] = level
+	PlayerData.Changed:Fire(player)
+end
+
+-- Adds potion time (seconds), capped at Config.BOOST_MAX_MINUTES.
+function PlayerData.addBoost(player, id, seconds)
+	local data = sessionData[player]
+	if not data then
+		return
+	end
+	data.Boosts[id] = math.min((data.Boosts[id] or 0) + seconds, Config.BOOST_MAX_MINUTES * 60)
+	PlayerData.Changed:Fire(player)
+end
+
+-- Rebirth resets coins and shop upgrades. Pets, the index, diamonds, perks
+-- and potions are kept.
 function PlayerData.rebirth(player)
 	local data = sessionData[player]
 	if not data then
@@ -148,7 +187,7 @@ function PlayerData.rebirth(player)
 	data.Rebirths += 1
 	data.Upgrades = {}
 	-- extra pet slots were reset, so unequip pets that no longer fit
-	while #data.Equipped > Config.maxEquipped(data.Upgrades) do
+	while #data.Equipped > Config.totalSlots(data) do
 		table.remove(data.Equipped)
 	end
 	showCoins(player, data.Coins)
@@ -227,7 +266,32 @@ function PlayerData.setEquipped(player, equipped)
 	PlayerData.Changed:Fire(player)
 end
 
+-- Counts down potion timers for everyone online (called once a second).
+local function tickBoosts()
+	for player, data in pairs(sessionData) do
+		local expired = false
+		for id, seconds in pairs(data.Boosts) do
+			if seconds <= 1 then
+				data.Boosts[id] = nil
+				expired = true
+			else
+				data.Boosts[id] = seconds - 1
+			end
+		end
+		if expired then
+			PlayerData.Changed:Fire(player)
+		end
+	end
+end
+
 function PlayerData.start()
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			tickBoosts()
+		end
+	end)
+
 	Players.PlayerAdded:Connect(load)
 	for _, player in ipairs(Players:GetPlayers()) do
 		task.spawn(load, player)

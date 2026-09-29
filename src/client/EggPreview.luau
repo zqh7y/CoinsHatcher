@@ -158,7 +158,7 @@ local function canHatch(count)
 		Ui.toast("🔒 Rebirth " .. Config.eggRequiredRebirths(shownEgg) .. " needed to open this egg!", Ui.COLORS.Red)
 		return false
 	end
-	if #data.Pets + count > Config.MAX_PETS then
+	if #data.Pets + count > Config.maxPets(data) then
 		Ui.toast("🎒 Your pet inventory is full! Delete some pets.", Ui.COLORS.Red)
 		return false
 	end
@@ -223,11 +223,11 @@ local function show(eggIndex)
 	end
 	popupStroke.Color = egg.Color:Lerp(Color3.new(1, 1, 1), 0.5)
 
-	for i, entry in ipairs(Config.mutationChances(data and data.Upgrades)) do
+	for i, entry in ipairs(Config.mutationChances(data)) do
 		mutationChips[i].Text = ("%s %s  %s"):format(entry.Mutation.Icon, entry.Mutation.Name, Ui.percent(entry.Chance))
 	end
 
-	for order, entry in ipairs(Config.eggChances(eggIndex, data and data.Upgrades)) do
+	for order, entry in ipairs(Config.eggChances(eggIndex, data)) do
 		local known = data and data.Index[entry.Pet]
 		local info = Config.PETS[entry.Pet]
 		Cards.pet(row, entry.Pet, {

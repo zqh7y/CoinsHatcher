@@ -229,7 +229,25 @@ local function spawnCoin(player)
 	model:SetAttribute("Value", stats.Value)
 	model:SetAttribute("Radius", radius)
 	model:SetAttribute("Height", height)
-	makeHealthBar(base, height)
+
+	-- some breakables carry diamonds: a glowing gem floats above them
+	local breakable = Config.BREAKABLES[kind]
+	if breakable.Diamonds > 0 and math.random() < breakable.DiamondChance then
+		model:SetAttribute("Diamonds", breakable.Diamonds)
+		local gem = piece(
+			model,
+			origin,
+			CFrame.new(0, height + 0.9, 0) * CFrame.Angles(math.rad(45), 0, math.rad(45)),
+			Vector3.one * 0.9,
+			Color3.fromRGB(110, 220, 255)
+		)
+		gem.Name = "Diamond"
+		gem.Material = Enum.Material.Neon
+		gem.CastShadow = false
+	end
+
+	-- the health bar goes above the gem if there is one
+	makeHealthBar(base, if model:GetAttribute("Diamonds") then height + 1.4 else height)
 	updateHealthBar(model, stats.Health)
 
 	if kind == #BUILDERS then
@@ -268,7 +286,11 @@ function Coins.damage(player, model, amount, crit)
 	end
 
 	local data = PlayerData.get(player)
-	PlayerData.addCoins(player, model:GetAttribute("Value") * Config.coinMult(data and data.Upgrades))
+	PlayerData.addCoins(player, model:GetAttribute("Value") * Config.totalCoins(data))
+	local diamonds = model:GetAttribute("Diamonds")
+	if diamonds then
+		PlayerData.addDiamonds(player, diamonds)
+	end
 	model:Destroy()
 	task.delay(Config.COIN_RESPAWN_TIME, spawnCoin, player)
 	return true

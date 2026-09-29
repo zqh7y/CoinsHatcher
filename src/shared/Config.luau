@@ -22,11 +22,12 @@ Config.COIN_RESPAWN_TIME = 1
 
 -- The things pets break in the coin zone. Chance is a weight;
 -- Mult multiplies both health and coins.
+-- Diamonds: how many a breakable drops, and the chance (0-1) it has them.
 Config.BREAKABLES = {
-	{ Name = "Coins", Chance = 60, Mult = 1 }, -- a stack of 4 coins
-	{ Name = "Coin Pile", Chance = 27, Mult = 3 },
-	{ Name = "Chest", Chance = 10, Mult = 10 },
-	{ Name = "Big Chest", Chance = 3, Mult = 30 },
+	{ Name = "Coins", Chance = 60, Mult = 1, Diamonds = 0, DiamondChance = 0 }, -- a stack of 4 coins
+	{ Name = "Coin Pile", Chance = 27, Mult = 3, Diamonds = 1, DiamondChance = 0.1 },
+	{ Name = "Chest", Chance = 10, Mult = 10, Diamonds = 1, DiamondChance = 1 },
+	{ Name = "Big Chest", Chance = 3, Mult = 30, Diamonds = 4, DiamondChance = 1 },
 }
 
 function Config.coinStats(rebirths: number, kind: number)
@@ -224,10 +225,11 @@ function Config.rollWeighted(list): number
 	return 1
 end
 
--- The chance (in %) of each pet in an egg, including luck from upgrades.
--- Returns a list of { Pet, Chance } with the huge pet last.
-function Config.eggChances(eggIndex: number, upgrades)
-	local luck = Config.luckMult(upgrades)
+-- The chance (in %) of each pet in an egg, including the player's luck
+-- (data can be nil for the base odds). Returns a list of { Pet, Chance }
+-- with the huge pet last.
+function Config.eggChances(eggIndex: number, data)
+	local luck = Config.totalLuck(data)
 	local egg = Config.EGGS[eggIndex]
 	local hugeChance = Config.HUGE_CHANCE * luck
 
@@ -246,9 +248,9 @@ function Config.eggChances(eggIndex: number, upgrades)
 	return list
 end
 
--- Mutation chances (in %) with luck applied.
-function Config.mutationChances(upgrades)
-	local luck = Config.luckMult(upgrades)
+-- Mutation chances (in %) with the player's luck applied.
+function Config.mutationChances(data)
+	local luck = Config.totalLuck(data)
 	local list = {}
 	for _, mutation in ipairs(Config.MUTATIONS) do
 		table.insert(list, { Mutation = mutation, Chance = mutation.Chance * luck })
@@ -283,15 +285,15 @@ function Config.chanceText(petName: string): string
 end
 
 -- Rolls a pet from the egg, then maybe a mutation.
-function Config.rollHatch(eggIndex: number, upgrades): string
-	local list = Config.eggChances(eggIndex, upgrades)
+function Config.rollHatch(eggIndex: number, data): string
+	local list = Config.eggChances(eggIndex, data)
 	local petName = list[Config.rollWeighted(list)].Pet
 	if Config.PETS[petName].Rarity == "Huge" then
 		return petName
 	end
 	-- rarest mutation first, so luck can't make a common one hide a rare one
 	local roll = math.random() * 100
-	local chances = Config.mutationChances(upgrades)
+	local chances = Config.mutationChances(data)
 	for i = #chances, 1, -1 do
 		if roll < chances[i].Chance then
 			return chances[i].Mutation.Name .. " " .. petName
@@ -353,6 +355,71 @@ function Config.maxEquipped(upgrades): number
 	return Config.MAX_EQUIPPED + level(upgrades, "Slots")
 end
 Config.HOVERBOARD_SPEED = 14 -- extra walk speed while riding
+
+-- Diamonds ------------------------------------------------------------------
+-- Diamonds never reset. Earned from chests, new pets, rebirths and gifts;
+-- spent on boost potions and permanent perks.
+Config.DIAMONDS_NEW_PET = 25 -- first time you hatch a pet
+Config.DIAMONDS_NEW_HUGE = 250 -- first time you hatch a huge
+Config.DIAMONDS_PER_REBIRTH = 100 -- times the new rebirth number
+
+function Config.giftDiamonds(giftIndex: number): number
+	return 10 * giftIndex
+end
+
+-- Potions: 2x for a while. Buying more adds time (up to BOOST_MAX_MINUTES).
+-- Their time only counts down while you're playing.
+Config.BOOSTS = {
+	{ Id = "Coins", Name = "2x Coins", Icon = "💰", Cost = 250, Minutes = 10 },
+	{ Id = "Luck", Name = "2x Luck", Icon = "🍀", Cost = 300, Minutes = 10 },
+	{ Id = "Damage", Name = "2x Damage", Icon = "⚔️", Cost = 250, Minutes = 10 },
+}
+Config.BOOST_MAX_MINUTES = 60
+
+-- Perks: permanent, kept through rebirths.
+Config.PERKS = {
+	{ Id = "Coins", Name = "Coin Master", Icon = "💰", Max = 10, BaseCost = 300, Growth = 1.4, Info = "+10% coins forever" },
+	{ Id = "Luck", Name = "Lucky Charm", Icon = "🍀", Max = 10, BaseCost = 350, Growth = 1.4, Info = "+10% luck forever" },
+	{ Id = "Backpack", Name = "Big Backpack", Icon = "🎒", Max = 4, BaseCost = 600, Growth = 2, Info = "+25 pet storage" },
+	{ Id = "Slots", Name = "Extra Slot", Icon = "🐾", Max = 2, BaseCost = 2000, Growth = 3, Info = "+1 pet slot forever" },
+}
+
+Config.BOOSTS_BY_ID = {}
+for _, boost in ipairs(Config.BOOSTS) do
+	Config.BOOSTS_BY_ID[boost.Id] = boost
+end
+Config.PERKS_BY_ID = {}
+for _, perk in ipairs(Config.PERKS) do
+	Config.PERKS_BY_ID[perk.Id] = perk
+end
+
+function Config.perkCost(perk, level: number): number
+	return math.floor(perk.BaseCost * perk.Growth ^ level)
+end
+
+local function perkLevel(data, id)
+	return if data and data.Perks then data.Perks[id] or 0 else 0
+end
+local function boosted(data, id)
+	return if data and data.Boosts and (data.Boosts[id] or 0) > 0 then 2 else 1
+end
+
+-- Totals: shop upgrades + diamond perks + potions, from the player's data.
+function Config.totalDamage(data): number
+	return Config.damageMult(data and data.Upgrades) * boosted(data, "Damage")
+end
+function Config.totalLuck(data): number
+	return (Config.luckMult(data and data.Upgrades) + 0.1 * perkLevel(data, "Luck")) * boosted(data, "Luck")
+end
+function Config.totalCoins(data): number
+	return (Config.coinMult(data and data.Upgrades) + 0.1 * perkLevel(data, "Coins")) * boosted(data, "Coins")
+end
+function Config.totalSlots(data): number
+	return Config.maxEquipped(data and data.Upgrades) + perkLevel(data, "Slots")
+end
+function Config.maxPets(data): number
+	return Config.MAX_PETS + 25 * perkLevel(data, "Backpack")
+end
 
 -- Numbers for kids: 1,234 / 12.5K / 3.4M / 750B / 1.2T ...
 local SUFFIXES = { "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc" }

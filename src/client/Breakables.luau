@@ -70,6 +70,7 @@ local function track(model)
 		Pivot = model:GetPivot(),
 		Health = model:GetAttribute("Health") or 0,
 		Value = model:GetAttribute("Value") or 0,
+		Diamonds = model:GetAttribute("Diamonds"),
 		Height = model:GetAttribute("Height") or 2,
 		ShakeUntil = 0,
 		Shaking = false,
@@ -100,10 +101,18 @@ local function untrack(model)
 	if info and info.Health <= 0 then
 		popup(
 			info.Pivot.Position + Vector3.new(0, info.Height + 1, 0),
-			"+" .. Config.formatNumber(info.Value * Config.coinMult(State.Data and State.Data.Upgrades)) .. " 💰",
+			"+" .. Config.formatNumber(info.Value * Config.totalCoins(State.Data)) .. " 💰",
 			Color3.fromRGB(255, 215, 60),
 			34
 		)
+		if info.Diamonds then
+			popup(
+				info.Pivot.Position + Vector3.new(0, info.Height + 2.6, 0),
+				"+" .. info.Diamonds .. " 💎",
+				Color3.fromRGB(120, 220, 255),
+				32
+			)
+		end
 	end
 end
 

@@ -28,7 +28,7 @@ local EGG_CENTER = Vector3.new(0, 0, 1000) -- same as World.EGG_CENTER on the se
 
 local hud = Instance.new("Frame")
 hud.Position = UDim2.fromOffset(12, 60)
-hud.Size = UDim2.fromOffset(200, 100)
+hud.Size = UDim2.fromOffset(200, 150)
 hud.BackgroundTransparency = 1
 hud.Parent = Ui.gui
 
@@ -53,7 +53,8 @@ local function counter(icon, color, y)
 end
 
 local coinText, coinScale = counter("💰", Color3.fromRGB(255, 190, 50), 0)
-local rebirthText = counter("⭐", Color3.fromRGB(170, 100, 230), 52)
+local diamondText, diamondScale = counter("💎", Color3.fromRGB(70, 190, 240), 52)
+local rebirthText = counter("⭐", Color3.fromRGB(170, 100, 230), 104)
 
 task.spawn(function()
 	local stats = player:WaitForChild("leaderstats")
@@ -67,6 +68,13 @@ task.spawn(function()
 		rebirthText.Text = ("Rebirth %d/%d"):format(rebirths.Value, Config.MAX_REBIRTHS)
 	end
 	player:GetAttributeChangedSignal("Coins"):Connect(updateCoins)
+	local function updateDiamonds()
+		diamondText.Text = Config.formatNumber(player:GetAttribute("Diamonds") or 0)
+		diamondScale.Scale = 1.15
+		TweenService:Create(diamondScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	end
+	player:GetAttributeChangedSignal("Diamonds"):Connect(updateDiamonds)
+	updateDiamonds()
 	rebirths.Changed:Connect(updateRebirths)
 	updateCoins()
 	updateRebirths()
@@ -76,7 +84,7 @@ end)
 
 local side = Instance.new("Frame")
 side.AnchorPoint = Vector2.new(0, 0.5)
-side.Position = UDim2.new(0, 12, 0.55, 0)
+side.Position = UDim2.new(0, 12, 0.6, 0)
 side.Size = UDim2.fromOffset(170, 260)
 side.BackgroundTransparency = 1
 side.Parent = Ui.gui

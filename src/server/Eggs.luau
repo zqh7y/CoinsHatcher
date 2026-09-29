@@ -52,7 +52,7 @@ local function hatch(player, eggIndex, count)
 		notify(player, "🔒 Rebirth " .. required .. " needed to open this egg!", RED)
 		return
 	end
-	if #data.Pets + count > Config.MAX_PETS then
+	if #data.Pets + count > Config.maxPets(data) then
 		notify(player, "🎒 Your pet inventory is full! Delete or combine some pets.", RED)
 		return
 	end
@@ -67,12 +67,28 @@ local function hatch(player, eggIndex, count)
 
 	local names = {}
 	for _ = 1, count do
-		table.insert(names, Config.rollHatch(eggIndex, data.Upgrades))
+		table.insert(names, Config.rollHatch(eggIndex, data))
 	end
+
+	-- diamonds for pets you've never found before (checked before adding them)
+	local reward, found = 0, {}
+	for _, petName in ipairs(names) do
+		local info = Config.PETS[petName]
+		local base = info.Base or petName
+		if not data.Index[base] and not found[base] then
+			found[base] = true
+			reward += if info.Rarity == "Huge" then Config.DIAMONDS_NEW_HUGE else Config.DIAMONDS_NEW_PET
+		end
+	end
+
 	local indexes = PlayerData.addPets(player, names)
+	if reward > 0 then
+		PlayerData.addDiamonds(player, reward)
+		notify(player, "📖 New pet discovered! +" .. reward .. " 💎", Color3.fromRGB(130, 220, 255))
+	end
 
 	-- auto-equip into free slots
-	local max = Config.maxEquipped(data.Upgrades)
+	local max = Config.totalSlots(data)
 	if #data.Equipped < max then
 		local equipped = table.clone(data.Equipped)
 		for _, index in ipairs(indexes) do

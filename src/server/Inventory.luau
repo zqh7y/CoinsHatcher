@@ -19,7 +19,7 @@ local function setEquipped(player, petIndex, equip)
 	local equipped = table.clone(data.Equipped)
 	local pos = table.find(equipped, petIndex)
 	if equip and not pos then
-		local max = Config.maxEquipped(data.Upgrades)
+		local max = Config.totalSlots(data)
 		if #equipped >= max then
 			return false, "You can only equip " .. max .. " pets! Buy more slots in the shop."
 		end
@@ -48,7 +48,7 @@ local function equipBest(player)
 	end)
 
 	local equipped = {}
-	for i = 1, math.min(#order, Config.maxEquipped(data.Upgrades)) do
+	for i = 1, math.min(#order, Config.totalSlots(data)) do
 		table.insert(equipped, order[i])
 	end
 	PlayerData.setEquipped(player, equipped)

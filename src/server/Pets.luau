@@ -155,7 +155,7 @@ local function update(dt)
 		local rootPos = root.Position
 		local inMain = World.isInMainArea(rootPos)
 		local speed = Config.PET_SPEED * Config.petSpeedMult(data.Upgrades)
-		local damageMult = Config.damageMult(data.Upgrades)
+		local damageMult = Config.totalDamage(data)
 
 		for i, pet in ipairs(pets) do
 			local part = pet.Part

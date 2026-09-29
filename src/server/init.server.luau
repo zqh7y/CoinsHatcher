@@ -38,6 +38,8 @@ remote("RemoteEvent", "Notify") -- server -> client: message, color
 remote("RemoteEvent", "Hatched") -- server -> client: { petName }
 remote("RemoteFunction", "BuyUpgrade") -- client -> server: upgrade id, returns ok, message
 remote("RemoteEvent", "ToggleHoverboard") -- client -> server
+remote("RemoteFunction", "BuyPerk") -- client -> server: perk id (costs diamonds)
+remote("RemoteFunction", "BuyBoost") -- client -> server: potion id (costs diamonds)
 
 remotes.Parent = ReplicatedStorage
 
@@ -96,5 +98,7 @@ Rebirth.OnServerInvoke = function(player)
 
 	PlayerData.rebirth(player)
 	Coins.reset(player) -- respawn their coins at the new, stronger level
-	return true, "Rebirth " .. data.Rebirths .. "! The area got stronger and a new egg unlocked!"
+	local diamonds = Config.DIAMONDS_PER_REBIRTH * data.Rebirths
+	PlayerData.addDiamonds(player, diamonds)
+	return true, ("Rebirth %d! +%d 💎  The area got stronger and a new egg unlocked!"):format(data.Rebirths, diamonds)
 end

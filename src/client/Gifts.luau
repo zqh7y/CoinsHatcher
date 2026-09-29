@@ -145,7 +145,7 @@ end
 local function refresh()
 	local rebirths = State.Data and State.Data.Rebirths or 0
 	for i, tile in ipairs(tiles) do
-		tile.Reward.Text = "💰 " .. Config.formatNumber(Config.giftReward(i, rebirths))
+		tile.Reward.Text = ("💰 %s  💎 %d"):format(Config.formatNumber(Config.giftReward(i, rebirths)), Config.giftDiamonds(i))
 		local total = Config.GIFT_TIMES[i] * 60
 		local left = secondsLeft(i)
 		tile.Fill.Size = UDim2.fromScale(1 - left / total, 1)

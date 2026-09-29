@@ -177,8 +177,58 @@ local function buy(player, id)
 	return true, upgrade.Icon .. " " .. upgrade.Name .. " upgraded!"
 end
 
+-- Diamond shop: permanent perks and 2x potions.
+local function buyPerk(player, id)
+	local data = PlayerData.get(player)
+	local perk = Config.PERKS_BY_ID[id]
+	if not data or not perk then
+		return false, "Can't buy that."
+	end
+	local level = data.Perks[id] or 0
+	if level >= perk.Max then
+		return false, perk.Name .. " is maxed out!"
+	end
+	local cost = Config.perkCost(perk, level)
+	if data.Diamonds < cost then
+		return false, "Not enough diamonds! 💎"
+	end
+	PlayerData.addDiamonds(player, -cost)
+	PlayerData.setPerk(player, id, level + 1)
+	return true, perk.Icon .. " " .. perk.Name .. " upgraded forever!"
+end
+
+local function buyBoost(player, id)
+	local data = PlayerData.get(player)
+	local boost = Config.BOOSTS_BY_ID[id]
+	if not data or not boost then
+		return false, "Can't buy that."
+	end
+	if (data.Boosts[id] or 0) + boost.Minutes * 60 > Config.BOOST_MAX_MINUTES * 60 then
+		return false, "You already have the most time on this potion!"
+	end
+	if data.Diamonds < boost.Cost then
+		return false, "Not enough diamonds! 💎"
+	end
+	PlayerData.addDiamonds(player, -boost.Cost)
+	PlayerData.addBoost(player, id, boost.Minutes * 60)
+	return true, "🧪 " .. boost.Name .. " for " .. boost.Minutes .. " more minutes!"
+end
+
 function Shop.start(remotes)
 	buildStall()
+
+	remotes.BuyPerk.OnServerInvoke = function(player, id)
+		if typeof(id) ~= "string" then
+			return false
+		end
+		return buyPerk(player, id)
+	end
+	remotes.BuyBoost.OnServerInvoke = function(player, id)
+		if typeof(id) ~= "string" then
+			return false
+		end
+		return buyBoost(player, id)
+	end
 
 	remotes.BuyUpgrade.OnServerInvoke = function(player, id)
 		if typeof(id) ~= "string" then

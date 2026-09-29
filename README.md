@@ -31,7 +31,15 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Big numbers**: numbers start in the hundreds/thousands and grow ×10 per
   rebirth (shown as 1.5K, 4.5M...); pets land 3x critical hits.
 - **Boosts**: small icons in the bottom right show every active upgrade.
-- **Free gifts** after 1, 3, 5, 10, 15 and 20 minutes of play.
+- **Free gifts** (coins + diamonds) after 1, 3, 5, 10, 15 and 20 minutes of play.
+- **Economy**:
+  - 💰 **Coins** (reset on rebirth): from breakables and gifts; spent on eggs,
+    shop upgrades and rebirths.
+  - 💎 **Diamonds** (never reset): chests (1), big chests (4), some coin piles
+    (floating gem), first time finding a pet (25, huge 250), rebirths
+    (100 × rebirth number) and gifts. Spent in the shop's Diamond tab on
+    2x potions (coins / luck / damage, 10 min, only ticks while playing) and
+    forever perks (coin bonus, luck, bigger backpack, extra pet slot).
 - **Index**: collection book of every pet; unfound ones are silhouettes.
 - **Rebirth**: resets everything except your pets (and index). Max 3 for now.
 
