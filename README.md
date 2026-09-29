@@ -21,7 +21,7 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   area's breakables tougher and worth more (and changes its color).
 - **Shop** (stall in the main area): upgrade pet damage, luck, walk speed,
   pet speed, coin bonus, pet slots, and buy a hoverboard.
-- **📈 Upgrade board** (big board in the main area, reset on rebirth):
+- **📈 Upgrade board** (big cartoon board in the main area, reset on rebirth):
   incremental upgrades for the coin zone with lots of levels and Buy Max:
   coin value, chest value, more things to break, chest luck, faster respawn,
   diamond finder, crit chance.

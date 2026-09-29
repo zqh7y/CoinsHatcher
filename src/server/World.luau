@@ -46,7 +46,7 @@ function World.build()
 			CFrame = CFrame.new(World.MAIN_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0))
 				* CFrame.Angles(0, 0, math.rad(90)),
 			Color = Color3.fromRGB(120, 210, 90), -- the client recolors this by rebirth
-			Material = Enum.Material.Grass,
+			Material = Enum.Material.SmoothPlastic,
 			Parent = main,
 		})
 	end
@@ -70,7 +70,7 @@ function World.build()
 			CFrame = CFrame.new(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0))
 				* CFrame.Angles(0, 0, math.rad(90)),
 			Color = Color3.fromRGB(235, 220, 255),
-			Material = Enum.Material.Marble,
+			Material = Enum.Material.SmoothPlastic,
 			Parent = eggs,
 		})
 	end

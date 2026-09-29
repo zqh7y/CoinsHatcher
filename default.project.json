@@ -24,6 +24,29 @@
         "FilteringEnabled": true,
         "StreamingEnabled": false
       },
+      "Baseplate": {
+        "$className": "Part",
+        "$properties": {
+          "Anchored": true,
+          "Color": [
+            0.43137,
+            0.76471,
+            0.33333
+          ],
+          "Locked": true,
+          "Position": [
+            0,
+            -10,
+            500
+          ],
+          "Size": [
+            2048,
+            20,
+            2048
+          ],
+          "Material": "SmoothPlastic"
+        }
+      },
       "MainArea": {
         "$className": "Folder",
         "Floor": {
@@ -67,7 +90,7 @@
               0.82353,
               0.35294
             ],
-            "Material": "Grass",
+            "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth"
           }
@@ -82,11 +105,11 @@
               50
             ],
             "Color": [
-              0.84314,
-              0.80392,
-              0.72549
+              0.66667,
+              0.90196,
+              0.56863
             ],
-            "Material": "Cobblestone",
+            "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth",
             "Shape": "Cylinder",
@@ -133,11 +156,11 @@
               38
             ],
             "Color": [
-              0.96078,
-              0.90196,
-              0.7451
+              1.0,
+              0.82353,
+              0.35294
             ],
-            "Material": "Marble",
+            "Material": "SmoothPlastic",
             "Duration": 0,
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth"
@@ -181,11 +204,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -226,11 +249,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -271,11 +294,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -316,11 +339,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -361,11 +384,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -406,11 +429,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -451,11 +474,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -496,11 +519,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -541,11 +564,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -586,11 +609,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -631,11 +654,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -676,11 +699,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -721,11 +744,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -766,11 +789,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -811,11 +834,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -856,11 +879,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -901,11 +924,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -946,11 +969,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -991,11 +1014,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -1036,11 +1059,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -1081,11 +1104,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -1126,11 +1149,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -1171,11 +1194,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -1216,11 +1239,11 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ],
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth"
             }
@@ -1233,7 +1256,7 @@
           "$className": "Part",
           "$properties": {
             "Anchored": true,
-            "Material": "Marble",
+            "Material": "SmoothPlastic",
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth",
             "Shape": "Cylinder",
@@ -1281,7 +1304,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "Marble",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Shape": "Cylinder",
@@ -1327,7 +1350,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "Marble",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Shape": "Cylinder",
@@ -1373,7 +1396,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "Marble",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Shape": "Cylinder",
@@ -1419,7 +1442,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "Marble",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Shape": "Cylinder",
@@ -1465,7 +1488,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "Marble",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Shape": "Cylinder",
@@ -1514,7 +1537,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1549,9 +1572,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1559,7 +1582,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1594,9 +1617,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1604,7 +1627,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1639,9 +1662,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1649,7 +1672,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1684,9 +1707,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1694,7 +1717,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1729,9 +1752,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1739,7 +1762,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1774,9 +1797,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1784,7 +1807,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1819,9 +1842,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1829,7 +1852,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1864,9 +1887,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1874,7 +1897,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1909,9 +1932,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1919,7 +1942,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1954,9 +1977,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -1964,7 +1987,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -1999,9 +2022,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2009,7 +2032,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2044,9 +2067,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2054,7 +2077,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2089,9 +2112,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2099,7 +2122,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2134,9 +2157,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2144,7 +2167,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2179,9 +2202,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2189,7 +2212,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2224,9 +2247,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2234,7 +2257,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2269,9 +2292,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2279,7 +2302,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2314,9 +2337,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2324,7 +2347,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2359,9 +2382,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2369,7 +2392,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2404,9 +2427,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2414,7 +2437,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2449,9 +2472,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2459,7 +2482,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2494,9 +2517,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2504,7 +2527,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2539,9 +2562,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           },
@@ -2549,7 +2572,7 @@
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Material": "WoodPlanks",
+              "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
               "BottomSurface": "Smooth",
               "Size": [
@@ -2584,9 +2607,9 @@
                 }
               },
               "Color": [
-                0.7451,
-                0.54902,
-                0.37255
+                1.0,
+                0.96078,
+                0.88235
               ]
             }
           }
@@ -2599,7 +2622,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -2691,7 +2714,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -2788,7 +2811,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -2880,7 +2903,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -2977,7 +3000,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3069,7 +3092,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3166,7 +3189,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3258,7 +3281,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3355,7 +3378,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3447,7 +3470,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3544,7 +3567,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3636,7 +3659,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3733,7 +3756,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3825,7 +3848,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -3922,7 +3945,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -4014,7 +4037,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -4111,7 +4134,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -4203,7 +4226,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -4300,7 +4323,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -4392,7 +4415,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -4489,7 +4512,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -4581,7 +4604,7 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
-                "Material": "Marble",
+                "Material": "SmoothPlastic",
                 "TopSurface": "Smooth",
                 "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
@@ -4673,82 +4696,68 @@
             }
           }
         }
-      },
-      "Terrain": {
-        "$properties": {
-          "Decoration": true
-        }
       }
     },
     "Lighting": {
       "$properties": {
         "Ambient": [
-          0.43137,
-          0.43137,
-          0.47059
+          0.47059,
+          0.47059,
+          0.5098
         ],
         "OutdoorAmbient": [
-          0.58824,
-          0.58824,
-          0.62745
+          0.62745,
+          0.62745,
+          0.66667
         ],
         "Brightness": 3,
-        "ClockTime": 14.5,
+        "ClockTime": 14,
         "GlobalShadows": true,
         "Outlines": false,
-        "Technology": "Future",
+        "Technology": "ShadowMap",
         "EnvironmentDiffuseScale": 1,
-        "EnvironmentSpecularScale": 1,
-        "ShadowSoftness": 0.25,
-        "GeographicLatitude": 35
+        "EnvironmentSpecularScale": 0.5
       },
       "Sky": {
         "$className": "Sky",
         "$properties": {
-          "SunAngularSize": 12,
+          "SunAngularSize": 14,
           "MoonAngularSize": 8
         }
       },
       "Atmosphere": {
         "$className": "Atmosphere",
         "$properties": {
-          "Density": 0.3,
-          "Offset": 0.25,
+          "Density": 0.32,
+          "Offset": 0.2,
           "Color": [
-            0.78039,
-            0.84314,
-            0.94118
+            0.78431,
+            0.88235,
+            1.0
           ],
           "Decay": [
-            0.41569,
-            0.5098,
-            0.66667
+            0.58824,
+            0.7451,
+            1.0
           ],
-          "Glare": 0.3,
-          "Haze": 1.4
-        }
-      },
-      "SunRays": {
-        "$className": "SunRaysEffect",
-        "$properties": {
-          "Intensity": 0.08,
-          "Spread": 0.7
+          "Glare": 0,
+          "Haze": 1.2
         }
       },
       "ColorCorrection": {
         "$className": "ColorCorrectionEffect",
         "$properties": {
-          "Saturation": 0.15,
-          "Contrast": 0.08,
+          "Saturation": 0.25,
+          "Contrast": 0.05,
           "Brightness": 0.02
         }
       },
       "Bloom": {
         "$className": "BloomEffect",
         "$properties": {
-          "Intensity": 0.25,
+          "Intensity": 0.35,
           "Size": 24,
-          "Threshold": 1.2
+          "Threshold": 0.95
         }
       }
     },

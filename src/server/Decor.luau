@@ -28,6 +28,12 @@ local FAR_HILL_COLORS = {
 	Color3.fromRGB(110, 175, 135),
 	Color3.fromRGB(135, 195, 125),
 }
+local TREE_COLORS = {
+	Color3.fromRGB(110, 200, 90),
+	Color3.fromRGB(90, 185, 100),
+	Color3.fromRGB(255, 170, 205), -- pink blossom
+	Color3.fromRGB(255, 205, 120), -- orange
+}
 local FLOWER_COLORS = {
 	Color3.fromRGB(255, 110, 150),
 	Color3.fromRGB(255, 220, 70),
@@ -78,13 +84,7 @@ local function clearOfOtherAreas(pos, radius, selfIndex)
 end
 
 -- Big balls sunk into the ground look like soft round hills.
--- A pond outside the main fence (terrain water), kept clear of hills.
-local POND_CENTER = World.MAIN_CENTER + Vector3.new(math.cos(math.rad(300)) * 82, 0, math.sin(math.rad(300)) * 82)
-local POND_RADIUS = 16
-
--- Rings of round hills. Near ones are terrain (real grass); the big far ones
--- are grassy parts, which is much cheaper for the game to load.
-local function hillRing(areaIndex, count, minSize, maxSize, gap, colors, useTerrain)
+local function hillRing(areaIndex, count, minSize, maxSize, gap, colors)
 	local area = AREAS[areaIndex]
 	for i = 1, count do
 		local angle = (i + rng:NextNumber(-0.3, 0.3)) / count * math.pi * 2
@@ -93,135 +93,37 @@ local function hillRing(areaIndex, count, minSize, maxSize, gap, colors, useTerr
 		-- a ball sunk by a quarter touches the ground in a circle ~0.43 * size wide
 		local dist = wallDistance(area, dx, dz) + size * 0.45 + gap + rng:NextNumber(0, 15)
 		local pos = area.Center + Vector3.new(dx * dist, 0, dz * dist)
-		local clearOfPond = (pos - POND_CENTER).Magnitude > POND_RADIUS + size * 0.45 + 6
-		if clearOfOtherAreas(pos, size * 0.45, areaIndex) and clearOfPond then
-			local center = Vector3.new(pos.X, -size * 0.25, pos.Z)
-			if useTerrain then
-				workspace.Terrain:FillBall(center, size / 2, Enum.Material.Grass)
-			else
-				part({
-					Name = "Hill",
-					Shape = Enum.PartType.Ball,
-					Size = Vector3.one * size,
-					Position = center,
-					Color = pick(colors),
-					Material = Enum.Material.Grass,
-				})
-			end
+		if clearOfOtherAreas(pos, size * 0.45, areaIndex) then
+			part({
+				Name = "Hill",
+				Shape = Enum.PartType.Ball,
+				Size = Vector3.one * size,
+				Position = Vector3.new(pos.X, -size * 0.25, pos.Z),
+				Color = pick(colors),
+			})
 		end
 	end
 end
 
--- The ground, pond, mountains and sky.
-local function landscape()
-	local terrain = workspace.Terrain
-	terrain:SetMaterialColor(Enum.Material.Grass, Color3.fromRGB(105, 185, 75))
-	terrain:SetMaterialColor(Enum.Material.Sand, Color3.fromRGB(235, 215, 160))
-
-	-- grass ground under both areas (top at y = 0)
-	terrain:FillBlock(CFrame.new(0, -6, 500), Vector3.new(1600, 12, 2200), Enum.Material.Grass)
-
-	-- pond: a sandy rim, dug out and filled with water
-	local pondCFrame = CFrame.new(POND_CENTER)
-	terrain:FillCylinder(pondCFrame * CFrame.new(0, -1, 0), 2, POND_RADIUS + 4, Enum.Material.Sand)
-	terrain:FillCylinder(pondCFrame * CFrame.new(0, -3, 0), 6, POND_RADIUS, Enum.Material.Air)
-	terrain:FillCylinder(pondCFrame * CFrame.new(0, -3.5, 0), 5, POND_RADIUS, Enum.Material.Water)
-	terrain.WaterColor = Color3.fromRGB(70, 160, 200)
-	terrain.WaterTransparency = 0.6
-	terrain.WaterWaveSize = 0.08
-	terrain.WaterWaveSpeed = 8
-	for _ = 1, 10 do
-		local angle = rng:NextNumber(0, math.pi * 2)
-		local spot = POND_CENTER + Vector3.new(math.cos(angle), 0, math.sin(angle)) * (POND_RADIUS + rng:NextNumber(2, 4))
-		part({
-			Name = "Reed",
-			Size = Vector3.new(0.3, rng:NextNumber(2.5, 4), 0.3),
-			CFrame = CFrame.new(spot + Vector3.new(0, 1.5, 0)) * CFrame.Angles(rng:NextNumber(-0.15, 0.15), 0, rng:NextNumber(-0.15, 0.15)),
-			Color = Color3.fromRGB(90, 150, 60),
-			Material = Enum.Material.Grass,
-			CanCollide = false,
-		})
-	end
-
-	-- snowy mountains all around the edge of the world
-	local mapCenter = Vector3.new(0, 0, 500)
-	for i = 1, 16 do
-		local angle = (i + rng:NextNumber(-0.25, 0.25)) / 16 * math.pi * 2
-		local spot = mapCenter + Vector3.new(math.cos(angle) * 820, 0, math.sin(angle) * 1150)
-		local size = rng:NextNumber(300, 460)
-		local peak = spot + Vector3.new(0, size * 0.3, 0)
-		part({
-			Name = "Mountain",
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * size,
-			Position = spot - Vector3.new(0, size * 0.2, 0),
-			Color = Color3.fromRGB(125, 130, 140),
-			Material = Enum.Material.Rock,
-			CastShadow = false,
-		})
-		part({
-			Name = "SnowCap",
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * size * 0.42,
-			Position = peak - Vector3.new(0, size * 0.06, 0),
-			Color = Color3.fromRGB(245, 248, 255),
-			Material = Enum.Material.Snow,
-			CastShadow = false,
-		})
-	end
-
-	-- real 3D clouds
-	local clouds = terrain:FindFirstChildOfClass("Clouds") or Instance.new("Clouds")
-	clouds.Cover = 0.55
-	clouds.Density = 0.6
-	clouds.Color = Color3.new(1, 1, 1)
-	clouds.Parent = terrain
-end
-
-local LEAF_COLORS = {
-	Color3.fromRGB(85, 160, 70),
-	Color3.fromRGB(105, 175, 80),
-	Color3.fromRGB(70, 140, 65),
-}
-
--- A leafy tree: a tapered trunk and a crown of overlapping leaf balls
--- (sometimes a pink cherry blossom tree).
 local function tree(pos)
-	local height = rng:NextNumber(7, 12)
-	local blossom = rng:NextNumber() < 0.15
-	local bark = if rng:NextNumber() < 0.2 then Color3.fromRGB(225, 220, 210) else Color3.fromRGB(120, 85, 55) -- some birches
+	local height = rng:NextNumber(5, 9)
+	local canopy = rng:NextNumber(6, 9)
 	part({
 		Name = "Trunk",
 		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(height * 0.6, 1.8, 1.8),
-		CFrame = CFrame.new(pos + Vector3.new(0, height * 0.3, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-		Color = bark,
-		Material = Enum.Material.Wood,
+		Size = Vector3.new(height, 1.4, 1.4),
+		CFrame = CFrame.new(pos + Vector3.new(0, height / 2, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+		Color = Color3.fromRGB(170, 115, 75),
+		CanCollide = false,
 	})
 	part({
-		Name = "Trunk",
-		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(height * 0.5, 1.2, 1.2),
-		CFrame = CFrame.new(pos + Vector3.new(0, height * 0.75, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-		Color = bark,
-		Material = Enum.Material.Wood,
+		Name = "Leaves",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * canopy,
+		Position = pos + Vector3.new(0, height + canopy * 0.3, 0),
+		Color = pick(TREE_COLORS),
+		CanCollide = false,
 	})
-	local crown = pos + Vector3.new(0, height, 0)
-	for k = 1, rng:NextInteger(4, 6) do
-		local size = rng:NextNumber(4.5, 7.5)
-		local offset = if k == 1
-			then Vector3.new(0, 1.5, 0)
-			else Vector3.new(rng:NextNumber(-3, 3), rng:NextNumber(-1, 2.5), rng:NextNumber(-3, 3))
-		part({
-			Name = "Leaves",
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * size,
-			Position = crown + offset,
-			Color = if blossom then Color3.fromRGB(255, 180, 210):Lerp(Color3.new(1, 1, 1), rng:NextNumber(0, 0.3)) else pick(LEAF_COLORS),
-			Material = if blossom then Enum.Material.SmoothPlastic else Enum.Material.LeafyGrass,
-			CanCollide = false,
-		})
-	end
 end
 
 local function flower(pos)
@@ -246,18 +148,10 @@ end
 
 -- A random spot just outside (or inside) an area's wall.
 local function spotNearWall(area, minOffset, maxOffset, groundY)
-	local spot
-	for _ = 1, 10 do
-		local angle = rng:NextNumber(0, math.pi * 2)
-		local dx, dz = math.cos(angle), math.sin(angle)
-		local dist = wallDistance(area, dx, dz) + rng:NextNumber(minOffset, maxOffset)
-		spot = area.Center + Vector3.new(dx * dist, groundY, dz * dist)
-		-- stay out of the pond (and its sandy rim)
-		if (spot * Vector3.new(1, 0, 1) - POND_CENTER).Magnitude > POND_RADIUS + 6 then
-			break
-		end
-	end
-	return spot
+	local angle = rng:NextNumber(0, math.pi * 2)
+	local dx, dz = math.cos(angle), math.sin(angle)
+	local dist = wallDistance(area, dx, dz) + rng:NextNumber(minOffset, maxOffset)
+	return area.Center + Vector3.new(dx * dist, groundY, dz * dist)
 end
 
 -- Colorful posts with ball caps along the walls, like a toy fence.
@@ -268,27 +162,16 @@ local function fencePosts(area)
 		local pos = area.Center + Vector3.new(x, 0, z)
 		part({
 			Name = "Post",
-			Size = Vector3.new(2.2, 8, 2.2),
+			Size = Vector3.new(2.4, 8, 2.4),
 			Position = pos + Vector3.new(0, 4, 0),
-			Color = Color3.fromRGB(150, 105, 70),
-			Material = Enum.Material.Wood,
+			Color = Color3.fromRGB(255, 250, 240),
 		})
 		part({
 			Name = "Cap",
-			Size = Vector3.new(2.8, 0.6, 2.8),
-			Position = pos + Vector3.new(0, 8.3, 0),
-			Color = Color3.fromRGB(120, 85, 55),
-			Material = Enum.Material.Wood,
-		})
-		-- a small colored lantern on top of every post
-		part({
-			Name = "Lantern",
 			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * 1.4,
-			Position = pos + Vector3.new(0, 9.3, 0),
+			Size = Vector3.one * 3,
+			Position = pos + Vector3.new(0, 9, 0),
 			Color = CAP_COLORS[capIndex % #CAP_COLORS + 1],
-			Material = Enum.Material.Glass,
-			Transparency = 0.2,
 		})
 	end
 
@@ -339,6 +222,20 @@ local function fencePosts(area)
 	end
 end
 
+local function cloud(pos)
+	for _ = 1, rng:NextInteger(3, 5) do
+		local size = rng:NextNumber(12, 24)
+		part({
+			Name = "Cloud",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * size,
+			Position = pos + Vector3.new(rng:NextNumber(-16, 16), rng:NextNumber(-3, 4), rng:NextNumber(-8, 8)),
+			Color = Color3.new(1, 1, 1),
+			CanCollide = false,
+			CastShadow = false,
+		})
+	end
+end
 
 -- Detail pieces ---------------------------------------------------------------
 
@@ -351,7 +248,7 @@ local PASTELS = {
 }
 
 -- A candy-striped cylinder standing up.
-local function candyPole(base, height, width, colorA, colorB, material)
+local function candyPole(base, height, width, colorA, colorB)
 	local segments = math.floor(height / 1.2)
 	for i = 0, segments - 1 do
 		part({
@@ -360,21 +257,14 @@ local function candyPole(base, height, width, colorA, colorB, material)
 			Size = Vector3.new(height / segments, width, width),
 			CFrame = CFrame.new(base + Vector3.new(0, (i + 0.5) * height / segments, 0)) * CFrame.Angles(0, 0, math.rad(90)),
 			Color = if i % 2 == 0 then colorA else colorB,
-			Material = material,
 		})
 	end
 end
 
 -- An arch of two candy poles and a beam with a sign on top (spans along X).
--- `style` = "stone" for a stone-and-wood gate instead of candy.
-local function gate(base, text, poleColor, beamColor, style)
-	local stone = style == "stone"
+local function gate(base, text, poleColor, beamColor)
 	for _, x in ipairs({ -6, 6 }) do
-		if stone then
-			candyPole(base + Vector3.new(x, 0, 0), 12, 2.2, Color3.fromRGB(170, 165, 160), Color3.fromRGB(140, 135, 130), Enum.Material.Cobblestone)
-		else
-			candyPole(base + Vector3.new(x, 0, 0), 12, 1.6, poleColor, Color3.new(1, 1, 1))
-		end
+		candyPole(base + Vector3.new(x, 0, 0), 12, 1.6, poleColor, Color3.new(1, 1, 1))
 		part({
 			Name = "GateCap",
 			Shape = Enum.PartType.Ball,
@@ -388,7 +278,6 @@ local function gate(base, text, poleColor, beamColor, style)
 		Size = Vector3.new(14, 1.6, 1.6),
 		Position = base + Vector3.new(0, 11.5, 0),
 		Color = beamColor,
-		Material = if stone then Enum.Material.Wood else nil,
 	})
 	local sign = Instance.new("BillboardGui")
 	sign.Size = UDim2.fromOffset(260, 60)
@@ -428,34 +317,6 @@ end
 
 local BUSH_COLORS = { Color3.fromRGB(90, 180, 80), Color3.fromRGB(110, 200, 95), Color3.fromRGB(75, 160, 90) }
 
--- An iron street lamp with a glowing glass lantern.
-local function streetLamp(base)
-	local iron = Color3.fromRGB(45, 45, 50)
-	part({ Name = "LampBase", Size = Vector3.new(1.4, 1, 1.4), Position = base + Vector3.new(0, 0.5, 0), Color = iron, Material = Enum.Material.Metal })
-	part({
-		Name = "LampPole",
-		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(9, 0.5, 0.5),
-		CFrame = CFrame.new(base + Vector3.new(0, 5.5, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-		Color = iron,
-		Material = Enum.Material.Metal,
-	})
-	part({ Name = "LampTop", Size = Vector3.new(1.8, 0.3, 1.8), Position = base + Vector3.new(0, 11.4, 0), Color = iron, Material = Enum.Material.Metal })
-	local glass = part({
-		Name = "LampGlass",
-		Size = Vector3.new(1.3, 1.5, 1.3),
-		Position = base + Vector3.new(0, 10.5, 0),
-		Color = Color3.fromRGB(255, 230, 170),
-		Material = Enum.Material.Neon,
-		CastShadow = false,
-	})
-	local light = Instance.new("PointLight")
-	light.Color = Color3.fromRGB(255, 215, 150)
-	light.Range = 18
-	light.Brightness = 1.2
-	light.Parent = glass
-end
-
 -- A round bush of a few green balls, sometimes with berries.
 local function bush(base)
 	local size = rng:NextNumber(2.5, 4)
@@ -466,7 +327,6 @@ local function bush(base)
 			Size = Vector3.one * size * rng:NextNumber(0.8, 1.1),
 			Position = base + Vector3.new(rng:NextNumber(-1.2, 1.2), size * 0.3, rng:NextNumber(-1.2, 1.2)),
 			Color = pick(BUSH_COLORS),
-			Material = Enum.Material.LeafyGrass,
 			CanCollide = false,
 		})
 	end
@@ -492,8 +352,7 @@ local function rock(base, size)
 		Shape = Enum.PartType.Ball,
 		Size = Vector3.one * size,
 		CFrame = CFrame.new(base + Vector3.new(0, size * 0.15, 0)) * CFrame.Angles(0, rng:NextNumber(0, 6.28), 0),
-		Color = Color3.fromRGB(130, 130, 135):Lerp(Color3.fromRGB(175, 170, 165), rng:NextNumber()),
-		Material = Enum.Material.Rock,
+		Color = Color3.fromRGB(160, 160, 175):Lerp(Color3.fromRGB(200, 195, 210), rng:NextNumber()),
 	})
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.Sphere
@@ -552,8 +411,7 @@ local function stonePath(from, to)
 			Shape = Enum.PartType.Cylinder,
 			Size = Vector3.new(0.3, 2.4, 2.4),
 			CFrame = CFrame.new(pos + Vector3.new(0, 0.2, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-			Color = Color3.fromRGB(190, 185, 175),
-			Material = Enum.Material.Slate,
+			Color = Color3.fromRGB(235, 225, 210),
 			CastShadow = false,
 		})
 	end
@@ -562,12 +420,11 @@ end
 -- A wooden bench facing `facing`.
 local function bench(base, facing)
 	local cf = CFrame.lookAt(base, Vector3.new(facing.X, base.Y, facing.Z))
-	local wood = Color3.fromRGB(170, 115, 70)
-	local iron = Color3.fromRGB(50, 50, 55)
-	part({ Name = "Seat", Size = Vector3.new(5, 0.4, 1.6), CFrame = cf * CFrame.new(0, 1.4, 0), Color = wood, Material = Enum.Material.WoodPlanks })
-	part({ Name = "Back", Size = Vector3.new(5, 1.4, 0.3), CFrame = cf * CFrame.new(0, 2.4, 0.7), Color = wood, Material = Enum.Material.WoodPlanks })
+	local wood = Color3.fromRGB(200, 140, 90)
+	part({ Name = "Seat", Size = Vector3.new(5, 0.4, 1.6), CFrame = cf * CFrame.new(0, 1.4, 0), Color = wood })
+	part({ Name = "Back", Size = Vector3.new(5, 1.4, 0.3), CFrame = cf * CFrame.new(0, 2.4, 0.7), Color = wood })
 	for _, x in ipairs({ -2, 2 }) do
-		part({ Name = "Leg", Size = Vector3.new(0.3, 1.2, 1.4), CFrame = cf * CFrame.new(x, 0.6, 0), Color = iron, Material = Enum.Material.Metal })
+		part({ Name = "Leg", Size = Vector3.new(0.4, 1.2, 1.4), CFrame = cf * CFrame.new(x, 0.6, 0), Color = Color3.fromRGB(120, 90, 70) })
 	end
 end
 
@@ -583,7 +440,6 @@ local function fountain(base)
 			CFrame = CFrame.new(base + Vector3.new(0, y, 0)) * CFrame.Angles(0, 0, math.rad(90)),
 			Color = color,
 			Transparency = transparency or 0,
-			Material = if transparency then Enum.Material.Glass else Enum.Material.Marble,
 		})
 	end
 	disc("Basin", 1.2, 13, 0.6, stone)
@@ -655,30 +511,29 @@ end
 -- named "UpgradeBoard" (in MainArea) with a SurfaceGui.
 local function upgradeBoard(base)
 	local facing = CFrame.lookAt(base, Vector3.new(World.MAIN_CENTER.X, base.Y, World.MAIN_CENTER.Z))
-	local wood = Color3.fromRGB(150, 100, 65)
+	local frame = Color3.fromRGB(255, 190, 90)
 	local screen = part({
 		Name = "UpgradeBoard",
 		Size = Vector3.new(22, 14, 0.6),
 		CFrame = facing * CFrame.new(0, 9.5, 0),
 		Color = Color3.fromRGB(40, 70, 80),
-		Material = Enum.Material.SmoothPlastic,
 		Parent = workspace:WaitForChild("MainArea"),
 	})
-	-- wooden frame and legs
+	-- cute frame, legs and a striped roof
 	for _, x in ipairs({ -11.6, 11.6 }) do
-		part({ Name = "BoardLeg", Size = Vector3.new(1.2, 17.5, 1.2), CFrame = facing * CFrame.new(x, 8.75, 0), Color = wood, Material = Enum.Material.Wood })
+		part({ Name = "BoardLeg", Size = Vector3.new(1.2, 17.5, 1.2), CFrame = facing * CFrame.new(x, 8.75, 0), Color = frame })
 	end
 	for _, y in ipairs({ 2.2, 16.8 }) do
-		part({ Name = "BoardFrame", Size = Vector3.new(24.4, 0.8, 1), CFrame = facing * CFrame.new(0, y, 0), Color = wood, Material = Enum.Material.Wood })
+		part({ Name = "BoardFrame", Size = Vector3.new(24.4, 0.8, 1), CFrame = facing * CFrame.new(0, y, 0), Color = frame })
 	end
-	-- little roof
-	part({
-		Name = "BoardRoof",
-		Size = Vector3.new(26, 0.6, 3.4),
-		CFrame = facing * CFrame.new(0, 17.7, 0.4) * CFrame.Angles(math.rad(-12), 0, 0),
-		Color = Color3.fromRGB(200, 80, 70),
-		Material = Enum.Material.WoodPlanks,
-	})
+	for i = 0, 5 do
+		part({
+			Name = "BoardRoof",
+			Size = Vector3.new(26 / 6, 0.6, 3.4),
+			CFrame = facing * CFrame.new(-13 + 26 / 6 * (i + 0.5), 17.7, 0.4) * CFrame.Angles(math.rad(-12), 0, 0),
+			Color = if i % 2 == 0 then Color3.fromRGB(90, 200, 150) else Color3.new(1, 1, 1),
+		})
+	end
 	return screen
 end
 
@@ -745,7 +600,7 @@ local function mainArea()
 	end
 
 	-- gate behind the spawn, benches and stone paths
-	gate(World.MAIN_CENTER + World.MAIN_SPAWN + Vector3.new(0, World.FLOOR_Y, 7), "🐾 PET PARK 🐾", Color3.fromRGB(110, 190, 255), Color3.fromRGB(140, 95, 60), "stone")
+	gate(World.MAIN_CENTER + World.MAIN_SPAWN + Vector3.new(0, World.FLOOR_Y, 7), "🐾 PET PARK 🐾", Color3.fromRGB(110, 190, 255), Color3.fromRGB(255, 190, 90))
 	for _, x in ipairs({ -10, 10 }) do
 		bench(World.MAIN_CENTER + Vector3.new(x, World.FLOOR_Y, 42), World.MAIN_CENTER)
 	end
@@ -758,7 +613,7 @@ local function mainArea()
 	stonePath(mainSpot(BOARD_ANGLE, zoneRadius + 2), mainSpot(BOARD_ANGLE, 38))
 
 	for _, angle in ipairs({ 45, 135, 225, 315 }) do
-		streetLamp(mainSpot(angle, 46))
+		lamp(mainSpot(angle, 46))
 	end
 
 	-- bushes, mushrooms and rocks along the fence inside
@@ -940,18 +795,15 @@ function Decor.build()
 	folder.Name = "Decor"
 	folder.Parent = workspace
 
-	landscape()
-
-	-- hills: a close ring, a bigger ring behind it (terrain), and huge hazy
-	-- ones far away
-	hillRing(1, 18, 45, 90, 14, NEAR_HILL_COLORS, true)
-	hillRing(1, 18, 90, 150, 50, NEAR_HILL_COLORS, true)
+	-- hills: a close ring, a bigger ring behind it, and huge hazy ones far away
+	hillRing(1, 18, 45, 90, 14, NEAR_HILL_COLORS)
+	hillRing(1, 18, 90, 150, 50, NEAR_HILL_COLORS)
 	hillRing(1, 18, 180, 320, 150, FAR_HILL_COLORS)
 	mainArea()
 	hatchery()
 
-	hillRing(2, 20, 40, 90, 10, NEAR_HILL_COLORS, true)
-	hillRing(2, 16, 80, 140, 45, NEAR_HILL_COLORS, true)
+	hillRing(2, 20, 40, 90, 10, NEAR_HILL_COLORS)
+	hillRing(2, 16, 80, 140, 45, NEAR_HILL_COLORS)
 	hillRing(2, 16, 160, 300, 150, FAR_HILL_COLORS)
 
 	for index, area in ipairs(AREAS) do
@@ -972,6 +824,12 @@ function Decor.build()
 			flower(spotNearWall(area, if index == 1 then -12 else -9, -3, World.FLOOR_Y))
 		end
 
+		-- clouds
+		for _ = 1, if index == 1 then 18 else 10 do
+			local angle = rng:NextNumber(0, math.pi * 2)
+			local dist = rng:NextNumber(120, 500)
+			cloud(area.Center + Vector3.new(math.cos(angle) * dist, rng:NextNumber(110, 170), math.sin(angle) * dist))
+		end
 	end
 end
 
