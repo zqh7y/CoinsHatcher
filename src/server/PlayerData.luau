@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 
 local store = DataStoreService:GetDataStore("PlayerData_v1")
+local AUTOSAVE_SECONDS = 120
 
 local PlayerData = {}
 
@@ -384,6 +385,18 @@ function PlayerData.start()
 		while true do
 			task.wait(1)
 			tickBoosts()
+		end
+	end)
+
+	-- auto-save everyone every couple of minutes, so a crash or a failed save
+	-- when leaving loses at most a little progress
+	task.spawn(function()
+		while true do
+			task.wait(AUTOSAVE_SECONDS)
+			for player in pairs(sessionData) do
+				task.spawn(save, player)
+				task.wait(1) -- spread the saves out a little
+			end
 		end
 	end)
 
