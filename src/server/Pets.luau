@@ -153,7 +153,8 @@ local function update(dt)
 		end
 
 		local rootPos = root.Position
-		local inMain = World.isInMainArea(rootPos)
+		-- pets only attack while their owner stands in the coin circle
+		local inMain = World.isInCoinZone(rootPos)
 		local speed = Config.PET_SPEED * Config.petSpeedMult(data.Upgrades)
 		local damageMult = Config.totalDamage(data)
 

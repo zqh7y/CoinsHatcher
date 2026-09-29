@@ -124,6 +124,13 @@ function World.isInMainArea(position: Vector3): boolean
 	return flat <= World.MAIN_RADIUS + 5 and offset.Y < 50
 end
 
+-- Is this position inside the round coin zone (where the breakables are)?
+function World.isInCoinZone(position: Vector3): boolean
+	local offset = position - World.MAIN_CENTER
+	local flat = Vector3.new(offset.X, 0, offset.Z).Magnitude
+	return flat <= World.COIN_ZONE / 2 + 1.5 and offset.Y < 50
+end
+
 -- A random spot in the round coin zone, keeping `margin` studs from its edge.
 function World.randomCoinPosition(margin: number): Vector3
 	local radius = World.COIN_ZONE / 2 - margin
