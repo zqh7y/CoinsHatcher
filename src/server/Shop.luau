@@ -1,4 +1,6 @@
--- The shop stall in the main area: buy upgrades (damage, luck, speed, ...).
+-- The merchant stall in the main area: stand on its circle to open the
+-- Merchant (pets for diamonds) and the Diamond Shop (potions and perks).
+-- Coin upgrades are bought in the upgrade tree (BuyUpgrade below).
 -- Also applies walk speed to the player's character.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -66,7 +68,7 @@ local function buildStall()
 	local text = Instance.new("TextLabel")
 	text.Size = UDim2.fromScale(1, 1)
 	text.BackgroundTransparency = 1
-	text.Text = "🛒 SHOP"
+	text.Text = "🐾 MERCHANT"
 	text.TextColor3 = Color3.fromRGB(255, 220, 80)
 	text.TextStrokeTransparency = 0
 	text.TextStrokeColor3 = Color3.fromRGB(120, 60, 20)
@@ -131,6 +133,11 @@ local function buy(player, id, max)
 	if startLevel >= upgrade.Max then
 		return false, upgrade.Name .. " is maxed out!"
 	end
+	-- upgrade tree: a branch opens once the branch it grows from is far enough
+	if not Config.upgradeUnlocked(data.Upgrades, upgrade) then
+		local req = upgrade.Requires
+		return false, ("Get %s to level %d first!"):format(Config.UPGRADES_BY_ID[req[1]].Name, req[2])
+	end
 
 	local level, spent = startLevel, 0
 	repeat
@@ -191,7 +198,45 @@ local function buyBoost(player, id)
 	return true, "🧪 " .. boost.Name .. " for " .. boost.Minutes .. " more minutes!"
 end
 
+-- Merchant: buys one of the current offers (once per restock).
+local function buyMerchant(player, slot)
+	local data = PlayerData.get(player)
+	if not data then
+		return false, "Can't buy that."
+	end
+	local cycle = Config.merchantCycle(workspace:GetServerTimeNow())
+	local offer = Config.merchantOffers(data, cycle)[slot]
+	if not offer then
+		return false, "Can't buy that."
+	end
+	-- what was already bought this restock
+	if not data.Merchant or data.Merchant.Cycle ~= cycle then
+		data.Merchant = { Cycle = cycle, Bought = {} }
+	end
+	local key = "s" .. slot
+	if data.Merchant.Bought[key] then
+		return false, "Sold out! New pets soon."
+	end
+	if #data.Pets >= Config.maxPets(data) then
+		return false, "🎒 Your pet inventory is full! Delete some pets."
+	end
+	if data.Diamonds < offer.Price then
+		return false, "Not enough diamonds! 💎"
+	end
+	data.Merchant.Bought[key] = true
+	PlayerData.addDiamonds(player, -offer.Price)
+	PlayerData.givePet(player, offer.Pet)
+	return true, "🐾 You got a " .. offer.Pet .. "!"
+end
+
 function Shop.start(remotes)
+	remotes.BuyMerchant.OnServerInvoke = function(player, slot)
+		if typeof(slot) ~= "number" then
+			return false
+		end
+		return buyMerchant(player, slot)
+	end
+
 	buildStall()
 
 	remotes.BuyPerk.OnServerInvoke = function(player, id)

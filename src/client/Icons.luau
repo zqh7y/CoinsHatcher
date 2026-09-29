@@ -95,6 +95,14 @@ function Icons.coin(parent, color)
 	inner.ZIndex = 2
 end
 
+-- a little tree: a trunk with three round crowns (for the upgrade tree)
+function Icons.tree(parent, color)
+	shape(parent, Color3.fromRGB(150, 100, 60), 0.5, 0.78, 0.16, 0.36, 0.3)
+	shape(parent, color, 0.3, 0.46, 0.4, 0.4, true)
+	shape(parent, color, 0.7, 0.46, 0.4, 0.4, true)
+	shape(parent, color, 0.5, 0.3, 0.46, 0.46, true)
+end
+
 function Icons.gem(parent, color)
 	shape(parent, color, 0.5, 0.52, 0.62, 0.62, 0.12, 45)
 	local shine = shape(parent, Color3.new(1, 1, 1), 0.42, 0.4, 0.16, 0.16, 0.2, 45)

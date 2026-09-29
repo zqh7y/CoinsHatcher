@@ -42,6 +42,7 @@ remote("RemoteEvent", "Hatched") -- server -> client: { petName }, { [i] = auto-
 remote("RemoteFunction", "SetAutoDelete") -- client -> server: petName, on
 remote("RemoteFunction", "BuyUpgrade") -- client -> server: upgrade id, returns ok, message
 remote("RemoteFunction", "BuyPerk") -- client -> server: perk id (costs diamonds)
+remote("RemoteFunction", "BuyMerchant") -- client -> server: offer slot (pets for diamonds)
 remote("RemoteFunction", "BuyBoost") -- client -> server: potion id (costs diamonds)
 local ChooseStarter = remote("RemoteFunction", "ChooseStarter") -- client -> server: "Dog" | "Cat"
 

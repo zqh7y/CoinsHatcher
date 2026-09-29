@@ -23,12 +23,17 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Main area** (round): your pets run to coin stacks and chests in the round
   coin zone and break them. Stronger pets hit harder. Every rebirth makes the
   area's breakables tougher and worth more (and changes its color).
-- **Shop** (stall in the main area): hatch speed (x2 at max), hatch amount
-  (open up to 8 eggs at once), luck (up to x100), walk speed, pet speed,
-  coin bonus (up to x10) and pet slots (+5). Kept forever (not reset on
-  rebirth). Every level has a fixed price, set for the rebirth you'd be at
-  when buying it. Stand on the glowing circle to open it; step off to close
-  it. The Diamond tab (potions and perks) is unchanged.
+- **🌳 Upgrade tree** (the Upgrades button at the bottom middle of the
+  screen): every coin upgrade is a branch growing out of the middle, one
+  circle per level: coin bonus (x10), luck (x100), walk speed, pet speed,
+  and branches that open later: hatch speed and hatch amount (from luck),
+  pet slots (from pet speed). Kept forever. Every level has a fixed price,
+  set for the rebirth you'd be at when buying it.
+- **🐾 Merchant** (stall in the main area; stand on its circle): sells pets
+  for diamonds from your best egg (a rare, a legendary, a mutated legendary
+  and a special slot that's sometimes a Mythical). New pets every 10 minutes;
+  each offer can be bought once per restock. The Diamond Shop tab (potions
+  and perks) is there too.
 - **📈 Upgrade board** (white board in the main area, reset on rebirth): one
   row of big, easy-to-read cards that scroll sideways, with Buy and Max:
   coin value, more coins, luck (x10 at max), diamond chance, crit, hit
@@ -107,7 +112,7 @@ are in `src/shared/Config.luau`.
 - `src/server/Pets.luau`: pets following you and breaking things
 - `src/server/Eggs.luau`: egg stands and hatching
 - `src/server/Shrines.luau`: themed shrine around each egg
-- `src/server/Shop.luau`: shop stall, upgrades, walk speed
+- `src/server/Shop.luau`: merchant stall, buying upgrades/perks/potions/merchant pets, walk speed
 - `src/server/Inventory.luau`: equip, equip best, delete pets
 - `src/server/Gifts.luau`: playtime mystery gifts
 - `src/server/Pickups.luau`: combos and boost orbs

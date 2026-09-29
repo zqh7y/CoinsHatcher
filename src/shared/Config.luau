@@ -566,15 +566,26 @@ end
 -- levels are spread over the rebirths (Span): level L is priced for the
 -- rebirth you'd be at when buying it, so the price grows x4 (like everything
 -- else per rebirth) every Max/Span levels.
+-- They're shown as an upgrade TREE (the Upgrades button at the bottom of the
+-- screen): every upgrade is a branch growing out of the middle in its own
+-- direction (Angle in degrees on screen: 0 = right, 90 = down), one circle
+-- per level. Some branches only open once another branch reaches a level
+-- (Requires = { upgrade id, level }) and then grow out of that circle.
 Config.UPGRADES = {
-	{ Id = "HatchSpeed", Name = "Hatch Speed", Icon = "⏩", Max = 5, BaseCost = 2000, Span = 6, Info = "Eggs open faster (x2 at max)" },
-	{ Id = "HatchAmount", Name = "Hatch Amount", Icon = "🥚", Max = 5, BaseCost = 5000, Span = 8, Info = "Open more eggs at once (up to 8)" },
-	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 2500, Span = 10, Info = "Luck x1.6 every level (x100 at max)" },
-	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 1000, Span = 5, Info = "+2 walk speed" },
-	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 2000, Span = 8, Info = "+15% pet run speed" },
-	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 15, BaseCost = 3000, Span = 10, Info = "Coins x10 at max" },
-	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 5, BaseCost = 10000, Span = 9, Info = "+1 pet you can equip" },
+	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 15, BaseCost = 3000, Span = 10, Info = "Coins x10 at max", Angle = 0, Color = Color3.fromRGB(255, 185, 40) },
+	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 2500, Span = 10, Info = "Luck x1.6 every level (x100 at max)", Angle = -90, Color = Color3.fromRGB(60, 200, 110) },
+	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 1000, Span = 5, Info = "+2 walk speed", Angle = 180, Color = Color3.fromRGB(90, 170, 255) },
+	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 2000, Span = 8, Info = "+15% pet run speed", Angle = 90, Color = Color3.fromRGB(80, 210, 220) },
+	{ Id = "HatchSpeed", Name = "Hatch Speed", Icon = "⏩", Max = 5, BaseCost = 2000, Span = 6, Info = "Eggs open faster (x2 at max)", Angle = -140, Requires = { "Luck", 3 }, Color = Color3.fromRGB(255, 120, 170) },
+	{ Id = "HatchAmount", Name = "Hatch Amount", Icon = "🥚", Max = 5, BaseCost = 5000, Span = 8, Info = "Open more eggs at once (up to 8)", Angle = -40, Requires = { "Luck", 6 }, Color = Color3.fromRGB(170, 110, 255) },
+	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 5, BaseCost = 10000, Span = 9, Info = "+1 pet you can equip", Angle = 140, Requires = { "PetSpeed", 3 }, Color = Color3.fromRGB(255, 140, 70) },
 }
+
+-- Can this upgrade's next level be bought (is its branch open)?
+function Config.upgradeUnlocked(upgrades, upgrade): boolean
+	local req = upgrade.Requires
+	return req == nil or ((upgrades and upgrades[req[1]]) or 0) >= req[2]
+end
 
 -- Upgrade board in the main area (reset on rebirth): lots of cheap levels
 -- that make the coin zone pay out more and more.
@@ -749,6 +760,51 @@ Config.ORB_CHANCE = { 0.015, 0.03, 0.08, 0.25 } -- per breakable kind
 Config.ORB_SECONDS = 45 -- boost length
 Config.ORB_LIFETIME = 25 -- seconds before an orb disappears
 Config.ORB_RANGE = 10 -- how close you need to get
+
+-- Pet merchant (the stall in the main area): sells pets for diamonds. The
+-- stock changes every RESTOCK_MINUTES (same for everyone at the same
+-- progress) and every offer can be bought once per restock. Pets come from
+-- your best unlocked egg (or close to it).
+Config.MERCHANT_RESTOCK_MINUTES = 10
+Config.MERCHANT_SLOTS = 4
+
+-- The current restock number and seconds until the next one. `now` is the
+-- server time (the client passes workspace:GetServerTimeNow()).
+function Config.merchantCycle(now: number): (number, number)
+	local length = Config.MERCHANT_RESTOCK_MINUTES * 60
+	local cycle = math.floor(now / length)
+	return cycle, math.ceil((cycle + 1) * length - now)
+end
+
+-- The merchant's offers for this player right now: { { Pet, Price } }.
+function Config.merchantOffers(data, cycle: number)
+	local best = math.clamp(((data and data.Rebirths) or 0) + 1, 1, Config.REBIRTH_EGGS)
+	local rng = Random.new(cycle * 131 + best)
+	local function pet(eggIndex, rarityIndex)
+		return Config.EGGS[eggIndex].Pets[rarityIndex]
+	end
+	local offers = {}
+	-- 1) a rare pet from your best egg
+	table.insert(offers, { Pet = pet(best, 3), Price = 200 })
+	-- 2) a legendary from one of your best eggs
+	table.insert(offers, { Pet = pet(rng:NextInteger(math.max(1, best - 2), best), 4), Price = 600 })
+	-- 3) a mutated legendary: Shiny, sometimes Rainbow, rarely Galaxy
+	local roll = rng:NextNumber()
+	local mutation, price = "Shiny", 1500
+	if roll < 0.1 then
+		mutation, price = "Galaxy", 8000
+	elseif roll < 0.4 then
+		mutation, price = "Rainbow", 3500
+	end
+	table.insert(offers, { Pet = mutation .. " " .. pet(best, 4), Price = price })
+	-- 4) the special slot: a Mythical 1 time in 4, otherwise a Shiny rare
+	if rng:NextNumber() < 0.25 then
+		table.insert(offers, { Pet = pet(best, 5), Price = 12000 })
+	else
+		table.insert(offers, { Pet = "Shiny " .. pet(best, 3), Price = 400 })
+	end
+	return offers
+end
 
 -- Perks: permanent, kept through rebirths.
 Config.PERKS = {

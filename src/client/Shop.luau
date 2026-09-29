@@ -1,6 +1,7 @@
--- The shop menu: opens at the shop stall in the main area. Two tabs:
---   💰 Upgrades     - bought with coins, reset when you rebirth
+-- The merchant menu: opens on the stall's circle in the main area. Two tabs:
+--   🐾 Merchant     - pets for diamonds; the stock changes every few minutes
 --   💎 Diamond Shop - 2x potions and permanent perks, bought with diamonds
+-- (Coin upgrades are in the upgrade tree: the Upgrades button.)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -8,7 +9,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
 local State = require(script.Parent.State)
 local Fx = require(script.Parent.Fx)
-local Boosts = require(script.Parent.Boosts)
+local Viewport = require(script.Parent.Viewport)
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local player = Players.LocalPlayer
@@ -16,7 +17,7 @@ local player = Players.LocalPlayer
 local Shop = {}
 
 -- fixed: only stepping off the shop circle closes it
-local panel = Ui.panel("Shop", nil, UDim2.fromOffset(640, 540), { Ui.COLORS.Gold }, { Fixed = true })
+local panel = Ui.panel("Merchant", nil, UDim2.fromOffset(640, 540), { Ui.COLORS.Gold }, { Fixed = true })
 
 -- minimal text tabs, like the pets menu
 local tabBar = Instance.new("Frame")
@@ -44,12 +45,13 @@ layout.Padding = UDim.new(0, 8)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.Parent = list
 
-local tab = "Upgrades"
+local tab = "Merchant"
 local tabs = {}
 local busy = false
+local spins = {} -- stops for the spinning pet previews
 local render
 
-for order, def in ipairs({ { "Upgrades", "💰 Upgrades" }, { "Diamonds", "💎 Diamond Shop" } }) do
+for order, def in ipairs({ { "Merchant", "🐾 Merchant" }, { "Diamonds", "💎 Diamond Shop" } }) do
 	local button = Instance.new("TextButton")
 	button.AutomaticSize = Enum.AutomaticSize.X
 	button.Size = UDim2.fromOffset(0, 30)
@@ -75,7 +77,7 @@ for order, def in ipairs({ { "Upgrades", "💰 Upgrades" }, { "Diamonds", "💎 
 end
 
 local function header(order, text)
-	Ui.label(list, {
+	return Ui.label(list, {
 		Text = text,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Font = Ui.FONT_BODY,
@@ -96,7 +98,18 @@ local function row(order, item)
 	Ui.corner(r, 14)
 	Ui.stroke(r, Ui.COLORS.Line, 1.5)
 
-	Ui.label(r, { Text = item.Icon, Size = UDim2.fromOffset(56, 56), Position = UDim2.fromOffset(10, 10) })
+	if item.Pet then
+		-- a spinning 3D pet instead of an icon
+		local view = Instance.new("Frame")
+		view.BackgroundTransparency = 1
+		view.Size = UDim2.fromOffset(64, 64)
+		view.Position = UDim2.fromOffset(6, 6)
+		view.Parent = r
+		local _, model = Viewport.pet(view, item.Pet)
+		table.insert(spins, Viewport.spin(model, 1))
+	else
+		Ui.label(r, { Text = item.Icon, Size = UDim2.fromOffset(56, 56), Position = UDim2.fromOffset(10, 10) })
+	end
 	Ui.label(r, {
 		Text = item.Name .. (if item.Extra then "  " .. item.Extra else ""),
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -133,7 +146,7 @@ local function row(order, item)
 		then Ui.COLORS.PanelDark
 		elseif item.CanAfford then item.BuyColor
 		else Ui.COLORS.Disabled
-	local buy = Ui.button(r, if item.Maxed then "MAX" else item.Price, color, {
+	local buy = Ui.button(r, if item.Maxed then (item.MaxedText or "MAX") else item.Price, color, {
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -12, 0.5, 0),
 		Size = UDim2.fromOffset(130, 50),
@@ -154,35 +167,34 @@ local function row(order, item)
 	end)
 end
 
-local function upgradesTab(data)
-	header(0, "Bought with coins · kept forever")
-	local coins = player:GetAttribute("Coins") or 0
-	for order, upgrade in ipairs(Config.UPGRADES) do
-		local level = data.Upgrades[upgrade.Id] or 0
-		local cost = Config.upgradeCost(upgrade, level, data.Rebirths)
-		-- show the real value: "x2.5 ➜ x4.0", or "x100 MAX" when maxed
-		local now = Boosts.upgradeText(upgrade.Id, level)
-		local info = upgrade.Info
-		if now then
-			info = if level >= upgrade.Max
-				then now .. "  MAX"
-				else now .. "  ➜  " .. Boosts.upgradeText(upgrade.Id, level + 1)
-		end
-		row(order, {
-			Icon = upgrade.Icon,
-			Name = upgrade.Name,
-			Extra = if upgrade.Max > 1 then ("Lv %d/%d"):format(level, upgrade.Max) else nil,
-			Info = info,
-			InfoColor = if now then Ui.COLORS.Green else nil,
-			Level = level,
-			Max = upgrade.Max,
-			PipColor = Ui.COLORS.Gold,
-			Maxed = level >= upgrade.Max,
-			Price = "💰 " .. Config.formatNumber(cost),
-			CanAfford = coins >= cost,
-			BuyColor = Ui.COLORS.Green,
+local timerLabel, shownCycle = nil, nil
+
+local function timerText(left)
+	return ("🐾 Pets for diamonds · new pets in %d:%02d"):format(left // 60, left % 60)
+end
+
+local function merchantTab(data)
+	local diamonds = player:GetAttribute("Diamonds") or 0
+	local cycle, left = Config.merchantCycle(workspace:GetServerTimeNow())
+	shownCycle = cycle
+	timerLabel = header(0, timerText(left))
+	local bought = if data.Merchant and data.Merchant.Cycle == cycle then data.Merchant.Bought else {}
+	for slot, offer in ipairs(Config.merchantOffers(data, cycle)) do
+		local info = Config.PETS[offer.Pet]
+		local sold = bought["s" .. slot] == true
+		row(slot, {
+			Pet = offer.Pet,
+			Name = offer.Pet,
+			Extra = info.Rarity,
+			Info = if sold then "Sold out · come back after the restock" else ("⚔ %s power · %s"):format(Config.formatNumber(info.Power), Config.chanceText(offer.Pet)),
+			InfoColor = if sold then nil else info.Color:Lerp(Color3.new(0, 0, 0), 0.25),
+			Maxed = sold,
+			MaxedText = "SOLD",
+			Price = "💎 " .. Config.formatNumber(offer.Price),
+			CanAfford = diamonds >= offer.Price,
+			BuyColor = Color3.fromRGB(60, 180, 240),
 			Buy = function()
-				return remotes.BuyUpgrade:InvokeServer(upgrade.Id)
+				return remotes.BuyMerchant:InvokeServer(slot)
 			end,
 		})
 	end
@@ -234,6 +246,10 @@ local function diamondsTab(data)
 end
 
 render = function()
+	for _, stop in ipairs(spins) do
+		stop()
+	end
+	table.clear(spins)
 	Ui.clear(list)
 	for id, t in pairs(tabs) do
 		t.Button.TextTransparency = if id == tab then 0 else 0.5
@@ -243,8 +259,8 @@ render = function()
 	if not data then
 		return
 	end
-	if tab == "Upgrades" then
-		upgradesTab(data)
+	if tab == "Merchant" then
+		merchantTab(data)
 	else
 		diamondsTab(data)
 	end
@@ -275,13 +291,22 @@ task.spawn(function()
 	player:GetAttributeChangedSignal("Diamonds"):Connect(refreshSoon)
 	while true do
 		task.wait(1)
-		if tab == "Diamonds" then
-			refreshSoon()
+		if panel.isOpen() then
+			if tab == "Diamonds" then
+				refreshSoon() -- potion timers tick
+			elseif timerLabel then
+				local cycle, left = Config.merchantCycle(workspace:GetServerTimeNow())
+				if cycle ~= shownCycle then
+					refreshSoon() -- restocked: new pets
+				else
+					timerLabel.Text = timerText(left)
+				end
+			end
 		end
 	end
 end)
 
--- Stand on the glowing circle in front of the stall to open the shop; step
+-- Stand on the glowing circle in front of the stall to open it; step
 -- off to close it. If you close it yourself, it stays closed until you step
 -- off and back on.
 task.spawn(function()

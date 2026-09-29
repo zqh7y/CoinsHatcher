@@ -238,6 +238,22 @@ function PlayerData.giveStarter(player, petName)
 	return true
 end
 
+-- Gives one pet that wasn't hatched (bought from the merchant): it goes into
+-- the inventory and the index, but doesn't count as a hatch.
+function PlayerData.givePet(player, petName)
+	local data = sessionData[player]
+	if not data then
+		return
+	end
+	table.insert(data.Pets, petName)
+	data.Index[petName] = true
+	local info = Config.PETS[petName]
+	if info and info.Base then
+		data.Index[info.Base] = true
+	end
+	PlayerData.Changed:Fire(player)
+end
+
 -- Adds hatched pets. `deleted[i]` = true for pets that are auto-deleted: they
 -- still count as found and hatched, but don't go into the inventory.
 -- Returns the new pets' indexes.
