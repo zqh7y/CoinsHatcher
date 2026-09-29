@@ -7,6 +7,7 @@ World.MAIN_RADIUS = 51 -- the round main area's wall (floor is 104 wide)
 World.COIN_ZONE = 50 -- coins spawn in this circle in the middle (diameter)
 World.MAIN_SPAWN = Vector3.new(0, 0, 38) -- spawn pad, between the coins and the wall
 World.EGG_CENTER = Vector3.new(0, 0, 1000)
+World.EGG_RADIUS = 41 -- the round hatchery's wall
 World.FLOOR_Y = 1 -- top of both floors
 
 local function part(props)
@@ -64,8 +65,10 @@ function World.build()
 	if not eggs:FindFirstChild("Floor") then
 		part({
 			Name = "Floor",
-			Size = Vector3.new(120, 1, 70),
-			Position = World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0),
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(1, World.EGG_RADIUS * 2 + 2, World.EGG_RADIUS * 2 + 2),
+			CFrame = CFrame.new(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0))
+				* CFrame.Angles(0, 0, math.rad(90)),
 			Color = Color3.fromRGB(235, 220, 255),
 			Material = Enum.Material.SmoothPlastic,
 			Parent = eggs,
@@ -76,7 +79,7 @@ end
 -- Where a player lands when they teleport to an area.
 function World.spawnCFrame(area: string): CFrame
 	local center = if area == "Eggs"
-		then World.EGG_CENTER + Vector3.new(0, 0, 20)
+		then World.EGG_CENTER + Vector3.new(0, 0, 28) -- by the gate, facing the eggs
 		else World.MAIN_CENTER + World.MAIN_SPAWN
 	return CFrame.new(center + Vector3.new(0, World.FLOOR_Y + 3, 0))
 end

@@ -9,7 +9,15 @@ local World = require(script.Parent.World)
 
 local Eggs = {}
 
-local SPACING = 22
+-- Eggs stand in a half circle at the back of the hatchery, facing the gate.
+local ARC_RADIUS = 24
+local ARC_STEP = math.rad(34)
+
+-- Floor position of egg N (same layout as default.project.json).
+function Eggs.position(eggIndex)
+	local angle = (eggIndex - (Config.EGG_COUNT + 1) / 2) * ARC_STEP
+	return World.EGG_CENTER + Vector3.new(math.sin(angle) * ARC_RADIUS, World.FLOOR_Y, -math.cos(angle) * ARC_RADIUS)
+end
 
 local remotes
 local eggModels = {} -- [eggIndex] = model, to check the player is close enough
@@ -89,37 +97,48 @@ end
 -- Creates the pedestal + egg for an egg that isn't in the project file.
 local function createEggModel(eggIndex, parent)
 	local egg = Config.EGGS[eggIndex]
-	local x = (eggIndex - (Config.EGG_COUNT + 1) / 2) * SPACING
-	local base = World.EGG_CENTER + Vector3.new(x, World.FLOOR_Y, -15)
+	local base = Eggs.position(eggIndex)
+	local soft = egg.Color:Lerp(Color3.new(1, 1, 1), 0.55)
 
 	local model = Instance.new("Model")
 	model.Name = egg.Name
 
-	local pedestal = Instance.new("Part")
-	pedestal.Name = "Pedestal"
-	pedestal.Anchored = true
-	pedestal.Shape = Enum.PartType.Cylinder
-	pedestal.Size = Vector3.new(2, 9, 9)
-	pedestal.CFrame = CFrame.new(base + Vector3.new(0, 1, 0)) * CFrame.Angles(0, 0, math.rad(90))
-	pedestal.Color = Color3.fromRGB(255, 225, 240)
-	pedestal.Material = Enum.Material.SmoothPlastic
-	pedestal.Parent = model
+	local function cylinder(name, height, width, y, color, material)
+		return World.part({
+			Name = name,
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(height, width, width),
+			CFrame = CFrame.new(base + Vector3.new(0, y, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+			Color = color,
+			Material = material or Enum.Material.SmoothPlastic,
+			Parent = model,
+		})
+	end
+	cylinder("Pedestal", 1.2, 10, 0.6, soft)
+	cylinder("Glow", 0.3, 10.5, 0.7, egg.Color, Enum.Material.Neon)
+	cylinder("Top", 1, 7.5, 1.7, Color3.fromRGB(255, 250, 245))
 
-	local shell = Instance.new("Part")
-	shell.Name = "Egg"
-	shell.Anchored = true
-	shell.Shape = Enum.PartType.Ball
-	shell.Size = Vector3.new(6, 6, 6)
-	shell.Position = base + Vector3.new(0, 5, 0)
-	shell.Color = egg.Color
-	shell.Material = Enum.Material.SmoothPlastic
-	shell.Parent = model
+	local shell = World.part({
+		Name = "Egg",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.new(6, 6, 6),
+		Position = base + Vector3.new(0, 5.65, 0),
+		Color = egg.Color,
+		Material = Enum.Material.SmoothPlastic,
+		Parent = model,
+	})
 
 	-- make it egg-shaped
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.Sphere
 	mesh.Scale = Vector3.new(0.85, 1.15, 0.85)
 	mesh.Parent = shell
+
+	local light = Instance.new("PointLight")
+	light.Color = egg.Color
+	light.Range = 14
+	light.Brightness = 1.5
+	light.Parent = shell
 
 	model.Parent = parent
 	return model
@@ -172,7 +191,7 @@ local function setupEgg(eggIndex, parent)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Hatch"
 	prompt.ObjectText = egg.Name
-	prompt.MaxActivationDistance = 12
+	prompt.MaxActivationDistance = 9 -- eggs are ~14 studs apart, so only one prompt shows
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = shell
 	prompt.Triggered:Connect(function(player)

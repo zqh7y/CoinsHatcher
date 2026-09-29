@@ -1256,122 +1256,1361 @@
           "$className": "Part",
           "$properties": {
             "Anchored": true,
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Shape": "Cylinder",
             "Size": [
-              120,
               1,
-              70
+              84,
+              84
             ],
-            "Position": [
-              0,
-              0.5,
-              1000
-            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  0.5,
+                  1000
+                ],
+                "orientation": [
+                  [
+                    0,
+                    -1,
+                    0
+                  ],
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
             "Color": [
               0.92157,
               0.86275,
               1.0
-            ],
-            "Material": "SmoothPlastic",
-            "TopSurface": "Smooth",
-            "BottomSurface": "Smooth"
+            ]
+          }
+        },
+        "FloorRings": {
+          "$className": "Folder",
+          "Ring1": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Shape": "Cylinder",
+              "Size": [
+                0.05,
+                78,
+                78
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    0,
+                    1.03,
+                    1000
+                  ],
+                  "orientation": [
+                    [
+                      0,
+                      -1,
+                      0
+                    ],
+                    [
+                      1,
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.84314,
+                0.92157
+              ]
+            }
+          },
+          "Ring2": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Shape": "Cylinder",
+              "Size": [
+                0.05,
+                62,
+                62
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    0,
+                    1.06,
+                    1000
+                  ],
+                  "orientation": [
+                    [
+                      0,
+                      -1,
+                      0
+                    ],
+                    [
+                      1,
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                0.92157,
+                0.86275,
+                1.0
+              ]
+            }
+          },
+          "Ring3": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Shape": "Cylinder",
+              "Size": [
+                0.05,
+                46,
+                46
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    0,
+                    1.09,
+                    1000
+                  ],
+                  "orientation": [
+                    [
+                      0,
+                      -1,
+                      0
+                    ],
+                    [
+                      1,
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Ring4": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Shape": "Cylinder",
+              "Size": [
+                0.05,
+                30,
+                30
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    0,
+                    1.12,
+                    1000
+                  ],
+                  "orientation": [
+                    [
+                      0,
+                      -1,
+                      0
+                    ],
+                    [
+                      1,
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                0.84314,
+                0.96078,
+                0.90196
+              ]
+            }
+          },
+          "Ring5": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Shape": "Cylinder",
+              "Size": [
+                0.05,
+                14,
+                14
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    0,
+                    1.15,
+                    1000
+                  ],
+                  "orientation": [
+                    [
+                      0,
+                      -1,
+                      0
+                    ],
+                    [
+                      1,
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0,
+                      1
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.84314,
+                0.92157
+              ]
+            }
           }
         },
         "Walls": {
           "$className": "Folder",
-          "North": {
+          "Wall1": {
             "$className": "Part",
             "$properties": {
               "Anchored": true,
-              "Size": [
-                124,
-                6,
-                2
-              ],
-              "Position": [
-                0,
-                3.0,
-                964
-              ],
-              "Color": [
-                1.0,
-                0.96078,
-                0.88235
-              ],
               "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
-              "BottomSurface": "Smooth"
-            }
-          },
-          "South": {
-            "$className": "Part",
-            "$properties": {
-              "Anchored": true,
-              "Size": [
-                124,
-                6,
-                2
-              ],
-              "Position": [
-                0,
-                3.0,
-                1036
-              ],
-              "Color": [
-                1.0,
-                0.96078,
-                0.88235
-              ],
-              "Material": "SmoothPlastic",
-              "TopSurface": "Smooth",
-              "BottomSurface": "Smooth"
-            }
-          },
-          "East": {
-            "$className": "Part",
-            "$properties": {
-              "Anchored": true,
+              "BottomSurface": "Smooth",
               "Size": [
                 2,
                 6,
-                70
+                11.53
               ],
-              "Position": [
-                61,
-                3.0,
-                1000
-              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    41.0,
+                    3.0,
+                    1000.0
+                  ],
+                  "orientation": [
+                    [
+                      1.0,
+                      0,
+                      -0.0
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.0,
+                      0,
+                      1.0
+                    ]
+                  ]
+                }
+              },
               "Color": [
                 1.0,
                 0.96078,
                 0.88235
-              ],
-              "Material": "SmoothPlastic",
-              "TopSurface": "Smooth",
-              "BottomSurface": "Smooth"
+              ]
             }
           },
-          "West": {
+          "Wall2": {
             "$className": "Part",
             "$properties": {
               "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
               "Size": [
                 2,
                 6,
-                70
+                11.53
               ],
-              "Position": [
-                -61,
-                3.0,
-                1000
-              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    39.603,
+                    3.0,
+                    1010.612
+                  ],
+                  "orientation": [
+                    [
+                      0.96593,
+                      0,
+                      -0.25882
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.25882,
+                      0,
+                      0.96593
+                    ]
+                  ]
+                }
+              },
               "Color": [
                 1.0,
                 0.96078,
                 0.88235
-              ],
+              ]
+            }
+          },
+          "Wall3": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
               "Material": "SmoothPlastic",
               "TopSurface": "Smooth",
-              "BottomSurface": "Smooth"
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    35.507,
+                    3.0,
+                    1020.5
+                  ],
+                  "orientation": [
+                    [
+                      0.86603,
+                      0,
+                      -0.5
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.5,
+                      0,
+                      0.86603
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall4": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    28.991,
+                    3.0,
+                    1028.991
+                  ],
+                  "orientation": [
+                    [
+                      0.70711,
+                      0,
+                      -0.70711
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.70711,
+                      0,
+                      0.70711
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall5": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    20.5,
+                    3.0,
+                    1035.507
+                  ],
+                  "orientation": [
+                    [
+                      0.5,
+                      0,
+                      -0.86603
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.86603,
+                      0,
+                      0.5
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall6": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    10.612,
+                    3.0,
+                    1039.603
+                  ],
+                  "orientation": [
+                    [
+                      0.25882,
+                      0,
+                      -0.96593
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.96593,
+                      0,
+                      0.25882
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall7": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    0.0,
+                    3.0,
+                    1041.0
+                  ],
+                  "orientation": [
+                    [
+                      0.0,
+                      0,
+                      -1.0
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      1.0,
+                      0,
+                      0.0
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall8": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -10.612,
+                    3.0,
+                    1039.603
+                  ],
+                  "orientation": [
+                    [
+                      -0.25882,
+                      0,
+                      -0.96593
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.96593,
+                      0,
+                      -0.25882
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall9": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -20.5,
+                    3.0,
+                    1035.507
+                  ],
+                  "orientation": [
+                    [
+                      -0.5,
+                      0,
+                      -0.86603
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.86603,
+                      0,
+                      -0.5
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall10": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -28.991,
+                    3.0,
+                    1028.991
+                  ],
+                  "orientation": [
+                    [
+                      -0.70711,
+                      0,
+                      -0.70711
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.70711,
+                      0,
+                      -0.70711
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall11": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -35.507,
+                    3.0,
+                    1020.5
+                  ],
+                  "orientation": [
+                    [
+                      -0.86603,
+                      0,
+                      -0.5
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.5,
+                      0,
+                      -0.86603
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall12": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -39.603,
+                    3.0,
+                    1010.612
+                  ],
+                  "orientation": [
+                    [
+                      -0.96593,
+                      0,
+                      -0.25882
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.25882,
+                      0,
+                      -0.96593
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall13": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -41.0,
+                    3.0,
+                    1000.0
+                  ],
+                  "orientation": [
+                    [
+                      -1.0,
+                      0,
+                      -0.0
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      0.0,
+                      0,
+                      -1.0
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall14": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -39.603,
+                    3.0,
+                    989.388
+                  ],
+                  "orientation": [
+                    [
+                      -0.96593,
+                      0,
+                      0.25882
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.25882,
+                      0,
+                      -0.96593
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall15": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -35.507,
+                    3.0,
+                    979.5
+                  ],
+                  "orientation": [
+                    [
+                      -0.86603,
+                      0,
+                      0.5
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.5,
+                      0,
+                      -0.86603
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall16": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -28.991,
+                    3.0,
+                    971.009
+                  ],
+                  "orientation": [
+                    [
+                      -0.70711,
+                      0,
+                      0.70711
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.70711,
+                      0,
+                      -0.70711
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall17": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -20.5,
+                    3.0,
+                    964.493
+                  ],
+                  "orientation": [
+                    [
+                      -0.5,
+                      0,
+                      0.86603
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.86603,
+                      0,
+                      -0.5
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall18": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -10.612,
+                    3.0,
+                    960.397
+                  ],
+                  "orientation": [
+                    [
+                      -0.25882,
+                      0,
+                      0.96593
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.96593,
+                      0,
+                      -0.25882
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall19": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    -0.0,
+                    3.0,
+                    959.0
+                  ],
+                  "orientation": [
+                    [
+                      -0.0,
+                      0,
+                      1.0
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -1.0,
+                      0,
+                      -0.0
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall20": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    10.612,
+                    3.0,
+                    960.397
+                  ],
+                  "orientation": [
+                    [
+                      0.25882,
+                      0,
+                      0.96593
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.96593,
+                      0,
+                      0.25882
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall21": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    20.5,
+                    3.0,
+                    964.493
+                  ],
+                  "orientation": [
+                    [
+                      0.5,
+                      0,
+                      0.86603
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.86603,
+                      0,
+                      0.5
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall22": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    28.991,
+                    3.0,
+                    971.009
+                  ],
+                  "orientation": [
+                    [
+                      0.70711,
+                      0,
+                      0.70711
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.70711,
+                      0,
+                      0.70711
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall23": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    35.507,
+                    3.0,
+                    979.5
+                  ],
+                  "orientation": [
+                    [
+                      0.86603,
+                      0,
+                      0.5
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.5,
+                      0,
+                      0.86603
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
+            }
+          },
+          "Wall24": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "SmoothPlastic",
+              "TopSurface": "Smooth",
+              "BottomSurface": "Smooth",
+              "Size": [
+                2,
+                6,
+                11.53
+              ],
+              "CFrame": {
+                "CFrame": {
+                  "position": [
+                    39.603,
+                    3.0,
+                    989.388
+                  ],
+                  "orientation": [
+                    [
+                      0.96593,
+                      0,
+                      0.25882
+                    ],
+                    [
+                      0,
+                      1,
+                      0
+                    ],
+                    [
+                      -0.25882,
+                      0,
+                      0.96593
+                    ]
+                  ]
+                }
+              },
+              "Color": [
+                1.0,
+                0.96078,
+                0.88235
+              ]
             }
           }
         },
@@ -1383,18 +2622,113 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
                 "Size": [
-                  2,
-                  9,
-                  9
+                  1.2,
+                  10,
+                  10
                 ],
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      -33.0,
-                      2,
-                      985
+                      -18.652,
+                      1.6,
+                      984.896
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.98235,
+                  0.97353,
+                  0.94706
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -18.652,
+                      1.7,
+                      984.896
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.96078,
+                  0.94118,
+                  0.88235
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -18.652,
+                      2.7,
+                      984.896
                     ],
                     "orientation": [
                       [
@@ -1417,18 +2751,18 @@
                 },
                 "Color": [
                   1.0,
-                  0.88235,
-                  0.94118
-                ],
-                "TopSurface": "Smooth",
-                "BottomSurface": "Smooth",
-                "Material": "SmoothPlastic"
+                  0.98039,
+                  0.96078
+                ]
               }
             },
             "Egg": {
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
                 "Shape": "Ball",
                 "Size": [
                   6,
@@ -1436,18 +2770,15 @@
                   6
                 ],
                 "Position": [
-                  -33.0,
-                  6,
-                  985
+                  -18.652,
+                  6.65,
+                  984.896
                 ],
                 "Color": [
-                  0.9607843137254902,
-                  0.9411764705882353,
-                  0.8823529411764706
-                ],
-                "Material": "SmoothPlastic",
-                "TopSurface": "Smooth",
-                "BottomSurface": "Smooth"
+                  0.96078,
+                  0.94118,
+                  0.88235
+                ]
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -1458,6 +2789,18 @@
                     1.15,
                     0.85
                   ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    0.96078,
+                    0.94118,
+                    0.88235
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
                 }
               }
             }
@@ -1468,18 +2811,113 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
                 "Size": [
-                  2,
-                  9,
-                  9
+                  1.2,
+                  10,
+                  10
                 ],
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      -11.0,
-                      2,
-                      985
+                      -7.017,
+                      1.6,
+                      977.049
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.70882,
+                  0.81471,
+                  0.67353
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -7.017,
+                      1.7,
+                      977.049
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.35294,
+                  0.58824,
+                  0.27451
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -7.017,
+                      2.7,
+                      977.049
                     ],
                     "orientation": [
                       [
@@ -1502,18 +2940,18 @@
                 },
                 "Color": [
                   1.0,
-                  0.88235,
-                  0.94118
-                ],
-                "TopSurface": "Smooth",
-                "BottomSurface": "Smooth",
-                "Material": "SmoothPlastic"
+                  0.98039,
+                  0.96078
+                ]
               }
             },
             "Egg": {
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
                 "Shape": "Ball",
                 "Size": [
                   6,
@@ -1521,18 +2959,15 @@
                   6
                 ],
                 "Position": [
-                  -11.0,
-                  6,
-                  985
+                  -7.017,
+                  6.65,
+                  977.049
                 ],
                 "Color": [
-                  0.35294117647058826,
-                  0.5882352941176471,
-                  0.27450980392156865
-                ],
-                "Material": "SmoothPlastic",
-                "TopSurface": "Smooth",
-                "BottomSurface": "Smooth"
+                  0.35294,
+                  0.58824,
+                  0.27451
+                ]
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -1543,6 +2978,18 @@
                     1.15,
                     0.85
                   ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    0.35294,
+                    0.58824,
+                    0.27451
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
                 }
               }
             }
@@ -1553,18 +3000,113 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
                 "Size": [
-                  2,
-                  9,
-                  9
+                  1.2,
+                  10,
+                  10
                 ],
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      11.0,
-                      2,
-                      985
+                      7.017,
+                      1.6,
+                      977.049
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.65588,
+                  0.79706,
+                  0.92059
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      7.017,
+                      1.7,
+                      977.049
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.23529,
+                  0.54902,
+                  0.82353
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      7.017,
+                      2.7,
+                      977.049
                     ],
                     "orientation": [
                       [
@@ -1587,18 +3129,18 @@
                 },
                 "Color": [
                   1.0,
-                  0.88235,
-                  0.94118
-                ],
-                "TopSurface": "Smooth",
-                "BottomSurface": "Smooth",
-                "Material": "SmoothPlastic"
+                  0.98039,
+                  0.96078
+                ]
               }
             },
             "Egg": {
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
                 "Shape": "Ball",
                 "Size": [
                   6,
@@ -1606,18 +3148,15 @@
                   6
                 ],
                 "Position": [
-                  11.0,
-                  6,
-                  985
+                  7.017,
+                  6.65,
+                  977.049
                 ],
                 "Color": [
-                  0.23529411764705882,
-                  0.5490196078431373,
-                  0.8235294117647058
-                ],
-                "Material": "SmoothPlastic",
-                "TopSurface": "Smooth",
-                "BottomSurface": "Smooth"
+                  0.23529,
+                  0.54902,
+                  0.82353
+                ]
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -1629,6 +3168,18 @@
                     0.85
                   ]
                 }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    0.23529,
+                    0.54902,
+                    0.82353
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
+                }
               }
             }
           },
@@ -1638,18 +3189,113 @@
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
                 "Shape": "Cylinder",
                 "Size": [
-                  2,
-                  9,
-                  9
+                  1.2,
+                  10,
+                  10
                 ],
                 "CFrame": {
                   "CFrame": {
                     "position": [
-                      33.0,
-                      2,
-                      985
+                      18.652,
+                      1.6,
+                      984.896
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.93824,
+                  0.69118,
+                  0.60294
+                ]
+              }
+            },
+            "Glow": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "Neon",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  0.3,
+                  10.5,
+                  10.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      18.652,
+                      1.7,
+                      984.896
+                    ],
+                    "orientation": [
+                      [
+                        0,
+                        -1,
+                        0
+                      ],
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.86275,
+                  0.31373,
+                  0.11765
+                ]
+              }
+            },
+            "Top": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
+                "Shape": "Cylinder",
+                "Size": [
+                  1,
+                  7.5,
+                  7.5
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      18.652,
+                      2.7,
+                      984.896
                     ],
                     "orientation": [
                       [
@@ -1672,18 +3318,18 @@
                 },
                 "Color": [
                   1.0,
-                  0.88235,
-                  0.94118
-                ],
-                "TopSurface": "Smooth",
-                "BottomSurface": "Smooth",
-                "Material": "SmoothPlastic"
+                  0.98039,
+                  0.96078
+                ]
               }
             },
             "Egg": {
               "$className": "Part",
               "$properties": {
                 "Anchored": true,
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth",
                 "Shape": "Ball",
                 "Size": [
                   6,
@@ -1691,18 +3337,15 @@
                   6
                 ],
                 "Position": [
-                  33.0,
-                  6,
-                  985
+                  18.652,
+                  6.65,
+                  984.896
                 ],
                 "Color": [
-                  0.8627450980392157,
-                  0.3137254901960784,
-                  0.11764705882352941
-                ],
-                "Material": "SmoothPlastic",
-                "TopSurface": "Smooth",
-                "BottomSurface": "Smooth"
+                  0.86275,
+                  0.31373,
+                  0.11765
+                ]
               },
               "Mesh": {
                 "$className": "SpecialMesh",
@@ -1713,6 +3356,18 @@
                     1.15,
                     0.85
                   ]
+                }
+              },
+              "Light": {
+                "$className": "PointLight",
+                "$properties": {
+                  "Color": [
+                    0.86275,
+                    0.31373,
+                    0.11765
+                  ],
+                  "Range": 14,
+                  "Brightness": 1.5
                 }
               }
             }

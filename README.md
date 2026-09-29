@@ -21,7 +21,9 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   area's breakables tougher and worth more (and changes its color).
 - **Shop** (stall in the main area): upgrade pet damage, luck, walk speed,
   pet speed, coin bonus, pet slots, and buy a hoverboard.
-- **Egg area**: walk up to an egg to see what's inside, press E to hatch.
+- **Hatchery** (round egg area): eggs in a half circle on glowing pedestals,
+  candy gate, big spotted eggs, balloons, lamps and sparkles. Walk up to an
+  egg to see what's inside, press E to hatch.
   Each rebirth unlocks a new egg. Every egg has a super rare **Huge** pet.
 - **Hatching**: Hatch 1, Hatch 3 or Auto from the egg popup. Any pet can
   come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy; not huges) for extra power. Every

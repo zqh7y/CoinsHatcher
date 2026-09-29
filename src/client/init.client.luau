@@ -18,6 +18,7 @@ require(script.Shop)
 require(script.EggPreview)
 require(script.Breakables)
 require(script.Boosts)
+require(script.EggArea)
 
 local player = Players.LocalPlayer
 
