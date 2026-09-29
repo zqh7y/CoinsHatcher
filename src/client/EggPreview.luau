@@ -234,7 +234,7 @@ local function canHatch(count)
 end
 
 local function requestHatch(count)
-	local speed = Config.hatchSpeed(State.Data and State.Data.Upgrades)
+	local speed = Config.totalHatchSpeed(State.Data)
 	if not shownEgg or Hatch.busy() or os.clock() - lastRequest < 0.9 / speed then
 		return
 	end
@@ -269,7 +269,7 @@ buyOne.Button.Activated:Connect(function()
 	buy(1)
 end)
 buyThree.Button.Activated:Connect(function()
-	buy(Config.hatchAmount(State.Data and State.Data.Upgrades))
+	buy(Config.totalHatchAmount(State.Data))
 end)
 autoButton.Button.Activated:Connect(toggleAuto)
 
@@ -280,7 +280,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if input.KeyCode == Enum.KeyCode.E then
 		buy(1)
 	elseif input.KeyCode == Enum.KeyCode.F then
-		buy(Config.hatchAmount(State.Data and State.Data.Upgrades))
+		buy(Config.totalHatchAmount(State.Data))
 	elseif input.KeyCode == Enum.KeyCode.T then
 		toggleAuto()
 	end
@@ -404,7 +404,7 @@ local function show(eggIndex)
 
 	local price = Config.eggPrice(data, eggIndex)
 	buyOne.Bottom.Text = "💰 " .. Config.formatNumber(price)
-	local amount = Config.hatchAmount(data and data.Upgrades)
+	local amount = Config.totalHatchAmount(data)
 	buyThree.Top.Text = "Buy " .. amount
 	buyThree.Bottom.Text = "💰 " .. Config.formatNumber(price * amount)
 	setAuto(auto)

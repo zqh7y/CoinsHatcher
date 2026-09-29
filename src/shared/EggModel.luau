@@ -26,7 +26,14 @@ local STYLES = {
 	Magic = { Pattern = "bands", Accent = Color3.fromRGB(255, 190, 255), Neon = true },
 	Mythic = { Pattern = "bands", Accent = Color3.fromRGB(255, 215, 80), Gem = true },
 	Party = { Pattern = "sprinkles", Gem = true, Shell = Color3.fromRGB(255, 205, 70), Band = Color3.fromRGB(255, 90, 150) },
+	Exclusive = { Pattern = "stars", Accent = Color3.fromRGB(120, 240, 255), Neon = true, Gem = true, Shell = Color3.fromRGB(60, 25, 110), Band = Color3.fromRGB(255, 110, 220) },
 }
+
+-- An egg's settings: a number is an egg in Config.EGGS, "Exclusive" is the
+-- Robux shop's Exclusive Egg.
+local function eggInfo(eggIndex)
+	return if eggIndex == "Exclusive" then Config.EXCLUSIVE_EGG else Config.EGGS[eggIndex]
+end
 
 local SPRINKLES = {
 	Color3.fromRGB(255, 90, 110),
@@ -38,7 +45,7 @@ local SPRINKLES = {
 
 -- The shell color for an egg (some themes use a darker shell).
 function EggModel.shellColor(eggIndex)
-	local egg = Config.EGGS[eggIndex]
+	local egg = eggInfo(eggIndex)
 	local style = STYLES[egg.Theme] or {}
 	return style.Shell or egg.Color
 end
@@ -46,9 +53,9 @@ end
 -- Adds the pattern and highlight around `shell` (a Ball part sized like an
 -- egg, with EggModel.SHAPE mesh). Parts go into `parent`, all anchored.
 function EggModel.decorate(shell, eggIndex, parent)
-	local egg = Config.EGGS[eggIndex]
+	local egg = eggInfo(eggIndex)
 	local style = STYLES[egg.Theme] or { Pattern = "spots", Accent = WHITE }
-	local rng = Random.new(eggIndex * 31)
+	local rng = Random.new(if typeof(eggIndex) == "number" then eggIndex * 31 else 777)
 	local size = shell.Size.X
 	local k = size / 6 -- everything below is designed for a 6-stud egg
 	local a, c = size / 2 * EggModel.SHAPE.X, size / 2 * EggModel.SHAPE.Y -- egg radii (side, up)
@@ -183,7 +190,7 @@ end
 -- A complete decorated egg (for previews): a Model whose PrimaryPart is the shell.
 function EggModel.build(eggIndex, size)
 	local model = Instance.new("Model")
-	model.Name = Config.EGGS[eggIndex].Name
+	model.Name = eggInfo(eggIndex).Name
 
 	local shell = Instance.new("Part")
 	shell.Name = "Egg"

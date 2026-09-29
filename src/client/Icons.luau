@@ -109,4 +109,25 @@ function Icons.gem(parent, color)
 	shine.BackgroundTransparency = 0.35
 end
 
+-- a shopping bag with a handle and a star (for the Robux shop)
+function Icons.shop(parent, color)
+	local handle = Instance.new("Frame")
+	handle.AnchorPoint = Vector2.new(0.5, 0.5)
+	handle.Position = UDim2.fromScale(0.5, 0.26)
+	handle.Size = UDim2.fromScale(0.4, 0.4)
+	handle.BackgroundTransparency = 1
+	handle.Parent = parent
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0.5, 0)
+	c.Parent = handle
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 4
+	stroke.Color = color
+	stroke.Parent = handle
+	local bag = shape(parent, color, 0.5, 0.64, 0.8, 0.62, 0.18)
+	bag.ZIndex = 2
+	local star = shape(parent, Color3.new(1, 1, 1), 0.5, 0.64, 0.22, 0.22, 0.2, 45)
+	star.ZIndex = 3
+end
+
 return Icons

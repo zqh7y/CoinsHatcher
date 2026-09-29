@@ -18,6 +18,7 @@ local Index = require(script.Index)
 local Rebirth = require(script.Rebirth)
 local Hatch = require(script.Hatch)
 local Gifts = require(script.Gifts)
+local RobuxShop = require(script.RobuxShop)
 local Fx = require(script.Fx)
 local Transition = require(script.Transition)
 require(script.Starter)
@@ -375,6 +376,25 @@ local gifts, _, _, giftsCell = sideButton(Icons.gift, "Gifts", Ui.COLORS.Red)
 giftsCell.LayoutOrder = 5
 gifts.Activated:Connect(Gifts.toggle)
 Gifts.attach(gifts)
+
+-- the Robux shop, with a little bouncing "NEW" tag so it gets noticed
+local shop, _, _, shopCell = sideButton(Icons.shop, "Shop", Color3.fromRGB(255, 80, 170))
+shopCell.LayoutOrder = 6
+shop.Activated:Connect(RobuxShop.toggle)
+local shopTag = Ui.label(shop, {
+	Text = "NEW",
+	TextColor3 = Ui.COLORS.White,
+	AnchorPoint = Vector2.new(0.5, 0.5),
+	Position = UDim2.new(1, -6, 0, 4),
+	Size = UDim2.fromOffset(38, 18),
+	BackgroundTransparency = 0,
+	BackgroundColor3 = Color3.fromRGB(255, 80, 170),
+	Rotation = 12,
+	ZIndex = 3,
+})
+Ui.corner(shopTag, 0.5)
+Ui.stroke(shopTag, Ui.COLORS.White, 1.5)
+TweenService:Create(shopTag, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Rotation = -8 }):Play()
 
 -- the teleport button shows where it will take you
 task.spawn(function()

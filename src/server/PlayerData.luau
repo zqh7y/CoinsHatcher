@@ -27,6 +27,9 @@ local DEFAULT = {
 	AutoDelete = {}, -- [pet name] = true: hatched copies are deleted right away
 	Guide = 1, -- step of the new-player guide (0 = finished or skipped)
 	Rarest = nil, -- { Pet = name, Odds = N } the rarest pet ever hatched (1 in N)
+	Passes = {}, -- [pass key] = true for owned gamepasses (see Config.ROBUX)
+	Codes = {}, -- [code] = true for promo codes already redeemed
+	Receipts = {}, -- [purchase id] = time, Robux purchases already given
 }
 
 local sessionData = {} -- [player] = data table while they're in game
@@ -68,6 +71,9 @@ local function load(player)
 	data.Perks = {}
 	data.AutoDelete = {}
 	data.Boosts = {}
+	data.Passes = {}
+	data.Codes = {}
+	data.Receipts = {}
 	if ok and saved then
 		for k, v in pairs(saved) do
 			data[k] = v
@@ -140,10 +146,10 @@ local function load(player)
 	end
 end
 
-local function save(player)
+local function save(player): boolean
 	local data = sessionData[player]
 	if not data or loadFailed[player] then
-		return
+		return false
 	end
 	local ok, err = pcall(function()
 		store:SetAsync("user_" .. player.UserId, data)
@@ -151,6 +157,12 @@ local function save(player)
 	if not ok then
 		warn("Save failed for", player.Name, err)
 	end
+	return ok
+end
+
+-- Saves right away (after a Robux purchase). Returns true if it worked.
+function PlayerData.saveNow(player): boolean
+	return save(player)
 end
 
 -- Developers (in Studio, or user ids in Config.DEV_MONEY) get test money and

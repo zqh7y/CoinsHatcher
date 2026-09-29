@@ -318,7 +318,13 @@ function PetModel.build(petName: string, options)
 		end)
 	end
 
-	if info.Rarity == "Legendary" or info.Rarity == "Mythical" or info.Rarity == "Huge" or info.Mutation then
+	-- exclusive pets wear a glowing neon collar
+	if info.Rarity == "Exclusive" then
+		local collar = add(0, -0.5, 0, Vector3.new(2.35, 0.22, 2.35), info.Color)
+		collar.Material = Enum.Material.Neon
+	end
+
+	if info.Rarity == "Legendary" or info.Rarity == "Mythical" or info.Rarity == "Huge" or info.Rarity == "Exclusive" or info.Mutation then
 		local sparkles = Instance.new("Sparkles")
 		sparkles.SparkleColor = info.Color
 		sparkles.Parent = body

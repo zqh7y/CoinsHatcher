@@ -108,6 +108,7 @@ end
 local RARITY_TITLES = {
 	Mythical = "MYTHICAL!",
 	Huge = "HUGE!!",
+	Exclusive = "EXCLUSIVE!",
 }
 
 local function play(allNames, allDeleted)
@@ -146,7 +147,7 @@ local function play(allNames, allDeleted)
 	SLOT = if full then math.floor(math.min(screen.X * 0.9, screen.Y * 0.55)) else math.min(240, math.floor(screen.X * 0.94 / #petNames))
 	local k = math.max(1, SLOT / 240) -- text scale for the big view
 	-- the Hatch Speed upgrade makes everything quicker
-	local speed = Config.hatchSpeed(State.Data and State.Data.Upgrades)
+	local speed = Config.totalHatchSpeed(State.Data)
 	local count = #petNames
 	local anyRare, epicPet = false, nil
 	for _, petName in ipairs(petNames) do
@@ -193,7 +194,7 @@ local function play(allNames, allDeleted)
 	-- 1) the eggs drop in and bounce
 	local eggs = {}
 	for i, petName in ipairs(petNames) do
-		local _, egg = Viewport.egg(slots[i], Config.PETS[petName].Egg or Config.EGG_COUNT)
+		local _, egg = Viewport.egg(slots[i], Config.PETS[petName].Egg or (if Config.PETS[petName].Exclusive then "Exclusive" else Config.EGG_COUNT))
 		eggs[i] = egg
 	end
 	local home = UDim2.fromScale(0.5, if full then 0.46 else 0.42)

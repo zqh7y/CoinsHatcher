@@ -438,6 +438,88 @@ for _, petName in ipairs(basePets) do
 	end
 end
 
+-- Exclusive pets (the Robux shop's Exclusive Egg) --------------------------
+-- They follow your progress: each design is a set % as strong as your best
+-- pet (Strength) with its chance in %. Every design comes in levels (power
+-- x1.25 per level, "Neon Dragon Lv40") and you get the level closest to that
+-- strength. They have no mutations and the merchant never sells them.
+Config.EXCLUSIVE_EGG = { Name = "Exclusive Egg", Theme = "Exclusive", Color = Color3.fromRGB(170, 90, 255) }
+Config.EXCLUSIVE_COLOR = Color3.fromRGB(0, 200, 255)
+Config.EXCLUSIVE_STEP = 1.25 -- power per level
+Config.EXCLUSIVE_MAX_LEVEL = 130
+Config.EXCLUSIVE_PETS = {
+	{ Name = "Neon Kitty", Chance = 50, Strength = 0.5, BodyColor = Color3.fromRGB(120, 230, 255), Look = { Ears = "pointy", Tail = "long", Extras = { "bowtie" } } },
+	{ Name = "Neon Puppy", Chance = 30, Strength = 0.75, BodyColor = Color3.fromRGB(255, 130, 220), Look = { Ears = "floppy", Tail = "short", Extras = { "halo" } } },
+	{ Name = "Neon Bunny", Chance = 15, Strength = 1, BodyColor = Color3.fromRGB(170, 255, 140), Look = { Ears = "long", Tail = "fluffy", Extras = { "wings" } } },
+	{ Name = "Neon Fox", Chance = 4, Strength = 1.25, BodyColor = Color3.fromRGB(255, 170, 60), Look = { Ears = "pointy", Tail = "fluffy", Extras = { "wings", "fire" } } },
+	{ Name = "Neon Dragon", Chance = 1, Strength = 2, BodyColor = Color3.fromRGB(190, 100, 255), Look = { Tail = "long", Extras = { "horns", "wings", "fire", "halo" } } },
+}
+
+local function exclusiveName(design, level)
+	return if level == 0 then design.Name else ("%s Lv%d"):format(design.Name, level)
+end
+for tier, design in ipairs(Config.EXCLUSIVE_PETS) do
+	for level = 0, Config.EXCLUSIVE_MAX_LEVEL do
+		Config.PETS[exclusiveName(design, level)] = {
+			Rarity = "Exclusive",
+			Power = 40 * Config.EXCLUSIVE_STEP ^ level,
+			Color = Config.EXCLUSIVE_COLOR,
+			BodyColor = design.BodyColor,
+			Look = design.Look,
+			Scale = 1.15,
+			Odds = math.floor(100 / design.Chance + 0.5),
+			Exclusive = tier,
+			Base = if level > 0 then design.Name else nil,
+		}
+	end
+	table.insert(Config.SPECIAL_PETS, design.Name)
+end
+
+-- The exclusive pet of this design for a player whose best pet has `best` power.
+function Config.exclusivePet(tier: number, best: number): string
+	local design = Config.EXCLUSIVE_PETS[tier]
+	local target = best * design.Strength
+	local level = math.floor(math.log(math.max(target, 40) / 40) / math.log(Config.EXCLUSIVE_STEP) + 0.5)
+	return exclusiveName(design, math.clamp(level, 0, Config.EXCLUSIVE_MAX_LEVEL))
+end
+
+function Config.rollExclusive(data): string
+	return Config.exclusivePet(Config.rollWeighted(Config.EXCLUSIVE_PETS), Config.bestPetPower(data))
+end
+
+-- Robux shop -----------------------------------------------------------------
+-- Make these on the Creator Dashboard (your game > Monetization) and paste
+-- their ids here. Id = 0 means "not made yet": in Studio the buttons then
+-- give the item for free so you can test; in the live game they're off.
+Config.ROBUX = {
+	-- Developer Products (can be bought again and again)
+	Products = {
+		{ Id = 0, Key = "Egg1", Eggs = 1, Price = 39 },
+		{ Id = 0, Key = "Egg3", Eggs = 3, Price = 100 },
+		{ Id = 0, Key = "Egg10", Eggs = 10, Price = 339 },
+	},
+	-- Game Passes (bought once, kept forever)
+	Passes = {
+		{ Id = 0, Key = "HatchSpeed", Name = "2x Hatch Speed", Icon = "⚡", Price = 99, Info = "Eggs hatch twice as fast", Color = Color3.fromRGB(255, 180, 40) },
+		{ Id = 0, Key = "Mutation", Name = "2x Mutations", Icon = "🌈", Price = 99, Info = "Shiny, Rainbow & Galaxy twice as often", Color = Color3.fromRGB(255, 100, 190) },
+		{ Id = 0, Key = "MoreEggs", Name = "+6 Eggs", Icon = "🥚", Price = 199, Info = "Open 6 more eggs at once", Color = Color3.fromRGB(80, 190, 255) },
+		{ Id = 0, Key = "Luck", Name = "2x Luck", Icon = "🍀", Price = 199, Info = "Double luck on every egg", Color = Color3.fromRGB(80, 210, 110) },
+	},
+	-- gives every pass above (not the Exclusive Eggs)
+	All = { Id = 0, Key = "All", Name = "ALL GAMEPASSES", Icon = "👑", Price = 450 },
+}
+
+-- Promo codes: typed at the bottom of the shop, once per player.
+--   { "Diamonds", n }  { "AllPotions", minutes }  { "ExclusiveEggs", n }
+Config.CODES = {
+	RELEASE = { Text = "+2,500 💎, 15 min of every potion and a free Exclusive Egg!", Rewards = { { "Diamonds", 2500 }, { "AllPotions", 15 }, { "ExclusiveEggs", 1 } } },
+}
+
+local function hasPass(data, key)
+	return data ~= nil and data.Passes ~= nil and (data.Passes[key] == true or data.Passes.All == true)
+end
+Config.hasPass = hasPass
+
 -- Picks a random index from a list of { Chance = weight } entries.
 function Config.rollWeighted(list): number
 	local total = 0
@@ -506,7 +588,9 @@ function Config.mutationChances(data)
 	local luck = Config.totalLuck(data)
 	local list = {}
 	for _, mutation in ipairs(Config.MUTATIONS) do
-		table.insert(list, { Mutation = mutation, Chance = withLuck(mutation.Chance, luck) })
+		-- the 2x Mutations gamepass doubles every chance
+		local chance = withLuck(mutation.Chance, luck) * (if hasPass(data, "Mutation") then 2 else 1)
+		table.insert(list, { Mutation = mutation, Chance = math.min(chance, 100) })
 	end
 	return list
 end
@@ -577,6 +661,7 @@ function Config.isRare(petName: string): boolean
 			or info.Rarity == "Huge"
 			or info.Mutation == "Rainbow"
 			or info.Mutation == "Galaxy"
+			or (info.Exclusive ~= nil and info.Exclusive >= 3)
 		)
 end
 
@@ -588,7 +673,10 @@ function Config.isEpic(petName: string): boolean
 		return false
 	end
 	local odds = Config.odds(petName)
-	return info.Rarity == "Mythical" or info.Rarity == "Huge" or (odds ~= nil and odds >= 10000)
+	return info.Rarity == "Mythical"
+		or info.Rarity == "Huge"
+		or (info.Exclusive ~= nil and info.Exclusive >= 4)
+		or (odds ~= nil and odds >= 10000)
 end
 
 -- Shop upgrades ----------------------------------------------------------------
@@ -763,6 +851,15 @@ function Config.hatchAmount(upgrades): number
 end
 Config.MAX_HATCH = 8
 
+-- With the gamepasses: 2x Hatch Speed and +6 Eggs.
+Config.MORE_EGGS_PASS = 6
+function Config.totalHatchSpeed(data): number
+	return Config.hatchSpeed(data and data.Upgrades) * (if hasPass(data, "HatchSpeed") then 2 else 1)
+end
+function Config.totalHatchAmount(data): number
+	return Config.hatchAmount(data and data.Upgrades) + (if hasPass(data, "MoreEggs") then Config.MORE_EGGS_PASS else 0)
+end
+
 -- Diamonds ------------------------------------------------------------------
 -- Diamonds never reset. Earned from chests, new pets, rebirths and gifts;
 -- spent on boost potions and permanent perks.
@@ -933,6 +1030,7 @@ function Config.totalLuck(data): number
 		* Config.boardLuckMult(data)
 		* (1 + 0.1 * perkLevel(data, "Luck"))
 		* boosted(data, "Luck")
+		* (if hasPass(data, "Luck") then 2 else 1)
 end
 function Config.totalCoins(data): number
 	return Config.coinMult(data and data.Upgrades) * (1 + 0.1 * perkLevel(data, "Coins")) * boosted(data, "Coins")
