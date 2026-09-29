@@ -208,15 +208,6 @@ local function setupEgg(eggIndex, parent)
 	-- themed shrine around the pedestal, name plaque and lock dome
 	Shrines.build(model, eggIndex, Eggs.position(eggIndex))
 
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.ActionText = "Hatch"
-	prompt.ObjectText = egg.Name
-	prompt.MaxActivationDistance = 9 -- eggs are ~14 studs apart, so only one prompt shows
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = shell
-	prompt.Triggered:Connect(function(player)
-		hatch(player, eggIndex, 1)
-	end)
 	eggModels[eggIndex] = model
 end
 

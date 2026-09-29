@@ -2,6 +2,7 @@
 local Players = game:GetService("Players")
 local DataStoreService = game:GetService("DataStoreService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 
@@ -79,6 +80,13 @@ local function load(player)
 
 	-- new players pick their first pet (Dog or Cat) when they join
 	data.NeedsStarter = #data.Pets == 0 or nil
+
+	-- developer test money (Studio, or user ids in Config.DEV_MONEY)
+	local dev = Config.DEV_MONEY
+	if dev.Enabled and (RunService:IsStudio() or table.find(dev.UserIds, player.UserId)) then
+		data.Coins = math.max(data.Coins, dev.Coins)
+		data.Diamonds = math.max(data.Diamonds, dev.Diamonds)
+	end
 
 	-- leaderstats shows Coins/Rebirths on the player list
 	local stats = Instance.new("Folder")

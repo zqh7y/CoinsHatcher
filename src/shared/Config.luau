@@ -17,7 +17,7 @@ end
 
 -- Main area -----------------------------------------------------------------
 
-Config.COINS_PER_PLAYER = 18
+Config.COINS_PER_PLAYER = 2 -- starts small; the board's "More Stuff" upgrade adds up to 18 more
 Config.COIN_RESPAWN_TIME = 1
 
 -- The things pets break in the coin zone. Chance is a weight;
@@ -66,6 +66,16 @@ end
 Config.MAX_EQUIPPED = 3
 Config.MAX_PETS = 100
 Config.STARTER_CHOICES = { "Dog", "Cat" } -- new players pick one of these
+
+-- Developer test money: when testing in Studio (and for the user ids listed
+-- here) your coins and diamonds are topped up to these amounts when you
+-- join. Set Enabled = false before releasing the game.
+Config.DEV_MONEY = {
+	Enabled = true,
+	Coins = 1e15, -- 1Qd
+	Diamonds = 1e9, -- 1B
+	UserIds = {}, -- e.g. { 123456789 } to also get it in the live game
+}
 Config.PET_SPEED = 32 -- studs per second when running to a coin
 Config.PET_HIT_INTERVAL = 0.6 -- seconds between hits; each hit deals the pet's power
 Config.CRIT_CHANCE = 0.1 -- 10% of hits are critical hits...
@@ -399,7 +409,7 @@ Config.UPGRADES = {
 Config.AREA_UPGRADES = {
 	{ Id = "CoinValue", Name = "Coin Value", Icon = "💰", Max = 50, BaseCost = 100, Growth = 1.18, Info = "Coin stacks & piles worth +10%" },
 	{ Id = "ChestValue", Name = "Chest Value", Icon = "🧰", Max = 50, BaseCost = 250, Growth = 1.2, Info = "Chests worth +15%" },
-	{ Id = "MoreBreakables", Name = "More Stuff", Icon = "➕", Max = 12, BaseCost = 400, Growth = 1.45, Info = "+1 thing to break in the zone" },
+	{ Id = "MoreBreakables", Name = "More Stuff", Icon = "➕", Max = 18, BaseCost = 50, Growth = 1.4, Info = "+1 thing to break (up to 20)" },
 	{ Id = "ChestLuck", Name = "Chest Luck", Icon = "🍀", Max = 20, BaseCost = 350, Growth = 1.3, Info = "Chests spawn 10% more often" },
 	{ Id = "Respawn", Name = "Fast Respawn", Icon = "⏩", Max = 10, BaseCost = 300, Growth = 1.4, Info = "Things come back 5% faster" },
 	{ Id = "DiamondFinder", Name = "Diamond Finder", Icon = "💎", Max = 10, BaseCost = 500, Growth = 1.45, Info = "+5% coin piles carry diamonds" },
@@ -593,7 +603,7 @@ function Config.maxPets(data): number
 end
 
 -- Numbers for kids: 1,234 / 12.5K / 3.4M / 750B / 1.2T ...
-local SUFFIXES = { "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc" }
+local SUFFIXES = { "K", "M", "B", "T", "Qd", "Qn", "Sx", "Sp", "Oc", "No", "Dc" }
 
 function Config.formatNumber(n: number): string
 	n = math.floor(n)

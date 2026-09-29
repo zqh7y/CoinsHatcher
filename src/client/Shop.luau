@@ -2,7 +2,6 @@
 --   💰 Upgrades     - bought with coins, reset when you rebirth
 --   💎 Diamond Shop - 2x potions and permanent perks, bought with diamonds
 local Players = game:GetService("Players")
-local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -271,23 +270,30 @@ task.spawn(function()
 	end
 end)
 
--- open at the stall, close when walking away
-ProximityPromptService.PromptTriggered:Connect(function(prompt)
-	if prompt.Name == "ShopPrompt" then
-		panel.open()
-	end
-end)
-
+-- Stand on the glowing circle in front of the stall to open the shop; step
+-- off to close it. If you close it yourself, it stays closed until you step
+-- off and back on.
 task.spawn(function()
+	local onPad = false
+	local openedByPad = false
 	while true do
-		task.wait(0.5)
-		if panel.isOpen() then
-			local shop = workspace:FindFirstChild("MainArea") and workspace.MainArea:FindFirstChild("Shop")
-			local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-			if shop and root and (shop:GetPivot().Position - root.Position).Magnitude > 20 then
-				panel.close()
-			end
+		task.wait(0.15)
+		local shop = workspace:FindFirstChild("MainArea") and workspace.MainArea:FindFirstChild("Shop")
+		local pad = shop and shop:FindFirstChild("ShopPad")
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		local inside = false
+		if pad and root then
+			local offset = root.Position - pad.Position
+			inside = Vector3.new(offset.X, 0, offset.Z).Magnitude < pad.Size.Y / 2 and math.abs(offset.Y) < 8
 		end
+		if inside and not onPad then
+			panel.open()
+			openedByPad = true
+		elseif not inside and onPad and openedByPad then
+			panel.close()
+			openedByPad = false
+		end
+		onPad = inside
 	end
 end)
 

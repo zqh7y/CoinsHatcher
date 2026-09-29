@@ -573,6 +573,102 @@ local function upgradeBoard(base)
 	return screen
 end
 
+-- A portal hole: a stone well with a glowing rim and a dark swirling center.
+-- Jump in and the client plays the teleport screen and sends you to
+-- `destination` ("Main" or "Eggs"). The swirl disc is tagged "Portal".
+local function portal(base, destination, text)
+	local RADIUS = 4
+	-- stone rim
+	for i = 0, 15 do
+		local a = i / 16 * math.pi * 2
+		local pos = base + Vector3.new(math.cos(a) * RADIUS, 0.6, math.sin(a) * RADIUS)
+		part({
+			Name = "PortalRim",
+			Size = Vector3.new(1.3, 1.2, 1.8),
+			CFrame = CFrame.lookAt(pos, Vector3.new(base.X, pos.Y, base.Z)),
+			Color = Color3.fromRGB(235, 232, 245),
+		})
+	end
+	local function disc(name, height, width, y, color, material)
+		return part({
+			Name = name,
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(height, width, width),
+			CFrame = CFrame.new(base + Vector3.new(0, y, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+			Color = color,
+			Material = material,
+			CanCollide = false,
+			CastShadow = false,
+		})
+	end
+	disc("PortalGlowRing", 0.15, 9.6, 1.25, Color3.fromRGB(170, 110, 255), Enum.Material.Neon)
+	local hole = disc("PortalHole", 0.1, 7.2, 0.12, Color3.fromRGB(25, 12, 50))
+	hole:SetAttribute("Destination", destination)
+	CollectionService:AddTag(hole, "Portal")
+
+	local light = Instance.new("PointLight")
+	light.Color = Color3.fromRGB(170, 110, 255)
+	light.Range = 14
+	light.Brightness = 2
+	light.Parent = hole
+
+	local swirl = Instance.new("ParticleEmitter")
+	swirl.Shape = Enum.ParticleEmitterShape.Cylinder
+	swirl.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+	swirl.EmissionDirection = Enum.NormalId.Right -- up (the disc is turned)
+	swirl.Rate = 18
+	swirl.Lifetime = NumberRange.new(1, 1.6)
+	swirl.Speed = NumberRange.new(2, 4)
+	swirl.RotSpeed = NumberRange.new(-180, 180)
+	swirl.LightEmission = 1
+	swirl.Size = NumberSequence.new(0.35, 0)
+	swirl.Color = ColorSequence.new(Color3.fromRGB(200, 150, 255), Color3.fromRGB(110, 220, 255))
+	swirl.Parent = hole
+
+	-- spinning spiral arms inside the hole (spun by the client)
+	local arms = Instance.new("Model")
+	arms.Name = "PortalSwirl"
+	local hubCFrame = CFrame.new(base + Vector3.new(0, 0.2, 0)) * CFrame.Angles(-math.pi / 2, 0, 0) -- local Z up
+	local hub = part({ Name = "Hub", Size = Vector3.one * 0.2, CFrame = hubCFrame, Transparency = 1, CanCollide = false, Parent = arms })
+	for k = 0, 2 do
+		for step = 1, 4 do
+			local angle = k * math.pi * 2 / 3 + step * 0.45
+			local r = step * 0.8
+			part({
+				Name = "SwirlArm",
+				Size = Vector3.new(0.9, 0.35, 0.06),
+				CFrame = hubCFrame * CFrame.Angles(0, 0, angle) * CFrame.new(r, 0, 0),
+				Color = Color3.fromRGB(150, 90, 255):Lerp(Color3.fromRGB(110, 220, 255), step / 4),
+				Material = Enum.Material.Neon,
+				CanCollide = false,
+				CastShadow = false,
+				Parent = arms,
+			})
+		end
+	end
+	arms.PrimaryPart = hub
+	arms:SetAttribute("SpinSpeed", 2)
+	arms.Parent = folder
+	CollectionService:AddTag(arms, "Spin")
+
+	-- sign above
+	local signPart = part({ Name = "PortalSign", Size = Vector3.one * 0.2, Position = base + Vector3.new(0, 6, 0), Transparency = 1, CanCollide = false })
+	local sign = Instance.new("BillboardGui")
+	sign.Size = UDim2.fromOffset(220, 44)
+	sign.MaxDistance = 90
+	sign.Parent = signPart
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.fromRGB(230, 210, 255)
+	label.TextStrokeTransparency = 0
+	label.TextStrokeColor3 = Color3.fromRGB(60, 20, 110)
+	label.Font = Enum.Font.GothamBold
+	label.TextScaled = true
+	label.Parent = sign
+end
+
 -- Main area details --------------------------------------------------------------
 
 local SHOP_ANGLE, FOUNTAIN_ANGLE, SPAWN_ANGLE, BOARD_ANGLE = 180, 0, 90, 270
@@ -637,9 +733,8 @@ local function mainArea()
 
 	-- gate behind the spawn, benches and stone paths
 	gate(World.MAIN_CENTER + World.MAIN_SPAWN + Vector3.new(0, World.FLOOR_Y, 7), "🐾 PET PARK 🐾", Color3.fromRGB(110, 190, 255), Color3.fromRGB(255, 190, 90))
-	for _, x in ipairs({ -10, 10 }) do
-		bench(World.MAIN_CENTER + Vector3.new(x, World.FLOOR_Y, 42), World.MAIN_CENTER)
-	end
+	bench(World.MAIN_CENTER + Vector3.new(-10, World.FLOOR_Y, 42), World.MAIN_CENTER)
+	portal(World.MAIN_CENTER + Vector3.new(14, World.FLOOR_Y, 36), "Eggs", "🌀 To Hatchery")
 	stonePath(mainSpot(SPAWN_ANGLE, 34), mainSpot(SPAWN_ANGLE, zoneRadius + 2))
 	stonePath(mainSpot(SHOP_ANGLE, zoneRadius + 2), mainSpot(SHOP_ANGLE, 32))
 	stonePath(mainSpot(FOUNTAIN_ANGLE, zoneRadius + 2), mainSpot(FOUNTAIN_ANGLE, 30))
@@ -778,6 +873,8 @@ end
 local function hatchery()
 	-- candy gate over the arrival spot with a sign
 	gate(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 47), "🥚 HATCHERY 🥚", Color3.fromRGB(255, 120, 160), Color3.fromRGB(200, 170, 255))
+
+	portal(World.EGG_CENTER + Vector3.new(-9, World.FLOOR_Y, 41), "Main", "🌀 To Home")
 
 	-- the crystal egg in the middle, and a path to it from the gate
 	crystalEgg(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 0))

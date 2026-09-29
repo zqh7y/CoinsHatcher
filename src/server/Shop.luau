@@ -76,20 +76,163 @@ local function buildStall()
 	text.TextScaled = true
 	text.Parent = sign
 
-	-- the client opens the shop menu when this is triggered
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.Name = "ShopPrompt"
-	prompt.ActionText = "Open Shop"
-	prompt.ObjectText = "Upgrades"
-	prompt.MaxActivationDistance = 12
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = counter
+	-- a glowing circle in front of the stall: stand on it and the shop opens
+	-- (the client watches for the part named "ShopPad")
+	local padCenter = origin * CFrame.new(0, 0, -8)
+	local function disc(name, height, width, y, color, material)
+		return World.part({
+			Name = name,
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(height, width, width),
+			CFrame = padCenter * CFrame.new(0, y, 0) * CFrame.Angles(0, 0, math.rad(90)),
+			Color = color,
+			Material = material or Enum.Material.SmoothPlastic,
+			CanCollide = false,
+			Parent = model,
+		})
+	end
+	disc("ShopRing", 0.12, 10, 0.06, Color3.fromRGB(255, 190, 50), Enum.Material.Neon)
+	local pad = disc("ShopPad", 0.14, 8.8, 0.08, Color3.fromRGB(255, 250, 235))
+	local sparkles = Instance.new("ParticleEmitter")
+	sparkles.Shape = Enum.ParticleEmitterShape.Cylinder
+	sparkles.ShapeStyle = Enum.ParticleEmitterShapeStyle.Surface
+	sparkles.EmissionDirection = Enum.NormalId.Right -- up, since the cylinder is turned
+	sparkles.Rate = 6
+	sparkles.Lifetime = NumberRange.new(1, 1.6)
+	sparkles.Speed = NumberRange.new(2, 3)
+	sparkles.LightEmission = 1
+	sparkles.Size = NumberSequence.new(0.3, 0)
+	sparkles.Color = ColorSequence.new(Color3.fromRGB(255, 220, 110))
+	sparkles.Parent = pad
 
 	model.PrimaryPart = counter
 	model.Parent = workspace.MainArea
 end
 
 -- Walk speed + hoverboard -------------------------------------------------------
+
+local BOARD_WHITE = Color3.fromRGB(245, 247, 252)
+local BOARD_CYAN = Color3.fromRGB(70, 220, 255)
+local BOARD_PINK = Color3.fromRGB(255, 90, 210)
+
+-- A sleek hoverboard: white deck with rounded ends, dark grip, glowing neon
+-- strips and underglow, twin rear thrusters with flames, light trails and
+-- hover dust. The deck hangs from the player's root on a Weld called
+-- "BoardWeld" so the client can make it bob and lean into turns.
+local function buildHoverboard(root, offset)
+	local model = Instance.new("Model")
+	model.Name = "Hoverboard"
+
+	local deck = Instance.new("Part")
+	deck.Name = "Deck"
+	deck.Size = Vector3.new(2.4, 0.3, 5)
+	deck.Color = BOARD_WHITE
+	deck.Material = Enum.Material.SmoothPlastic
+	deck.Reflectance = 0.15
+	deck.CanCollide = false
+	deck.Massless = true
+	deck.CFrame = root.CFrame * offset
+	deck.Parent = model
+	model.PrimaryPart = deck
+
+	local weld = Instance.new("Weld")
+	weld.Name = "BoardWeld"
+	weld.Part0 = root
+	weld.Part1 = deck
+	weld.C0 = offset
+	weld.Parent = deck
+
+	local function add(name, size, cf, color, material, shape)
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Shape = shape or Enum.PartType.Block
+		p.Size = size
+		p.CFrame = deck.CFrame * cf
+		p.Color = color
+		p.Material = material or Enum.Material.SmoothPlastic
+		p.CanCollide = false
+		p.Massless = true
+		p.CastShadow = false
+		local w = Instance.new("WeldConstraint")
+		w.Part0 = deck
+		w.Part1 = p
+		w.Parent = p
+		p.Parent = model
+		return p
+	end
+	local standUp = CFrame.Angles(0, 0, math.rad(90))
+	-- rounded nose and tail
+	for _, z in ipairs({ -2.5, 2.5 }) do
+		add("DeckEnd", Vector3.new(0.3, 2.4, 2.4), CFrame.new(0, 0, z) * standUp, BOARD_WHITE, nil, Enum.PartType.Cylinder)
+	end
+	add("Grip", Vector3.new(2, 0.06, 4.6), CFrame.new(0, 0.17, 0), Color3.fromRGB(40, 42, 55))
+	-- neon edge lines and underglow
+	for _, x in ipairs({ -1.18, 1.18 }) do
+		add("EdgeGlow", Vector3.new(0.1, 0.12, 5), CFrame.new(x, 0, 0), BOARD_CYAN, Enum.Material.Neon)
+	end
+	local under = add("UnderGlow", Vector3.new(1.8, 0.08, 4.6), CFrame.new(0, -0.19, 0), BOARD_PINK, Enum.Material.Neon)
+	local light = Instance.new("PointLight")
+	light.Color = BOARD_PINK
+	light.Range = 10
+	light.Brightness = 2
+	light.Parent = under
+
+	-- hover dust drifting down from under the board
+	local dust = Instance.new("ParticleEmitter")
+	dust.EmissionDirection = Enum.NormalId.Bottom
+	dust.Rate = 25
+	dust.Lifetime = NumberRange.new(0.3, 0.5)
+	dust.Speed = NumberRange.new(3, 5)
+	dust.SpreadAngle = Vector2.new(25, 25)
+	dust.LightEmission = 1
+	dust.Size = NumberSequence.new(0.25, 0)
+	dust.Color = ColorSequence.new(BOARD_PINK, BOARD_CYAN)
+	dust.Parent = under
+
+	-- twin thrusters at the back with flames
+	for _, x in ipairs({ -0.65, 0.65 }) do
+		local thruster = add(
+			"Thruster",
+			Vector3.new(1.1, 0.6, 0.6),
+			CFrame.new(x, 0.05, 2.9) * CFrame.Angles(0, math.rad(90), 0),
+			Color3.fromRGB(60, 64, 80),
+			Enum.Material.Metal,
+			Enum.PartType.Cylinder
+		)
+		local nozzle = Instance.new("Attachment")
+		nozzle.Position = Vector3.new(-0.6, 0, 0) -- the back end of the cylinder
+		nozzle.Parent = thruster
+		local flame = Instance.new("ParticleEmitter")
+		flame.EmissionDirection = Enum.NormalId.Left
+		flame.Rate = 40
+		flame.Lifetime = NumberRange.new(0.15, 0.25)
+		flame.Speed = NumberRange.new(6, 9)
+		flame.LightEmission = 1
+		flame.Size = NumberSequence.new(0.4, 0)
+		flame.Color = ColorSequence.new(BOARD_CYAN, Color3.new(1, 1, 1))
+		flame.Parent = nozzle
+	end
+
+	-- light trails from both back corners
+	for _, x in ipairs({ -1.1, 1.1 }) do
+		local a0 = Instance.new("Attachment")
+		a0.Position = Vector3.new(x, 0.12, 2.5)
+		a0.Parent = deck
+		local a1 = Instance.new("Attachment")
+		a1.Position = Vector3.new(x, -0.12, 2.5)
+		a1.Parent = deck
+		local trail = Instance.new("Trail")
+		trail.Attachment0 = a0
+		trail.Attachment1 = a1
+		trail.Lifetime = 0.35
+		trail.LightEmission = 1
+		trail.Color = ColorSequence.new(BOARD_CYAN, BOARD_PINK)
+		trail.Transparency = NumberSequence.new(0.2, 1)
+		trail.Parent = deck
+	end
+
+	return model
+end
 
 local function applyMovement(player)
 	local data = PlayerData.get(player)
@@ -116,36 +259,8 @@ local function applyMovement(player)
 	if ride and not board then
 		-- how far below the root part the feet are
 		local feet = if humanoid.RigType == Enum.HumanoidRigType.R15 then root.Size.Y / 2 + baseHip else 3
-
-		board = Instance.new("Part")
-		board.Name = "Hoverboard"
-		board.Size = Vector3.new(2.6, 0.35, 5.5)
-		board.Color = Color3.fromRGB(120, 200, 255)
-		board.Material = Enum.Material.SmoothPlastic
-		board.CanCollide = false
-		board.Massless = true
-		board.CFrame = root.CFrame * CFrame.new(0, -feet - 0.2, 0)
-
-		local stripe = Instance.new("Part")
-		stripe.Name = "Glow"
-		stripe.Size = Vector3.new(2.7, 0.2, 1)
-		stripe.Color = Color3.fromRGB(255, 120, 220)
-		stripe.Material = Enum.Material.Neon
-		stripe.CanCollide = false
-		stripe.Massless = true
-		stripe.CFrame = board.CFrame * CFrame.new(0, -0.1, 0)
-		local stripeWeld = Instance.new("WeldConstraint")
-		stripeWeld.Part0 = board
-		stripeWeld.Part1 = stripe
-		stripeWeld.Parent = stripe
-		stripe.Parent = board
-
-		local weld = Instance.new("WeldConstraint")
-		weld.Part0 = root
-		weld.Part1 = board
-		weld.Parent = board
+		board = buildHoverboard(root, CFrame.new(0, -feet - 0.25, 0))
 		board.Parent = character
-
 		humanoid.HipHeight = baseHip + 1.2 -- hover above the ground
 	elseif not ride and board then
 		board:Destroy()

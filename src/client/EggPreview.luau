@@ -115,7 +115,7 @@ buttonLayout.Padding = UDim.new(0, 12)
 buttonLayout.SortOrder = Enum.SortOrder.LayoutOrder
 buttonLayout.Parent = buttonRow
 
-local hatchOne = Ui.button(buttonRow, "🥚 Hatch 1  [E]", Ui.COLORS.Green, { Size = UDim2.fromOffset(180, 56), LayoutOrder = 1 })
+local hatchOne = Ui.button(buttonRow, "🥚 Hatch 1", Ui.COLORS.Green, { Size = UDim2.fromOffset(180, 56), LayoutOrder = 1 })
 local hatchThree = Ui.button(buttonRow, "🥚🥚🥚 Hatch 3", Color3.fromRGB(70, 160, 250), { Size = UDim2.fromOffset(190, 56), LayoutOrder = 2 })
 local autoButton = Ui.button(buttonRow, "🔁 Auto", Color3.fromRGB(150, 140, 170), { Size = UDim2.fromOffset(170, 56), LayoutOrder = 3 })
 
