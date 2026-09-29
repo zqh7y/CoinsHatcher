@@ -30,6 +30,17 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   and hatch amount (from luck), pet slots (from pet speed). Scroll to zoom,
   right-click and drag to move (pinch and drag on phones, or the +/−/⌂
   buttons). After buying, the view glides to the next bubble. Kept forever.
+- **🤖 Auto Buy** (a bubble on the upgrade tree): once bought, the upgrade
+  board gets an ON/OFF switch and keeps buying its cheapest upgrade for you.
+- **🌦 Area themes**: every rebirth area has its own look for the coins and
+  chests (sand, ice, candy, ocean, jungle, sunset, magic, mint, space, gold),
+  a patch of its ground under each breakable, a decoration on chest lids and
+  its own weather (leaves, dust, snow, sprinkles, bubbles, embers, sparkles,
+  petals, stars, glitter).
+- **🧭 New-player guide**: a card at the top plus a glowing beam and arrow
+  show new players what to do: break coins, buy a board upgrade, save up for
+  the first egg, walk to the hatchery, hatch, use the upgrade tree, rebirth.
+  It can be skipped.
 - **🐾 Merchant** (stall in the main area; stand on its circle): sells 3 pets
   for diamonds that follow your progress: about 10%, 50% and 90% as strong as
   your best pet (never stronger). New pets every 10 minutes; each offer once
@@ -62,12 +73,14 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   is always really hard and gets harder in better eggs (1 in 1,000 in the
   Basic Egg, about 1 in 6M in the Mythic Egg). Only some eggs have a **Huge**
   (Ocean, Snow, Space, Mythic and Release), with very low odds even with
-  max luck. Any pet can come out mutated (✨ Shiny, 🌈 Rainbow, 🌌 Galaxy;
-  not huges). Hatching plays an animation with light rays; Mythical, Huge
+  max luck. Any pet can come out mutated, but it's really rare (✨ Shiny 1 in
+  200, 🌈 Rainbow 1 in 2,000, 🌌 Galaxy 1 in 20,000; luck helps only a
+  little; not huges). Hatching plays an animation with light rays; Mythical, Huge
   and 1-in-10K+ pets get a special one, and when one of those hatches only
   the good pets are shown (a Huge gets the whole screen). Tap a pet in the
   popup to **auto-delete** it: hatched copies don't go into your inventory
-  (Mythical, Huge and mutated pets are always kept). Rare hatches are announced to the
+  (its Shiny/Rainbow/Galaxy versions too; Mythical and Huge pets can't be
+  picked). Rare hatches are announced to the
   server.
 - **Big numbers**: numbers start in the hundreds/thousands and grow ×4 per
   rebirth (shown as 1.5K, 4.5M...); pets land 3x critical hits.
@@ -95,8 +108,8 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   main area across the coin circle from the spawn, on a party platform
   behind a "RELEASE" arch, so new players see it right away. Party pets and a
   Huge Launch Dragon.
-- **Leaderboards** (three boards in the main area): most eggs hatched, most
-  rebirths and the rarest pet ever hatched (by its odds). Global, refreshed
+- **Leaderboards** (three boards in the main area, with each player's avatar):
+  most eggs hatched, most rebirths and the rarest pet ever hatched (by its odds). Global, refreshed
   every minute, with the players in the server shown live.
 - **Rebirth**: big reward cards (x4 coin value / +300%, diamonds, the new
   egg, 100% pets kept) and a coin progress bar. Resets coins and the upgrade board; keeps pets, index, diamonds and perks. 10 rebirths, each unlocking a new egg (11 eggs, plus the Release Egg).

@@ -18,8 +18,6 @@ local folder = Instance.new("Folder")
 folder.Name = "Coins"
 folder.Parent = workspace
 
-local GOLD = Color3.fromRGB(255, 205, 50)
-local GOLD_DARK = Color3.fromRGB(235, 150, 30)
 local FLAT = CFrame.Angles(0, 0, math.rad(90)) -- turns a cylinder so it lies flat
 local COIN_SIZE = Vector3.new(0.35, 2.4, 2.4)
 
@@ -40,34 +38,38 @@ local function corner(parent, scale)
 end
 
 -- Builders --------------------------------------------------------------------
+-- Everything is built in the look of the player's area (Config.areaTheme):
+-- the coins, the chests, a patch of the area's ground under each breakable
+-- and a decoration on the chest lids.
 
-local function piece(model, origin, offset, size, color, shape)
+local function piece(model, origin, offset, size, color, shape, shiny)
 	local p = Instance.new("Part")
 	p.Shape = shape or Enum.PartType.Block
 	p.Size = size
 	p.CFrame = origin * offset
 	p.Color = color
 	p.Material = Enum.Material.SmoothPlastic
-	-- gold is shiny, like polished coins
-	p.Reflectance = if color == GOLD or color == GOLD_DARK then 0.3 else 0.05
+	-- coins are shiny, like polished coins
+	p.Reflectance = if shiny then 0.3 else 0.05
 	p.TopSurface = Enum.SurfaceType.Smooth
 	p.BottomSurface = Enum.SurfaceType.Smooth
 	p.Anchored = true
 	p.CanCollide = false
+	p.CastShadow = false
 	p.Parent = model
 	return p
 end
 
 -- One flat coin; y is the height of its bottom.
-local function coin(model, origin, x, y, z)
-	return piece(model, origin, CFrame.new(x, y + COIN_SIZE.X / 2, z) * FLAT, COIN_SIZE, GOLD, Enum.PartType.Cylinder)
+local function coin(model, origin, x, y, z, theme)
+	return piece(model, origin, CFrame.new(x, y + COIN_SIZE.X / 2, z) * FLAT, COIN_SIZE, theme.Coin, Enum.PartType.Cylinder, true)
 end
 
 -- A stack of coins; the top one gets a star.
-local function stack(model, origin, x, z, count)
+local function stack(model, origin, x, z, count, theme)
 	local top
 	for i = 0, count - 1 do
-		top = coin(model, origin, x + math.random(-15, 15) / 100, i * 0.37, z + math.random(-15, 15) / 100)
+		top = coin(model, origin, x + math.random(-15, 15) / 100, i * 0.37, z + math.random(-15, 15) / 100, theme)
 	end
 
 	local gui = Instance.new("SurfaceGui")
@@ -81,22 +83,90 @@ local function stack(model, origin, x, z, count)
 	star.Size = UDim2.fromScale(0.7, 0.7)
 	star.BackgroundTransparency = 1
 	star.Text = "★"
-	star.TextColor3 = GOLD_DARK
+	star.TextColor3 = theme.CoinDark
 	star.TextScaled = true
 	star.Font = Enum.Font.FredokaOne
 	star.Parent = gui
 end
 
-local function chest(model, origin, s, bodyColor, lidColor)
+-- A patch of the area's ground under a breakable.
+local function groundPatch(model, origin, radius, theme)
+	local patch = piece(model, origin, CFrame.new(0, 0.04, 0) * FLAT, Vector3.new(0.08, radius * 2 + 1, radius * 2 + 1), theme.Ground, Enum.PartType.Cylinder)
+	patch.Name = "Ground"
+end
+
+-- A little decoration on a chest lid, in the area's style. (x, y, z) is the
+-- middle of the lid's top; s is the chest's size.
+local DECOR = {
+	grass = function(model, at, s)
+		for k = -1, 1 do
+			piece(model, at, CFrame.new(k * 0.35 * s, 0.25 * s, 0) * CFrame.Angles(0, 0, k * 0.4), Vector3.new(0.18, 0.6, 0.18) * s, Color3.fromRGB(90, 180, 70))
+		end
+	end,
+	cactus = function(model, at, s)
+		local green = Color3.fromRGB(90, 170, 90)
+		piece(model, at, CFrame.new(0, 0.45 * s, 0), Vector3.new(0.4, 0.9, 0.4) * s, green)
+		piece(model, at, CFrame.new(0.3 * s, 0.55 * s, 0), Vector3.new(0.25, 0.35, 0.25) * s, green)
+	end,
+	snow = function(model, at, s)
+		piece(model, at, CFrame.new(0, 0.08 * s, 0), Vector3.new(3.9, 0.22, 2.9) * s, Color3.new(1, 1, 1))
+		for _, x in ipairs({ -1, 0.8 }) do
+			piece(model, at, CFrame.new(x * s, 0.3 * s, 0.4 * s), Vector3.one * 0.5 * s, Color3.new(1, 1, 1), Enum.PartType.Ball)
+		end
+	end,
+	sprinkles = function(model, at, s)
+		local colors = { Color3.fromRGB(255, 90, 120), Color3.fromRGB(255, 220, 70), Color3.fromRGB(110, 210, 120), Color3.fromRGB(90, 170, 255), Color3.new(1, 1, 1) }
+		for k = 1, 8 do
+			local x, z = (k % 4 - 1.5) * 0.7, (if k > 4 then 0.4 else -0.4)
+			piece(model, at, CFrame.new(x * s, 0.06, z * s) * CFrame.Angles(0, k, 0), Vector3.new(0.12, 0.12, 0.4) * s, colors[k % #colors + 1])
+		end
+	end,
+	shell = function(model, at, s)
+		local shell = piece(model, at, CFrame.new(0, 0.25 * s, 0), Vector3.new(1, 0.5, 0.9) * s, Color3.fromRGB(255, 190, 170))
+		local mesh = Instance.new("SpecialMesh")
+		mesh.MeshType = Enum.MeshType.Sphere
+		mesh.Parent = shell
+	end,
+	leaf = function(model, at, s)
+		piece(model, at, CFrame.new(0, 0.1 * s, 0) * CFrame.Angles(0, 0.5, 0), Vector3.new(1.6, 0.1, 0.7) * s, Color3.fromRGB(80, 170, 70))
+	end,
+	flame = function(model, at, s)
+		local flame = piece(model, at, CFrame.new(0, 0.35 * s, 0), Vector3.new(0.6, 0.8, 0.6) * s, Color3.fromRGB(255, 150, 40), Enum.PartType.Ball)
+		flame.Material = Enum.Material.Neon
+	end,
+	crystal = function(model, at, s)
+		local c = piece(model, at, CFrame.new(0, 0.45 * s, 0) * CFrame.Angles(0, math.rad(45), math.rad(12)), Vector3.new(0.45, 0.9, 0.45) * s, Color3.fromRGB(210, 150, 255))
+		c.Material = Enum.Material.Neon
+	end,
+	flower = function(model, at, s)
+		piece(model, at, CFrame.new(0, 0.25 * s, 0), Vector3.one * 0.55 * s, Color3.fromRGB(255, 170, 210), Enum.PartType.Ball)
+		piece(model, at, CFrame.new(0, 0.3 * s, -0.2 * s), Vector3.one * 0.25 * s, Color3.fromRGB(255, 225, 90), Enum.PartType.Ball)
+	end,
+	star = function(model, at, s)
+		local star = piece(model, at, CFrame.new(0, 0.4 * s, 0) * CFrame.Angles(math.rad(45), 0, math.rad(45)), Vector3.one * 0.5 * s, Color3.fromRGB(140, 235, 255))
+		star.Material = Enum.Material.Neon
+	end,
+	crown = function(model, at, s)
+		local gold = Color3.fromRGB(255, 210, 60)
+		piece(model, at, CFrame.new(0, 0.12 * s, 0), Vector3.new(1, 0.24, 0.8) * s, gold, nil, true)
+		for k = -1, 1 do
+			piece(model, at, CFrame.new(k * 0.35 * s, 0.38 * s, 0), Vector3.new(0.2, 0.3, 0.2) * s, gold, nil, true)
+		end
+	end,
+}
+
+local function chest(model, origin, s, theme, big)
 	local function at(x, y, z)
 		return CFrame.new(x * s, y * s, z * s)
 	end
-	piece(model, origin, at(0, 1, 0), Vector3.new(3.6, 2, 2.6) * s, bodyColor)
-	piece(model, origin, at(0, 2.45, 0), Vector3.new(3.8, 0.9, 2.8) * s, lidColor)
+	local body = if big then theme.Lid else theme.Body
+	local lid = if big then theme.Lid:Lerp(Color3.new(0, 0, 0), 0.2) else theme.Lid
+	piece(model, origin, at(0, 1, 0), Vector3.new(3.6, 2, 2.6) * s, body)
+	piece(model, origin, at(0, 2.45, 0), Vector3.new(3.8, 0.9, 2.8) * s, lid)
 	for _, x in ipairs({ -1.2, 1.2 }) do
-		piece(model, origin, at(x, 1.45, 0), Vector3.new(0.35, 2.95, 2.7) * s, GOLD)
+		piece(model, origin, at(x, 1.45, 0), Vector3.new(0.35, 2.95, 2.7) * s, theme.Band, nil, true)
 	end
-	piece(model, origin, at(0, 1.9, -1.35), Vector3.new(0.7, 0.8, 0.25) * s, GOLD_DARK)
+	piece(model, origin, at(0, 1.9, -1.35), Vector3.new(0.7, 0.8, 0.25) * s, theme.CoinDark, nil, true)
 	-- coins spilling out on top
 	for _, spot in ipairs({ { -0.8, 0.3 }, { 0.5, -0.4 }, { 0.2, 0.6 } }) do
 		piece(
@@ -104,31 +174,37 @@ local function chest(model, origin, s, bodyColor, lidColor)
 			origin,
 			CFrame.new(spot[1] * s, 2.9 * s + 0.2, spot[2] * s) * CFrame.Angles(math.random() * 0.4, 0, 0) * FLAT,
 			COIN_SIZE * math.min(s, 1.3),
-			GOLD,
-			Enum.PartType.Cylinder
+			theme.Coin,
+			Enum.PartType.Cylinder,
+			true
 		)
+	end
+	-- the area's decoration on the lid
+	local decor = DECOR[theme.Decor]
+	if decor then
+		decor(model, origin * at(0, 2.9, 0.2), s)
 	end
 end
 
 -- Each builder draws one kind of breakable (same order as Config.BREAKABLES)
 -- around origin and returns its height.
 local BUILDERS = {
-	function(model, origin) -- Coins: a stack of 4
-		stack(model, origin, 0, 0, 4)
+	function(model, origin, theme) -- Coins: a stack of 4
+		stack(model, origin, 0, 0, 4, theme)
 		return 1.5
 	end,
-	function(model, origin) -- Coin Pile: three stacks
-		stack(model, origin, -0.95, 0.55, 5)
-		stack(model, origin, 0.95, 0.55, 3)
-		stack(model, origin, 0, -0.85, 4)
+	function(model, origin, theme) -- Coin Pile: three stacks
+		stack(model, origin, -0.95, 0.55, 5, theme)
+		stack(model, origin, 0.95, 0.55, 3, theme)
+		stack(model, origin, 0, -0.85, 4, theme)
 		return 1.9
 	end,
-	function(model, origin) -- Chest
-		chest(model, origin, 1, Color3.fromRGB(170, 105, 60), Color3.fromRGB(135, 80, 45))
+	function(model, origin, theme) -- Chest
+		chest(model, origin, 1, theme, false)
 		return 3.3
 	end,
-	function(model, origin) -- Big Chest
-		chest(model, origin, 1.6, Color3.fromRGB(150, 95, 225), Color3.fromRGB(115, 70, 190))
+	function(model, origin, theme) -- Big Chest
+		chest(model, origin, 1.6, theme, true)
 		return 5.2
 	end,
 }
@@ -223,12 +299,14 @@ local function spawnCoin(player)
 	model.Name = Config.BREAKABLES[kind].Name
 
 	-- invisible base: the model's pivot sits on the ground at its center
-	local base = piece(model, origin, CFrame.new(0, 0.05, 0), Vector3.new(1, 0.1, 1), GOLD)
+	local theme = Config.areaTheme(data.Rebirths)
+	local base = piece(model, origin, CFrame.new(0, 0.05, 0), Vector3.new(1, 0.1, 1), theme.Coin)
 	base.Name = "Base"
 	base.Transparency = 1
 	model.PrimaryPart = base
 
-	local height = BUILDERS[kind](model, origin)
+	groundPatch(model, origin, radius, theme)
+	local height = BUILDERS[kind](model, origin, theme)
 	model:SetAttribute("Health", stats.Health)
 	model:SetAttribute("MaxHealth", stats.Health)
 	model:SetAttribute("Kind", kind)
@@ -258,7 +336,7 @@ local function spawnCoin(player)
 
 	if kind == #BUILDERS then
 		local sparkles = Instance.new("Sparkles")
-		sparkles.SparkleColor = GOLD
+		sparkles.SparkleColor = theme.Coin
 		sparkles.Parent = base
 	end
 

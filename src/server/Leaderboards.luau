@@ -197,19 +197,28 @@ local function buildBoard(board, angle)
 		pad.PaddingBottom = UDim.new(0, 6)
 		pad.Parent = rank
 
+		-- the player's avatar (head shot) in a round frame
+		local avatar = Instance.new("ImageLabel")
+		avatar.Position = UDim2.fromOffset(48, 5)
+		avatar.Size = UDim2.fromOffset(40, 40)
+		avatar.BackgroundColor3 = Color3.fromRGB(225, 230, 240)
+		avatar.Image = ""
+		avatar.Parent = row
+		corner(avatar, 0.5)
+
 		-- the rarest board shows the pet under the name
 		local two = board.Id == "Rarest"
 		local name = label(row, {
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Position = UDim2.fromOffset(52, if two then 5 else 8),
-			Size = UDim2.new(0.55, -52, 0, if two then 24 else 34),
+			Position = UDim2.fromOffset(96, if two then 5 else 8),
+			Size = UDim2.new(0.55, -96, 0, if two then 24 else 34),
 		})
 		local pet = if two
 			then label(row, {
 				Font = Enum.Font.GothamMedium,
 				TextXAlignment = Enum.TextXAlignment.Left,
-				Position = UDim2.fromOffset(52, 29),
-				Size = UDim2.new(0.55, -52, 0, 17),
+				Position = UDim2.fromOffset(96, 29),
+				Size = UDim2.new(0.55, -96, 0, 17),
 			})
 			else nil
 		local value = label(row, {
@@ -218,7 +227,7 @@ local function buildBoard(board, angle)
 			Position = UDim2.new(0.55, 0, 0, 8),
 			Size = UDim2.new(0.45, -10, 0, 34),
 		})
-		rows[i] = { Frame = row, Name = name, Value = value, Pet = pet }
+		rows[i] = { Frame = row, Name = name, Value = value, Pet = pet, Avatar = avatar }
 	end
 	board.Rows = rows
 end
@@ -256,6 +265,7 @@ local function draw(board)
 		row.Frame.Visible = entry ~= nil
 		if entry then
 			row.Name.Text = userName(entry[1])
+			row.Avatar.Image = ("rbxthumb://type=AvatarHeadShot&id=%d&w=60&h=60"):format(entry[1])
 			row.Value.Text = board.Text(entry[2])
 			if row.Pet then
 				local pet = rarestPetName(entry[1], entry[2])

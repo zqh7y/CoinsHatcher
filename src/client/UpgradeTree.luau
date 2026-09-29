@@ -132,6 +132,53 @@ do
 	end
 end
 
+-- a big friendly tree drawn behind the START badge: a grassy hill, a trunk
+-- with roots and a round leafy crown (soft, so the branches stay easy to see)
+do
+	local function blob(center, size, color, transparency, rotation)
+		local f = Instance.new("Frame")
+		f.AnchorPoint = Vector2.new(0.5, 0.5)
+		f.Position = UDim2.fromOffset(center.X, center.Y)
+		f.Size = UDim2.fromOffset(size.X, size.Y)
+		f.Rotation = rotation or 0
+		f.BackgroundColor3 = color
+		f.BackgroundTransparency = transparency
+		f.BorderSizePixel = 0
+		f.Parent = content
+		return f
+	end
+	local hill = blob(ORIGIN + Vector2.new(0, 330), Vector2.new(760, 170), Color3.fromRGB(150, 220, 120), 0.35)
+	Ui.corner(hill, 0.5)
+	-- trunk and roots
+	local trunk = blob(ORIGIN + Vector2.new(0, 170), Vector2.new(96, 330), WOOD, 0.2)
+	Ui.corner(trunk, 0.3)
+	blob(ORIGIN + Vector2.new(-18, 170), Vector2.new(14, 290), WOOD:Lerp(Color3.new(1, 1, 1), 0.3), 0.3)
+	for _, side in ipairs({ -1, 1 }) do
+		local rootPart = blob(ORIGIN + Vector2.new(side * 70, 320), Vector2.new(120, 34), WOOD, 0.2, side * 22)
+		Ui.corner(rootPart, 0.5)
+	end
+	-- leafy crown: overlapping soft green circles
+	local leaf = { Color3.fromRGB(110, 205, 95), Color3.fromRGB(90, 190, 90), Color3.fromRGB(135, 220, 110) }
+	for k, spot in ipairs({
+		{ 0, -40, 380 },
+		{ -190, 10, 280 },
+		{ 190, 10, 280 },
+		{ -120, -170, 260 },
+		{ 120, -170, 260 },
+		{ 0, -230, 240 },
+		{ -250, -120, 200 },
+		{ 250, -120, 200 },
+	}) do
+		local c = blob(ORIGIN + Vector2.new(spot[1], spot[2]), Vector2.new(spot[3], spot[3]), leaf[(k - 1) % #leaf + 1], 0.45)
+		Ui.corner(c, 0.5)
+	end
+	-- a few apples and flowers in the crown
+	for _, spot in ipairs({ { -160, -60 }, { 150, -90 }, { -60, -250 }, { 90, -200 }, { -250, 20 }, { 240, 40 } }) do
+		local apple = blob(ORIGIN + Vector2.new(spot[1], spot[2]), Vector2.new(26, 26), Color3.fromRGB(255, 95, 110), 0.1)
+		Ui.corner(apple, 0.5)
+	end
+end
+
 local lines = Instance.new("Frame")
 lines.Name = "Lines"
 lines.BackgroundTransparency = 1

@@ -229,7 +229,46 @@ local function buyMerchant(player, slot)
 	return true, "🐾 You got a " .. offer.Pet .. "!"
 end
 
+-- Auto Buy (bought in the upgrade tree): keeps buying the cheapest upgrade
+-- board level you can afford, while its switch on the board is on.
+local function autoBuyTick()
+	for _, player in ipairs(Players:GetPlayers()) do
+		local data = PlayerData.get(player)
+		if data and (data.Upgrades.AutoBuy or 0) > 0 and data.AutoBuyOn ~= false then
+			local bestId, bestCost = nil, math.huge
+			for _, upgrade in ipairs(Config.AREA_UPGRADES) do
+				local level = data.Upgrades[upgrade.Id] or 0
+				if level < upgrade.Max then
+					local cost = Config.upgradeCost(upgrade, level, data.Rebirths)
+					if cost < bestCost then
+						bestId, bestCost = upgrade.Id, cost
+					end
+				end
+			end
+			if bestId and data.Coins >= bestCost then
+				buy(player, bestId, false)
+			end
+		end
+	end
+end
+
 function Shop.start(remotes)
+	remotes.SetAutoBuy.OnServerInvoke = function(player, on)
+		local data = PlayerData.get(player)
+		if not data or typeof(on) ~= "boolean" or (data.Upgrades.AutoBuy or 0) == 0 then
+			return false
+		end
+		data.AutoBuyOn = on
+		PlayerData.Changed:Fire(player)
+		return true
+	end
+	task.spawn(function()
+		while true do
+			task.wait(0.5)
+			autoBuyTick()
+		end
+	end)
+
 	remotes.BuyMerchant.OnServerInvoke = function(player, slot)
 		if typeof(slot) ~= "number" then
 			return false

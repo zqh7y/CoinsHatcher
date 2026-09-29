@@ -46,10 +46,12 @@ local function notify(player, message, color, celebrate)
 end
 
 -- Should this freshly hatched pet be deleted right away? (The player picked
--- it for auto-delete in the egg popup; mutated pets are always kept.)
+-- it for auto-delete in the egg popup; its Shiny/Rainbow/Galaxy versions go
+-- too.)
 local function autoDeleted(data, petName)
 	local info = Config.PETS[petName]
-	return data.AutoDelete ~= nil and data.AutoDelete[petName] == true and info ~= nil and info.Mutation == nil
+	local base = info and info.Base or petName
+	return data.AutoDelete ~= nil and data.AutoDelete[base] == true
 end
 
 -- Gives hatched pets to the player: diamonds for new discoveries, auto-delete,

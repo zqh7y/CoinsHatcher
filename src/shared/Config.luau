@@ -61,6 +61,34 @@ function Config.areaColor(rebirths: number): Color3
 	return Config.AREA_COLORS[math.min(rebirths + 1, #Config.AREA_COLORS)]
 end
 
+-- The look of each rebirth's area (same order as AREA_COLORS): the coins and
+-- chests match the place, a little patch of its ground sits under each
+-- breakable, the chest lid gets a decoration, and the air has weather.
+--   Coin / CoinDark: coin colors · Body / Lid / Band: chest colors
+--   Ground: patch under the breakables · Decor: on the chest lid
+--   Weather: "leaves", "dust", "snow", "sprinkles", "bubbles", "embers",
+--            "sparkles", "petals", "stars", "glitter"
+local function rgb(r, g, b)
+	return Color3.fromRGB(r, g, b)
+end
+Config.AREA_THEMES = {
+	{ Name = "Meadow", Coin = rgb(255, 205, 50), CoinDark = rgb(235, 150, 30), Body = rgb(170, 105, 60), Lid = rgb(135, 80, 45), Band = rgb(255, 205, 50), Ground = rgb(100, 190, 80), Decor = "grass", Weather = "leaves", WeatherColor = rgb(120, 200, 90) },
+	{ Name = "Desert", Coin = rgb(255, 200, 60), CoinDark = rgb(215, 140, 40), Body = rgb(190, 140, 80), Lid = rgb(150, 100, 55), Band = rgb(240, 200, 120), Ground = rgb(235, 205, 140), Decor = "cactus", Weather = "dust", WeatherColor = rgb(240, 215, 160) },
+	{ Name = "Ice", Coin = rgb(200, 235, 255), CoinDark = rgb(110, 170, 230), Body = rgb(130, 190, 240), Lid = rgb(95, 150, 215), Band = rgb(235, 250, 255), Ground = rgb(245, 250, 255), Decor = "snow", Weather = "snow", WeatherColor = rgb(255, 255, 255) },
+	{ Name = "Candy", Coin = rgb(255, 150, 200), CoinDark = rgb(230, 80, 150), Body = rgb(255, 180, 215), Lid = rgb(255, 120, 180), Band = rgb(255, 255, 255), Ground = rgb(255, 205, 230), Decor = "sprinkles", Weather = "sprinkles", WeatherColor = rgb(255, 150, 200) },
+	{ Name = "Ocean", Coin = rgb(240, 250, 255), CoinDark = rgb(120, 200, 230), Body = rgb(60, 160, 190), Lid = rgb(40, 125, 160), Band = rgb(255, 170, 150), Ground = rgb(120, 200, 240), Decor = "shell", Weather = "bubbles", WeatherColor = rgb(200, 240, 255) },
+	{ Name = "Jungle", Coin = rgb(255, 210, 60), CoinDark = rgb(200, 140, 30), Body = rgb(110, 75, 45), Lid = rgb(80, 55, 35), Band = rgb(90, 180, 80), Ground = rgb(70, 150, 70), Decor = "leaf", Weather = "leaves", WeatherColor = rgb(60, 150, 60) },
+	{ Name = "Sunset", Coin = rgb(255, 170, 70), CoinDark = rgb(230, 100, 40), Body = rgb(210, 90, 60), Lid = rgb(170, 60, 45), Band = rgb(255, 210, 90), Ground = rgb(250, 160, 100), Decor = "flame", Weather = "embers", WeatherColor = rgb(255, 150, 60) },
+	{ Name = "Magic", Coin = rgb(210, 160, 255), CoinDark = rgb(150, 90, 230), Body = rgb(120, 80, 190), Lid = rgb(90, 55, 160), Band = rgb(255, 215, 255), Ground = rgb(190, 150, 255), Decor = "crystal", Weather = "sparkles", WeatherColor = rgb(220, 170, 255) },
+	{ Name = "Mint", Coin = rgb(170, 245, 210), CoinDark = rgb(70, 190, 150), Body = rgb(120, 210, 180), Lid = rgb(80, 175, 145), Band = rgb(255, 255, 255), Ground = rgb(150, 230, 195), Decor = "flower", Weather = "petals", WeatherColor = rgb(255, 190, 220) },
+	{ Name = "Space", Coin = rgb(210, 230, 255), CoinDark = rgb(120, 140, 230), Body = rgb(50, 45, 100), Lid = rgb(35, 30, 75), Band = rgb(120, 230, 255), Ground = rgb(80, 70, 150), Decor = "star", Weather = "stars", WeatherColor = rgb(230, 240, 255) },
+	{ Name = "Gold", Coin = rgb(255, 215, 60), CoinDark = rgb(220, 160, 20), Body = rgb(245, 190, 50), Lid = rgb(220, 160, 30), Band = rgb(255, 245, 200), Ground = rgb(250, 215, 110), Decor = "crown", Weather = "glitter", WeatherColor = rgb(255, 220, 90) },
+}
+
+function Config.areaTheme(rebirths: number)
+	return Config.AREA_THEMES[math.min(rebirths + 1, #Config.AREA_THEMES)]
+end
+
 -- Pets ----------------------------------------------------------------------
 
 Config.MAX_EQUIPPED = 3
@@ -380,9 +408,10 @@ Config.SPECIAL_PETS = { Config.GIFT_HUGE }
 -- special look. Huge pets don't mutate (they're special enough). Chance is in
 -- percent, before luck.
 Config.MUTATIONS = {
-	{ Name = "Shiny", Icon = "✨", Chance = 5, Power = 1.5, Color = Color3.fromRGB(255, 240, 150) },
-	{ Name = "Rainbow", Icon = "🌈", Chance = 2, Power = 2, Color = Color3.fromRGB(255, 120, 200) },
-	{ Name = "Galaxy", Icon = "🌌", Chance = 0.5, Power = 3, Color = Color3.fromRGB(170, 110, 255) },
+	-- way rare: 1 in 200 / 1 in 2,000 / 1 in 20,000 before luck
+	{ Name = "Shiny", Icon = "✨", Chance = 0.5, Power = 1.5, Color = Color3.fromRGB(255, 240, 150) },
+	{ Name = "Rainbow", Icon = "🌈", Chance = 0.05, Power = 2, Color = Color3.fromRGB(255, 120, 200) },
+	{ Name = "Galaxy", Icon = "🌌", Chance = 0.005, Power = 3, Color = Color3.fromRGB(170, 110, 255) },
 }
 
 -- Adds "Shiny Dog", "Rainbow Huge Dragon", ... to Config.PETS
@@ -425,10 +454,12 @@ function Config.rollWeighted(list): number
 	return 1
 end
 
--- Chance (in %) of something rare after luck. Luck counts like extra tries
--- (square-rooted), so even x100 luck keeps mutations special.
+-- Chance (in %) of a mutation after luck. Luck counts like extra tries, but
+-- only a little (luck ^ 0.25: x4000 luck = about 8 tries), so mutations stay
+-- really rare.
+Config.MUTATION_LUCK_POWER = 0.25
 local function withLuck(chance: number, luck: number): number
-	return (1 - (1 - chance / 100) ^ math.sqrt(luck)) * 100
+	return (1 - (1 - chance / 100) ^ (luck ^ Config.MUTATION_LUCK_POWER)) * 100
 end
 
 -- The chance (in %) of each pet in an egg, including the player's luck
@@ -579,6 +610,7 @@ Config.UPGRADES = {
 	{ Id = "HatchSpeed", Name = "Hatch Speed", Icon = "⏩", Max = 5, BaseCost = 2000, Span = 6, Info = "Eggs open faster (x2 at max)", Angle = -140, Requires = { "Luck", 3 }, Color = Color3.fromRGB(255, 120, 170) },
 	{ Id = "HatchAmount", Name = "Hatch Amount", Icon = "🥚", Max = 5, BaseCost = 5000, Span = 8, Info = "Open more eggs at once (up to 8)", Angle = -40, Requires = { "Luck", 6 }, Color = Color3.fromRGB(170, 110, 255) },
 	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 5, BaseCost = 10000, Span = 9, Info = "+1 pet you can equip", Angle = 140, Requires = { "PetSpeed", 3 }, Color = Color3.fromRGB(255, 140, 70) },
+	{ Id = "AutoBuy", Name = "Auto Buy", Icon = "🤖", Max = 1, BaseCost = 20000, Span = 0, Info = "The upgrade board buys its cheapest upgrade for you (turn it on/off on the board)", Angle = 70, Requires = { "CoinBonus", 2 }, Color = Color3.fromRGB(110, 140, 255) },
 }
 
 -- Can this upgrade's next level be bought (is its branch open)?

@@ -11,6 +11,9 @@ local Boosts = {}
 
 -- How each upgrade's boost is written, from the player's upgrade levels.
 local TEXT = {
+	AutoBuy = function(u)
+		return if (u and u.AutoBuy or 0) > 0 then "ON" else "OFF"
+	end,
 	HatchSpeed = function(u)
 		return Config.formatMult(Config.hatchSpeed(u))
 	end,

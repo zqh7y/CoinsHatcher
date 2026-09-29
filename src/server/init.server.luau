@@ -43,6 +43,8 @@ remote("RemoteFunction", "SetAutoDelete") -- client -> server: petName, on
 remote("RemoteFunction", "BuyUpgrade") -- client -> server: upgrade id, returns ok, message
 remote("RemoteFunction", "BuyPerk") -- client -> server: perk id (costs diamonds)
 remote("RemoteFunction", "BuyMerchant") -- client -> server: offer slot (pets for diamonds)
+remote("RemoteFunction", "SetAutoBuy") -- client -> server: on (the board's Auto Buy switch)
+local SetGuideStep = remote("RemoteEvent", "SetGuideStep") -- client -> server: new-player guide step (0 = done)
 remote("RemoteFunction", "BuyBoost") -- client -> server: potion id (costs diamonds)
 local ChooseStarter = remote("RemoteFunction", "ChooseStarter") -- client -> server: "Dog" | "Cat"
 
@@ -60,6 +62,14 @@ Inventory.start(remotes)
 Gifts.start(remotes)
 Pickups.start(remotes)
 Leaderboards.start()
+
+-- The new-player guide remembers which step you're on (0 = done or skipped)
+SetGuideStep.OnServerEvent:Connect(function(player, step)
+	local data = PlayerData.get(player)
+	if data and typeof(step) == "number" and step == math.floor(step) and step >= 0 and step <= 20 then
+		data.Guide = step
+	end
+end)
 
 -- Keep the client's copy of the data (pets, equipped, rebirths) up to date
 PlayerData.Changed.Event:Connect(function(player)

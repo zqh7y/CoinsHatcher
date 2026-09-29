@@ -769,10 +769,6 @@ local function mainArea()
 	upgradeBoard(mainSpot(BOARD_ANGLE, 43))
 	stonePath(mainSpot(BOARD_ANGLE, zoneRadius + 2), mainSpot(BOARD_ANGLE, 38))
 
-	-- the Release egg's party arch, facing the coins
-	local archSpot = mainSpot(RELEASE_ANGLE, World.RELEASE_DIST - 11)
-	gate(archSpot, "🎉 RELEASE 🎉", Color3.fromRGB(255, 200, 60), Color3.fromRGB(255, 110, 170), World.MAIN_CENTER)
-
 	for _, angle in ipairs({ 45, 135, 345 }) do -- (leaderboards at 300-330, Release egg at 225)
 		lamp(mainSpot(angle, 46))
 	end

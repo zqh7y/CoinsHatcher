@@ -25,6 +25,7 @@ local DEFAULT = {
 	Perks = {}, -- [perk id] = level, bought with diamonds, never reset
 	Boosts = {}, -- [boost id] = seconds left on a potion (counts down while online)
 	AutoDelete = {}, -- [pet name] = true: hatched copies are deleted right away
+	Guide = 1, -- step of the new-player guide (0 = finished or skipped)
 	Rarest = nil, -- { Pet = name, Odds = N } the rarest pet ever hatched (1 in N)
 }
 
@@ -78,6 +79,11 @@ local function load(player)
 		if not Config.UPGRADES_BY_ID[id] then
 			data.Upgrades[id] = nil
 		end
+	end
+
+	-- older saves: players who already hatched something don't need the guide
+	if ok and saved and saved.Guide == nil then
+		data.Guide = if (data.Hatched or 0) > 0 then 0 else 1
 	end
 
 	-- older saves: fill in the index from the pets they already own

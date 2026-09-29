@@ -97,8 +97,41 @@ Ui.label(background, {
 	TextColor3 = Ui.COLORS.SubText,
 	TextXAlignment = Enum.TextXAlignment.Left,
 	Position = UDim2.fromOffset(50, 66),
-	Size = UDim2.fromOffset(560, 20),
+	Size = UDim2.fromOffset(500, 20),
 })
+
+-- the Auto Buy switch (top right): unlocked with Auto Buy in the upgrade tree
+local autoButton = Ui.button(background, "", Ui.COLORS.Soft, {
+	AnchorPoint = Vector2.new(1, 0),
+	Position = UDim2.new(1, -30, 0, 26),
+	Size = UDim2.fromOffset(250, 58),
+})
+local autoBusy = false
+local function refreshAuto()
+	local data = State.Data
+	local owned = data and (data.Upgrades.AutoBuy or 0) > 0
+	local on = owned and data.AutoBuyOn ~= false
+	if not owned then
+		autoButton.Text = "🔒 Auto Buy"
+		Ui.setButtonColor(autoButton, Ui.COLORS.Disabled)
+	else
+		autoButton.Text = if on then "🤖 Auto Buy: ON" else "🤖 Auto Buy: OFF"
+		Ui.setButtonColor(autoButton, if on then Ui.COLORS.Green else Ui.COLORS.Soft)
+	end
+end
+autoButton.Activated:Connect(function()
+	local data = State.Data
+	if not data or autoBusy then
+		return
+	end
+	if (data.Upgrades.AutoBuy or 0) == 0 then
+		Ui.toast("🤖 Unlock Auto Buy in the Upgrade Tree!", Ui.COLORS.Accent)
+		return
+	end
+	autoBusy = true
+	remotes.SetAutoBuy:InvokeServer(data.AutoBuyOn == false)
+	autoBusy = false
+end)
 
 -- one row of big cards that scrolls sideways (3 fit at a time)
 local CARD = Vector2.new(232, 432)
@@ -256,7 +289,11 @@ task.spawn(function()
 	render()
 end)
 
-State.Changed.Event:Connect(render)
+State.Changed.Event:Connect(function()
+	render()
+	refreshAuto()
+end)
+refreshAuto()
 local pending = false
 player:GetAttributeChangedSignal("Coins"):Connect(function()
 	if not pending then
