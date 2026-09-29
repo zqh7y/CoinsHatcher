@@ -15,6 +15,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Ui = require(script.Parent.Ui)
 local Viewport = require(script.Parent.Viewport)
 local Fx = require(script.Parent.Fx)
+local State = require(script.Parent.State)
 
 local Hatch = {}
 
@@ -24,7 +25,7 @@ local queue = {}
 local playing = false
 local current -- the overlay on screen, removed if an animation errors
 
-local SLOT = 240 -- width of each egg/pet on screen
+local SLOT = 240 -- width of each egg/pet on screen (smaller when hatching many)
 
 local function tween(obj, time, props, style, direction)
 	local t = TweenService:Create(obj, TweenInfo.new(time, style or Enum.EasingStyle.Quad, direction or Enum.EasingDirection.Out), props)
@@ -109,6 +110,11 @@ local RARITY_TITLES = {
 
 local function play(petNames)
 	local fast = Hatch.fast
+	-- up to 8 eggs fit across the screen
+	local screenWidth = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize.X or 1200
+	SLOT = math.min(240, math.floor(screenWidth * 0.94 / #petNames))
+	-- the Hatch Speed upgrade makes everything quicker
+	local speed = Config.hatchSpeed(State.Data and State.Data.Upgrades)
 	local count = #petNames
 	local anyRare, epicPet = false, nil
 	for _, petName in ipairs(petNames) do
@@ -174,7 +180,7 @@ local function play(petNames)
 
 	-- 2) wobble harder and harder, with cracks; the special one shakes the
 	-- screen and pulses like a heartbeat
-	local wobbleTime = if epic then 2.8 elseif fast then 0.6 else 1.4
+	local wobbleTime = if epic then 2.8 elseif fast then 0.6 / speed else 1.4 / speed
 	local start = os.clock()
 	local cracked = 0
 	local wobble = RunService.RenderStepped:Connect(function()
@@ -335,7 +341,7 @@ local function play(petNames)
 		Fx.confetti(70)
 	end
 
-	task.wait(if epic then 4.5 elseif fast then 1 elseif anyRare then 3 else 2)
+	task.wait(if epic then 4.5 elseif fast then 1 / speed elseif anyRare then 3 / speed else 2 / speed)
 
 	-- 4) fade out
 	tween(overlay, 0.25, { BackgroundTransparency = 1 })

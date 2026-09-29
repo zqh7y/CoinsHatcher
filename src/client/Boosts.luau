@@ -11,6 +11,12 @@ local Boosts = {}
 
 -- How each upgrade's boost is written, from the player's upgrade levels.
 local TEXT = {
+	HatchSpeed = function(u)
+		return Config.formatMult(Config.hatchSpeed(u))
+	end,
+	HatchAmount = function(u)
+		return Config.hatchAmount(u) .. " eggs"
+	end,
 	Damage = function(u)
 		return Config.formatMult(Config.damageMult(u))
 	end,

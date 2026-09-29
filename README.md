@@ -23,16 +23,16 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Main area** (round): your pets run to coin stacks and chests in the round
   coin zone and break them. Stronger pets hit harder. Every rebirth makes the
   area's breakables tougher and worth more (and changes its color).
-- **Shop** (stall in the main area): upgrade pet damage, luck, walk speed,
-  pet speed, coin bonus and pet slots. Kept forever (not reset on rebirth).
-  Every level has a fixed price, set for the rebirth you'd be at when buying it.
-  Luck goes up to x100, damage x20 and coins x10 at max. Stand on
-  the glowing circle to open it; step off to close it.
-- **📈 Upgrade board** (white board in the main area, reset on rebirth): 15
-  incremental upgrades on tall cards that scroll sideways, with Buy and Max:
-  coin value, chest value, more things to break, chest luck, faster respawn,
-  diamond finder, crit chance, crit damage, hit speed, big chest luck, orb
-  luck, orb time, combo time, egg discount, stack gems.
+- **Shop** (stall in the main area): hatch speed (x2 at max), hatch amount
+  (open up to 8 eggs at once), luck (up to x100), walk speed, pet speed,
+  coin bonus (up to x10) and pet slots (+5). Kept forever (not reset on
+  rebirth). Every level has a fixed price, set for the rebirth you'd be at
+  when buying it. Stand on the glowing circle to open it; step off to close
+  it. The Diamond tab (potions and perks) is unchanged.
+- **📈 Upgrade board** (white board in the main area, reset on rebirth): one
+  row of big, easy-to-read cards that scroll sideways, with Buy and Max:
+  coin value, more coins, luck (x10 at max), diamond chance, crit, hit
+  speed, chest luck, orb luck and combo time.
 - **Boosts from playing**: 🔥 combos (every 25 breaks in a row = a free 2x
   boost) and 🧪 boost orbs that sometimes drop from breakables.
 - **Juice**: breakables pop in, flash on hit and burst into coins; coins and
@@ -45,12 +45,13 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   eggs stand along the right side, 24 studs apart, each on a round platform
   in its theme's color with a matching prop mirrored on both sides behind
   it (meadow, forest, ocean, lava, candy, snow, jungle, desert, space,
-  magic, mythic). Eggs you haven't unlocked are plain black eggs with just
-  "Rebirth N" over them. The **Release Egg** (party pets, open for
+  magic, mythic). Eggs you haven't unlocked are plain black eggs with a
+  gold padlock on the front that says which rebirth opens them. The **Release Egg** (party pets, open for
   everyone) waits at the far end under a party arch.
 - **Hatching**: walk up to an egg for a small popup on top of it: its pets in
   a 3-wide grid with the chance under each ("1 in 4", tiny ones as
-  "0.00004%") and three buttons with the price: **E** buy 1, **F** buy 3,
+  "0.00004%") and three buttons with the price: **E** buy 1, **F** buy 3 (up to 8 with the
+  Hatch Amount upgrade),
   **T** auto. Every egg has 5 pets (Common to **Mythical**); the Mythical one
   is always really hard and gets harder in better eggs (1 in 1,000 in the
   Basic Egg, about 1 in 6M in the Mythic Egg). Only some eggs have a **Huge**

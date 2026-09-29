@@ -100,14 +100,14 @@ function Eggs.freeHatch(player, count)
 	return true
 end
 
--- Hatches `count` eggs (1 or 3) at once, paying with coins.
+-- Hatches `count` eggs (1 up to the Hatch Amount) at once, paying with coins.
 local function hatch(player, eggIndex, count)
 	local data = PlayerData.get(player)
 	if not data or not eggModels[eggIndex] then
 		return
 	end
 	local now = os.clock()
-	if lastHatch[player] and now - lastHatch[player] < HATCH_COOLDOWN then
+	if lastHatch[player] and now - lastHatch[player] < HATCH_COOLDOWN / Config.hatchSpeed(data.Upgrades) then
 		return
 	end
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -267,7 +267,12 @@ function Eggs.start(remoteFolder)
 
 	-- E / F / T and the popup's buttons (auto sends 1 or 3 over and over)
 	remotes.Hatch.OnServerEvent:Connect(function(player, eggIndex, count)
-		if typeof(eggIndex) ~= "number" or (count ~= 1 and count ~= 3) then
+		if typeof(eggIndex) ~= "number" or typeof(count) ~= "number" or count ~= math.floor(count) or count < 1 then
+			return
+		end
+		-- 1, or up to the player's Hatch Amount
+		local data = PlayerData.get(player)
+		if not data or (count ~= 1 and count > Config.hatchAmount(data.Upgrades)) then
 			return
 		end
 		hatch(player, eggIndex, count)

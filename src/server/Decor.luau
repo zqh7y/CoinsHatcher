@@ -79,6 +79,18 @@ local function wallDistance(area, dx, dz)
 	return math.min(x, z)
 end
 
+-- How far `pos` is outside an area (0 if inside), measured to its real edge
+-- (for a rectangle that's the nearest point on it, not just along one line).
+local function distanceOutside(area, pos)
+	local offset = pos - area.Center
+	if area.Radius then
+		return math.max(0, Vector3.new(offset.X, 0, offset.Z).Magnitude - area.Radius)
+	end
+	local dx = math.max(0, math.abs(offset.X) - area.HalfX)
+	local dz = math.max(0, math.abs(offset.Z) - area.HalfZ)
+	return math.sqrt(dx * dx + dz * dz)
+end
+
 -- Keeps hills out of the other area.
 local function clearOfOtherAreas(pos, radius, selfIndex)
 	for i, area in ipairs(AREAS) do
@@ -102,6 +114,12 @@ local function hillRing(areaIndex, count, minSize, maxSize, gap, colors)
 		-- a ball sunk by a quarter touches the ground in a circle ~0.43 * size wide
 		local dist = wallDistance(area, dx, dz) + size * 0.45 + gap + rng:NextNumber(0, 15)
 		local pos = area.Center + Vector3.new(dx * dist, 0, dz * dist)
+		-- push it further out until it's clear of the wall everywhere (near a
+		-- rectangle's corners it can still reach inside otherwise)
+		while distanceOutside(area, pos) < size * 0.45 + gap do
+			dist += 2
+			pos = area.Center + Vector3.new(dx * dist, 0, dz * dist)
+		end
 		if clearOfOtherAreas(pos, size * 0.45, areaIndex) then
 			part({
 				Name = "Hill",
@@ -198,7 +216,15 @@ local function spotNearWall(area, minOffset, maxOffset, groundY)
 	local angle = rng:NextNumber(0, math.pi * 2)
 	local dx, dz = math.cos(angle), math.sin(angle)
 	local dist = wallDistance(area, dx, dz) + rng:NextNumber(minOffset, maxOffset)
-	return area.Center + Vector3.new(dx * dist, groundY, dz * dist)
+	local pos = area.Center + Vector3.new(dx * dist, groundY, dz * dist)
+	-- outside spots keep their distance from the wall everywhere (corners too)
+	if minOffset > 0 then
+		while distanceOutside(area, pos) < minOffset do
+			dist += 1
+			pos = area.Center + Vector3.new(dx * dist, groundY, dz * dist)
+		end
+	end
+	return pos
 end
 
 -- Colorful posts with ball caps along the walls, like a toy fence.

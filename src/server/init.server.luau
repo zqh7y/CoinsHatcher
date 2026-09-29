@@ -32,7 +32,7 @@ remote("RemoteFunction", "SetEquipped") -- client -> server: petIndex, bool
 remote("RemoteFunction", "EquipBest") -- client -> server
 remote("RemoteFunction", "DeletePets") -- client -> server: { petIndex }
 remote("RemoteFunction", "ClaimGift") -- client -> server: gift number
-remote("RemoteEvent", "Hatch") -- client -> server: eggIndex, 1 or 3
+remote("RemoteEvent", "Hatch") -- client -> server: eggIndex, count (1 up to the Hatch Amount)
 remote("RemoteEvent", "Announce") -- server -> all clients: player name, pet name
 local GetData = remote("RemoteFunction", "GetData") -- client -> server, returns data
 local DataChanged = remote("RemoteEvent", "DataChanged") -- server -> client: data

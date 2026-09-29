@@ -527,32 +527,27 @@ end
 -- rebirth you'd be at when buying it, so the price grows x4 (like everything
 -- else per rebirth) every Max/Span levels.
 Config.UPGRADES = {
-	{ Id = "Damage", Name = "Pet Damage", Icon = "⚔️", Max = 15, BaseCost = 1500, Span = 10, Info = "Pet damage x20 at max" },
+	{ Id = "HatchSpeed", Name = "Hatch Speed", Icon = "⏩", Max = 5, BaseCost = 2000, Span = 6, Info = "Eggs open faster (x2 at max)" },
+	{ Id = "HatchAmount", Name = "Hatch Amount", Icon = "🥚", Max = 5, BaseCost = 5000, Span = 8, Info = "Open more eggs at once (up to 8)" },
 	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 2500, Span = 10, Info = "Luck x1.6 every level (x100 at max)" },
 	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 1000, Span = 5, Info = "+2 walk speed" },
 	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 2000, Span = 8, Info = "+15% pet run speed" },
 	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 15, BaseCost = 3000, Span = 10, Info = "Coins x10 at max" },
-	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 3, BaseCost = 10000, Span = 9, Info = "+1 pet you can equip" },
+	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 5, BaseCost = 10000, Span = 9, Info = "+1 pet you can equip" },
 }
 
--- Incremental "area" upgrades (📈 menu, buy anywhere, reset on rebirth).
--- Lots of cheap levels that make the coin zone pay out more and more.
+-- Upgrade board in the main area (reset on rebirth): lots of cheap levels
+-- that make the coin zone pay out more and more.
 Config.AREA_UPGRADES = {
-	{ Id = "CoinValue", Name = "Coin Value", Icon = "💰", Max = 50, BaseCost = 100, Growth = 1.18, Info = "Coin stacks & piles worth +10%" },
-	{ Id = "ChestValue", Name = "Chest Value", Icon = "🧰", Max = 50, BaseCost = 250, Growth = 1.2, Info = "Chests worth +15%" },
-	{ Id = "MoreBreakables", Name = "More Stuff", Icon = "➕", Max = 18, BaseCost = 50, Growth = 1.4, Info = "+1 thing to break (up to 20)" },
-	{ Id = "ChestLuck", Name = "Chest Luck", Icon = "🍀", Max = 20, BaseCost = 350, Growth = 1.3, Info = "More chests (x10 at max)" },
-	{ Id = "Respawn", Name = "Fast Respawn", Icon = "⏩", Max = 10, BaseCost = 300, Growth = 1.4, Info = "Things come back 5% faster" },
-	{ Id = "DiamondFinder", Name = "Diamond Finder", Icon = "💎", Max = 10, BaseCost = 500, Growth = 1.45, Info = "+5% coin piles carry diamonds" },
-	{ Id = "CritChance", Name = "Crit Chance", Icon = "🎯", Max = 20, BaseCost = 450, Growth = 1.3, Info = "+1% critical hits" },
-	{ Id = "CritDamage", Name = "Crit Damage", Icon = "💥", Max = 10, BaseCost = 600, Growth = 1.4, Info = "Crits hit harder" },
+	{ Id = "CoinValue", Name = "Coin Value", Icon = "💰", Max = 50, BaseCost = 100, Growth = 1.18, Info = "Everything you break is worth +10%" },
+	{ Id = "MoreBreakables", Name = "More Coins", Icon = "➕", Max = 18, BaseCost = 50, Growth = 1.4, Info = "+1 thing to break (up to 20)" },
+	{ Id = "BoardLuck", Name = "Luck", Icon = "🍀", Max = 30, BaseCost = 300, Growth = 1.25, Info = "Hatch luck (x10 at max)" },
+	{ Id = "DiamondFinder", Name = "Diamond Chance", Icon = "💎", Max = 10, BaseCost = 500, Growth = 1.45, Info = "More coins drop diamonds" },
+	{ Id = "Crit", Name = "Crit", Icon = "🎯", Max = 20, BaseCost = 450, Growth = 1.3, Info = "More and stronger critical hits" },
 	{ Id = "HitSpeed", Name = "Hit Speed", Icon = "⚡", Max = 10, BaseCost = 700, Growth = 1.4, Info = "Pets hit 3% faster" },
-	{ Id = "BigChestLuck", Name = "Big Chest Luck", Icon = "👑", Max = 15, BaseCost = 800, Growth = 1.35, Info = "More big chests (x10 at max)" },
+	{ Id = "ChestLuck", Name = "Chest Luck", Icon = "🧰", Max = 20, BaseCost = 350, Growth = 1.3, Info = "More chests and big chests (x10 at max)" },
 	{ Id = "OrbLuck", Name = "Orb Luck", Icon = "🧪", Max = 15, BaseCost = 500, Growth = 1.3, Info = "Boost orbs drop more" },
-	{ Id = "OrbTime", Name = "Orb Time", Icon = "⏱️", Max = 10, BaseCost = 450, Growth = 1.35, Info = "Orb boosts last longer" },
 	{ Id = "ComboTime", Name = "Combo Time", Icon = "🔥", Max = 10, BaseCost = 450, Growth = 1.35, Info = "Combo boosts last longer" },
-	{ Id = "EggDiscount", Name = "Egg Discount", Icon = "🏷️", Max = 15, BaseCost = 900, Growth = 1.35, Info = "Eggs cost 2% less" },
-	{ Id = "StackGems", Name = "Stack Gems", Icon = "💠", Max = 10, BaseCost = 700, Growth = 1.4, Info = "Coin stacks can carry 💎" },
 }
 
 Config.UPGRADES_BY_ID = {}
@@ -593,14 +588,14 @@ end
 function Config.breakableCount(data): number
 	return Config.COINS_PER_PLAYER + areaLevel(data, "MoreBreakables")
 end
-function Config.respawnTime(data): number
-	return Config.COIN_RESPAWN_TIME * (1 - 0.05 * areaLevel(data, "Respawn"))
+function Config.respawnTime(_data): number
+	return Config.COIN_RESPAWN_TIME
 end
 function Config.critChance(data): number
-	return Config.CRIT_CHANCE + 0.01 * areaLevel(data, "CritChance")
+	return Config.CRIT_CHANCE + 0.01 * areaLevel(data, "Crit")
 end
 function Config.critMult(data): number
-	return Config.CRIT_MULT + 0.2 * areaLevel(data, "CritDamage")
+	return Config.CRIT_MULT + 0.1 * areaLevel(data, "Crit")
 end
 function Config.hitInterval(data): number
 	return Config.PET_HIT_INTERVAL * (1 - 0.03 * areaLevel(data, "HitSpeed"))
@@ -608,40 +603,41 @@ end
 function Config.orbChance(data, kind: number): number
 	return (Config.ORB_CHANCE[kind] or 0) * (1 + 0.1 * areaLevel(data, "OrbLuck"))
 end
-function Config.orbSeconds(data): number
-	return Config.ORB_SECONDS + 5 * areaLevel(data, "OrbTime")
+function Config.orbSeconds(_data): number
+	return Config.ORB_SECONDS
 end
 function Config.comboSeconds(data): number
 	return Config.COMBO_BOOST_SECONDS + 5 * areaLevel(data, "ComboTime")
 end
--- What an egg costs this player (Egg Discount upgrade).
-function Config.eggPrice(data, eggIndex: number): number
-	return math.floor(Config.eggCost(eggIndex) * (1 - 0.02 * areaLevel(data, "EggDiscount")))
+-- The board's Luck upgrade: x10 at max level.
+function Config.boardLuckMult(data): number
+	return 10 ^ (areaLevel(data, "BoardLuck") / 30)
 end
--- Value multiplier for a kind of breakable (1-2 coins, 3-4 chests).
-function Config.breakableValueMult(data, kind: number): number
-	if kind >= 3 then
-		return 1 + 0.15 * areaLevel(data, "ChestValue")
-	end
+-- What an egg costs this player.
+function Config.eggPrice(_data, eggIndex: number): number
+	return math.floor(Config.eggCost(eggIndex))
+end
+-- Value multiplier for a breakable (Coin Value counts for everything).
+function Config.breakableValueMult(data, _kind: number): number
 	return 1 + 0.1 * areaLevel(data, "CoinValue")
 end
--- Spawn weights with Chest Luck applied.
+-- Spawn weights with Chest Luck applied (chests and big chests, x10 at max).
 function Config.breakableWeights(data)
-	local luck = 10 ^ (areaLevel(data, "ChestLuck") / 20) -- up to x10
-	local bigLuck = 10 ^ (areaLevel(data, "BigChestLuck") / 15) -- up to x10
+	local luck = 10 ^ (areaLevel(data, "ChestLuck") / 20)
 	local list = {}
 	for kind, b in ipairs(Config.BREAKABLES) do
-		local weight = b.Chance * (if kind >= 3 then luck else 1) * (if kind == #Config.BREAKABLES then bigLuck else 1)
-		table.insert(list, { Chance = weight })
+		table.insert(list, { Chance = b.Chance * (if kind >= 3 then luck else 1) })
 	end
 	return list
 end
+-- Diamond Chance: coin piles +5% and coin stacks +1% per level.
 function Config.diamondChance(data, kind: number): number
+	local lvl = areaLevel(data, "DiamondFinder")
 	if kind == 1 then
-		return 0.01 * areaLevel(data, "StackGems") -- plain coin stacks
+		return 0.01 * lvl -- plain coin stacks
 	end
 	local b = Config.BREAKABLES[kind]
-	return math.min(1, b.DiamondChance + (if kind == 2 then 0.05 * areaLevel(data, "DiamondFinder") else 0))
+	return math.min(1, b.DiamondChance + (if kind == 2 then 0.05 * lvl else 0))
 end
 -- How many diamonds a breakable carries when it has some.
 function Config.breakableDiamonds(kind: number): number
@@ -652,10 +648,11 @@ function Config.breakablePayout(data, kind: number, baseValue: number): number
 	return math.floor(baseValue * Config.breakableValueMult(data, kind) * Config.totalCoins(data))
 end
 
--- Damage and coins multiply every level too: x20 / x10 at max (level 15).
+-- (Pet Damage isn't sold any more; old saves have it removed on load.)
 function Config.damageMult(upgrades): number
 	return 20 ^ (level(upgrades, "Damage") / 15)
 end
+-- Coins multiply every level: x10 at max (level 15).
 -- Luck grows fast: x1.6 per level, x100 at max level.
 function Config.luckMult(upgrades): number
 	return 100 ^ (level(upgrades, "Luck") / 10)
@@ -672,6 +669,15 @@ end
 function Config.maxEquipped(upgrades): number
 	return Config.MAX_EQUIPPED + level(upgrades, "Slots")
 end
+-- Hatch Speed: the hatch animation and cooldown get shorter (x2 at max).
+function Config.hatchSpeed(upgrades): number
+	return 1 + 0.2 * level(upgrades, "HatchSpeed")
+end
+-- Hatch Amount: how many eggs the "buy more" button opens (3, up to 8).
+function Config.hatchAmount(upgrades): number
+	return 3 + level(upgrades, "HatchAmount")
+end
+Config.MAX_HATCH = 8
 
 -- Diamonds ------------------------------------------------------------------
 -- Diamonds never reset. Earned from chests, new pets, rebirths and gifts;
@@ -737,7 +743,10 @@ function Config.totalDamage(data): number
 	return Config.damageMult(data and data.Upgrades) * boosted(data, "Damage")
 end
 function Config.totalLuck(data): number
-	return Config.luckMult(data and data.Upgrades) * (1 + 0.1 * perkLevel(data, "Luck")) * boosted(data, "Luck")
+	return Config.luckMult(data and data.Upgrades)
+		* Config.boardLuckMult(data)
+		* (1 + 0.1 * perkLevel(data, "Luck"))
+		* boosted(data, "Luck")
 end
 function Config.totalCoins(data): number
 	return Config.coinMult(data and data.Upgrades) * (1 + 0.1 * perkLevel(data, "Coins")) * boosted(data, "Coins")

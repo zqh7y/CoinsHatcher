@@ -1,7 +1,8 @@
 -- The hatchery on this player's screen:
 --  * eggs gently bob and sway
---  * eggs you haven't unlocked turn into plain black eggs with just
---    "Rebirth N" floating over them; unlocked ones show their name
+--  * eggs you haven't unlocked turn into plain black eggs with a gold
+--    padlock on the front that says which rebirth opens them; unlocked ones
+--    show their name floating above
 --  * the speed lane down the middle makes you run much faster and its arrows
 --    light up in a wave
 local Players = game:GetService("Players")
@@ -19,9 +20,75 @@ local EggArea = {}
 local LANE_SPEED = 2.6 -- times your normal walk speed on the speed lane
 local LOCKED_COLOR = Color3.fromRGB(22, 22, 30)
 
-local eggs = {} -- { Model, Shell, Base, Phase, Look = { { Part, Offset, Transparency } }, Label, Glows }
+local eggs = {} -- { Model, Shell, Base, Phase, Look = { { Part, Offset, Transparency } }, Lock, Gui, Glows }
 
--- Floating label over an egg: the name, or "Rebirth N" when locked.
+local lockFolder = Instance.new("Folder")
+lockFolder.Name = "EggLocks"
+lockFolder.Parent = workspace
+
+-- A gold padlock on the front of an egg (the side facing the walkway) with
+-- "REBIRTH N" written on it. Only this player sees it. Returns its parts as
+-- { Part, Offset } so they bob with the egg, and its sign.
+local function makePadlock(shell, eggIndex)
+	local front = if Config.EGGS[eggIndex].Release then Vector3.new(0, 0, 1) else Vector3.new(-1, 0, 0)
+	local radius = shell.Size.X / 2 * 0.85
+	local center = shell.Position + front * (radius + 0.3) + Vector3.new(0, -0.5, 0)
+	local cf = CFrame.lookAt(center, center + front)
+	local gold = Color3.fromRGB(255, 200, 60)
+	local silver = Color3.fromRGB(215, 220, 235)
+
+	local parts = {}
+	local function add(name, size, offset, color, material)
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Size = size
+		p.CFrame = cf * offset
+		p.Color = color
+		p.Material = material or Enum.Material.SmoothPlastic
+		p.Reflectance = 0.15
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.CastShadow = false
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.BottomSurface = Enum.SurfaceType.Smooth
+		p.Parent = lockFolder
+		table.insert(parts, { Part = p, Offset = shell.CFrame:ToObjectSpace(p.CFrame) })
+		return p
+	end
+	-- the shackle (an upside-down U), then the body
+	for _, x in ipairs({ -0.8, 0.8 }) do
+		add("Shackle", Vector3.new(0.4, 1.4, 0.4), CFrame.new(x, 1.55, 0.05), silver, Enum.Material.Metal)
+	end
+	add("Shackle", Vector3.new(2, 0.4, 0.4), CFrame.new(0, 2.25, 0.05), silver, Enum.Material.Metal)
+	local body = add("LockBody", Vector3.new(2.8, 2.3, 0.7), CFrame.new(), gold)
+	add("LockRim", Vector3.new(2.95, 0.25, 0.75), CFrame.new(0, 1.0, 0), gold:Lerp(Color3.new(0, 0, 0), 0.15))
+
+	local sign = Instance.new("SurfaceGui")
+	sign.Face = Enum.NormalId.Front
+	sign.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	sign.PixelsPerStud = 80
+	sign.LightInfluence = 0
+	sign.Adornee = body
+	sign.Parent = player:WaitForChild("PlayerGui")
+	local function line(text, y, height)
+		local label = Instance.new("TextLabel")
+		label.BackgroundTransparency = 1
+		label.Position = UDim2.fromScale(0.06, y)
+		label.Size = UDim2.fromScale(0.88, height)
+		label.Font = Enum.Font.FredokaOne
+		label.TextScaled = true
+		label.Text = text
+		label.TextColor3 = Color3.fromRGB(110, 70, 10)
+		label.Parent = sign
+	end
+	line("REBIRTH", 0.12, 0.3)
+	line(tostring(Config.eggRequiredRebirths(eggIndex)), 0.42, 0.5)
+	return parts, sign
+end
+
+-- Floating name over an unlocked egg.
 local function makeLabel(model, shell)
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "EggLabel"
@@ -74,9 +141,15 @@ local function refreshLocks()
 				beam.Transparency = if locked then 1 else 0.92
 			end
 
-			egg.Text.Text = if locked then "🔒 Rebirth " .. required else info.Name
-			egg.Text.TextColor3 = if locked then Color3.fromRGB(255, 120, 120) else Color3.new(1, 1, 1)
-			egg.Text.TextStrokeColor3 = if locked then Color3.new(0, 0, 0) else info.Color:Lerp(Color3.new(0, 0, 0), 0.5)
+			-- the padlock shows on locked eggs, the floating name on unlocked ones
+			for _, piece in ipairs(egg.Lock) do
+				piece.Part.Transparency = if locked then 0 else 1
+			end
+			egg.Sign.Enabled = locked
+			egg.Locked = locked
+			egg.Gui.Enabled = not locked and not egg.PopupOpen
+			egg.Text.Text = info.Name
+			egg.Text.TextStrokeColor3 = info.Color:Lerp(Color3.new(0, 0, 0), 0.5)
 		end
 	end
 end
@@ -108,7 +181,10 @@ local function track(model)
 		end
 	end
 	local gui, text = makeLabel(model, shell)
+	local lock, sign = makePadlock(shell, model:GetAttribute("EggIndex"))
 	table.insert(eggs, {
+		Lock = lock,
+		Sign = sign,
 		Model = model,
 		Shell = shell,
 		ShellColor = shell.Color,
@@ -150,7 +226,8 @@ end
 function EggArea.setLabelVisible(eggIndex, visible)
 	for _, egg in ipairs(eggs) do
 		if egg.Model:GetAttribute("EggIndex") == eggIndex then
-			egg.Gui.Enabled = visible
+			egg.PopupOpen = not visible
+			egg.Gui.Enabled = visible and not egg.Locked
 		end
 	end
 end
@@ -192,6 +269,11 @@ RunService.RenderStepped:Connect(function()
 		egg.Shell.CFrame = cf
 		for _, piece in ipairs(egg.Look) do
 			piece.Part.CFrame = cf * piece.Offset
+		end
+		if egg.Locked then
+			for _, piece in ipairs(egg.Lock) do
+				piece.Part.CFrame = cf * piece.Offset
+			end
 		end
 	end
 

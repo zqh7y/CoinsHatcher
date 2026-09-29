@@ -70,6 +70,14 @@ local function load(player)
 			data[k] = v
 		end
 	end
+	-- older saves: drop upgrades that aren't sold any more (their levels would
+	-- otherwise keep giving hidden bonuses)
+	for id in pairs(data.Upgrades) do
+		if not Config.UPGRADES_BY_ID[id] then
+			data.Upgrades[id] = nil
+		end
+	end
+
 	-- older saves: fill in the index from the pets they already own
 	for _, petName in ipairs(data.Pets) do
 		data.Index[petName] = true

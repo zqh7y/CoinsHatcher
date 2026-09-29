@@ -1,7 +1,8 @@
 -- When you walk up to an egg, a small popup floats on top of it: the pets
 -- inside in a 3-wide grid with the chance to get each one under it (with your
 -- luck), and three buttons that show the price:
---   E = buy 1 egg, F = buy 3 eggs, T = auto hatch (on/off)
+--   E = buy 1 egg, F = buy more (3, up to 8 with the Hatch Amount upgrade),
+--   T = auto hatch (on/off)
 -- The keys work while the popup is open; the buttons can be tapped too.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -127,12 +128,11 @@ local buyOne = keyButton(1, "E", Ui.COLORS.Green)
 local buyThree = keyButton(2, "F", Color3.fromRGB(70, 160, 250))
 local autoButton = keyButton(3, "T", AUTO_OFF)
 buyOne.Top.Text = "Buy 1"
-buyThree.Top.Text = "Buy 3"
 autoButton.Top.Text = "Auto"
 
 local shownEgg = nil -- egg index currently shown
 local auto = false
-local autoCount = 1 -- auto hatches 1 or 3 at a time (whichever you bought last)
+local autoCount = 1 -- auto hatches 1 or several at a time (whichever you bought last)
 local lastRequest = 0
 
 local function setAuto(on)
@@ -166,7 +166,8 @@ local function canHatch(count)
 end
 
 local function requestHatch(count)
-	if not shownEgg or Hatch.busy() or os.clock() - lastRequest < 0.9 then
+	local speed = Config.hatchSpeed(State.Data and State.Data.Upgrades)
+	if not shownEgg or Hatch.busy() or os.clock() - lastRequest < 0.9 / speed then
 		return
 	end
 	if not canHatch(count) then
@@ -200,7 +201,7 @@ buyOne.Button.Activated:Connect(function()
 	buy(1)
 end)
 buyThree.Button.Activated:Connect(function()
-	buy(3)
+	buy(Config.hatchAmount(State.Data and State.Data.Upgrades))
 end)
 autoButton.Button.Activated:Connect(toggleAuto)
 
@@ -211,7 +212,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if input.KeyCode == Enum.KeyCode.E then
 		buy(1)
 	elseif input.KeyCode == Enum.KeyCode.F then
-		buy(3)
+		buy(Config.hatchAmount(State.Data and State.Data.Upgrades))
 	elseif input.KeyCode == Enum.KeyCode.T then
 		toggleAuto()
 	end
@@ -282,7 +283,9 @@ local function show(eggIndex)
 
 	local price = Config.eggPrice(data, eggIndex)
 	buyOne.Bottom.Text = "💰 " .. Config.formatNumber(price)
-	buyThree.Bottom.Text = "💰 " .. Config.formatNumber(price * 3)
+	local amount = Config.hatchAmount(data and data.Upgrades)
+	buyThree.Top.Text = "Buy " .. amount
+	buyThree.Bottom.Text = "💰 " .. Config.formatNumber(price * amount)
 	setAuto(auto)
 
 	local chances = Config.eggChances(eggIndex, data)
