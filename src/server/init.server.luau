@@ -120,8 +120,7 @@ Rebirth.OnServerInvoke = function(player)
 	if data.Rebirths >= Config.MAX_REBIRTHS then
 		return false, "You're at max rebirth!"
 	end
-	-- developers rebirth for free to test the game
-	local cost = if PlayerData.isDev(player) then 0 else Config.rebirthCost(data.Rebirths)
+	local cost = Config.rebirthCost(data.Rebirths)
 	if data.Coins < cost then
 		return false, "You need " .. Config.formatNumber(cost) .. " coins to rebirth!"
 	end

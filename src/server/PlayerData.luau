@@ -2,11 +2,10 @@
 local Players = game:GetService("Players")
 local DataStoreService = game:GetService("DataStoreService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 
-local store = DataStoreService:GetDataStore("PlayerData_v1")
+local store = DataStoreService:GetDataStore("PlayerData_v2") -- v2: fresh start at release (v1 had test data)
 local AUTOSAVE_SECONDS = 120
 
 local PlayerData = {}
@@ -109,21 +108,6 @@ local function load(player)
 	-- new players pick their first pet (Dog or Cat) when they join
 	data.NeedsStarter = #data.Pets == 0 or nil
 
-	-- developer test money (Studio, or user ids in Config.DEV_MONEY)
-	if PlayerData.isDev(player) then
-		data.Coins = math.max(data.Coins, Config.DEV_MONEY.Coins)
-		data.Diamonds = math.max(data.Diamonds, Config.DEV_MONEY.Diamonds)
-		data.Tokens = math.max(data.Tokens, Config.DEV_MONEY.Tokens)
-		-- huge pets to look at (once each)
-		for _, huge in ipairs(Config.DEV_MONEY.Huges or {}) do
-			if Config.PETS[huge] and not table.find(data.Pets, huge) then
-				table.insert(data.Pets, huge)
-				data.Index[huge] = true
-			end
-		end
-		player:SetAttribute("Dev", true) -- the client shows free rebirths
-	end
-
 	-- leaderstats shows Coins/Rebirths on the player list
 	local stats = Instance.new("Folder")
 	stats.Name = "leaderstats"
@@ -164,13 +148,6 @@ local function save(player)
 	if not ok then
 		warn("Save failed for", player.Name, err)
 	end
-end
-
--- Developers (in Studio, or user ids in Config.DEV_MONEY) get test money and
--- free rebirths.
-function PlayerData.isDev(player)
-	local dev = Config.DEV_MONEY
-	return dev.Enabled and (RunService:IsStudio() or table.find(dev.UserIds, player.UserId) ~= nil)
 end
 
 -- Returns the player's data, or nil if it hasn't loaded yet.

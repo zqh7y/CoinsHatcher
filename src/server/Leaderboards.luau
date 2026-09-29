@@ -60,13 +60,13 @@ local function getStore(fn)
 end
 for _, board in ipairs(BOARDS) do
 	board.Store = getStore(function()
-		return DataStoreService:GetOrderedDataStore("Leader" .. board.Id .. "_v1")
+		return DataStoreService:GetOrderedDataStore("Leader" .. board.Id .. "_v2")
 	end)
 	board.Global = {} -- { { UserId, Value } } from the last refresh
 	board.Written = {} -- [userId] = value we last saved
 end
 local rarestPets = getStore(function()
-	return DataStoreService:GetDataStore("LeaderRarestPet_v1")
+	return DataStoreService:GetDataStore("LeaderRarestPet_v2")
 end)
 local petNameCache = {} -- [userId .. ":" .. odds] = pet name
 local userNameCache = {} -- [userId] = name

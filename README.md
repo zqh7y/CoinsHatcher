@@ -105,9 +105,6 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
     2x potions (coins / luck / damage, 10 min, only ticks while playing) and
     forever perks (coin bonus, luck, bigger backpack, extra pet slot).
 - **Index**: collection book of every pet; unfound ones are silhouettes.
-- **Developer testing**: in Studio (or for user ids in `Config.DEV_MONEY`)
-  you get 1Qd coins, 1B diamonds and free rebirths. Set
-  `Config.DEV_MONEY.Enabled = false` before releasing.
 - **🎉 Release Egg** (limited event egg, open for everyone): stands in the
   main area across the coin circle from the spawn, on a party platform
   behind a "RELEASE" arch, so new players see it right away. Party pets and a
@@ -161,21 +158,17 @@ are in `src/shared/Config.luau`.
 
 ## Before publishing (checklist)
 
-0. **Coming-soon lock**: while `Config.ACCESS.Open = false` (in
-   `src/shared/Config.luau`) the game can be Public (so it shows on your
-   profile) but only you (the owner), the ids in `AllowedUserIds` and Studio
-   can play; everyone else gets "Pet Park is coming soon!". Set `Open = true`
-   and publish on release day.
+0. **Coming-soon lock**: the game is open (`Config.ACCESS.Open = true` in
+   `src/shared/Config.luau`). Setting it to `false` closes it again: then only
+   you (the owner), the ids in `AllowedUserIds` and Studio can play and
+   everyone else gets "Pet Park is coming soon!".
 
-1. **Turn off developer money and free rebirths**: in `src/shared/Config.luau`
-   set `Config.DEV_MONEY.Enabled = false` (or keep it on and only list your own
-   user id in `UserIds`; Studio always counts as a developer while it's on).
-2. **Game Settings → Security → Enable Studio Access to API Services**: needed
+1. **Game Settings → Security → Enable Studio Access to API Services**: needed
    for saving player data and the global leaderboards when testing in Studio.
-3. **Game Settings → Security**: leave "Allow HTTP Requests" and "Allow
+2. **Game Settings → Security**: leave "Allow HTTP Requests" and "Allow
    Third Party Sales/Teleports" off (the game doesn't need them).
-4. **Publish to Roblox** (File → Publish to Roblox), then open the game's
+3. **Publish to Roblox** (File → Publish to Roblox), then open the game's
    settings on the Creator Dashboard: set the age rating questionnaire,
    max players, and a thumbnail/icon.
-5. Play the published game once and check that coins save after rejoining
+4. Play the published game once and check that coins save after rejoining
    and that the leaderboards fill in within a minute.
