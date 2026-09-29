@@ -24,7 +24,8 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
   coin zone and break them. Stronger pets hit harder. Every rebirth makes the
   area's breakables tougher and worth more (and changes its color).
 - **Shop** (stall in the main area): upgrade pet damage, luck, walk speed,
-  pet speed, coin bonus and pet slots (luck goes up to x100 at max). Stand on
+  pet speed, coin bonus and pet slots. Kept forever (not reset on rebirth).
+  Luck goes up to x100, damage x20 and coins x10 at max. Stand on
   the glowing circle to open it; step off to close it.
 - **📈 Upgrade board** (white board in the main area, reset on rebirth): 15
   incremental upgrades on tall cards that scroll sideways, with Buy and Max:
@@ -63,8 +64,14 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
     2x potions (coins / luck / damage, 10 min, only ticks while playing) and
     forever perks (coin bonus, luck, bigger backpack, extra pet slot).
 - **Index**: collection book of every pet; unfound ones are silhouettes.
+- **Developer testing**: in Studio (or for user ids in `Config.DEV_MONEY`)
+  you get 1Qd coins, 1B diamonds and free rebirths. Set
+  `Config.DEV_MONEY.Enabled = false` before releasing.
+- **Leaderboards** (three boards in the main area): most eggs hatched, most
+  rebirths and the rarest pet ever hatched (by its odds). Global, refreshed
+  every minute, with the players in the server shown live.
 - **Rebirth**: big reward cards (x4 coin value / +300%, diamonds, the new
-  egg, 100% pets kept) and a coin progress bar. Resets coins and shop upgrades; keeps pets, index, diamonds and perks. 10 rebirths, each unlocking a new egg (11 eggs).
+  egg, 100% pets kept) and a coin progress bar. Resets coins and the upgrade board; keeps pets, index, diamonds and perks. 10 rebirths, each unlocking a new egg (11 eggs).
 
 All numbers (costs, coin health, pet power, chances, upgrades, pet looks)
 are in `src/shared/Config.luau`.
@@ -82,6 +89,7 @@ are in `src/shared/Config.luau`.
 - `src/server/Inventory.luau`: equip, equip best, delete pets
 - `src/server/Gifts.luau`: playtime mystery gifts
 - `src/server/Pickups.luau`: combos and boost orbs
+- `src/server/Leaderboards.luau`: the three leaderboards in the main area
 - `src/server/init.server.luau`: starts everything, handles teleport/rebirth/equip
 - `src/client/`: UI (buttons, pets, shop, index, rebirth, egg popup,
   hatch animation) and breakable effects

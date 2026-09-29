@@ -24,6 +24,7 @@ local DEFAULT = {
 	Diamonds = 0, -- never reset
 	Perks = {}, -- [perk id] = level, bought with diamonds, never reset
 	Boosts = {}, -- [boost id] = seconds left on a potion (counts down while online)
+	Rarest = nil, -- { Pet = name, Odds = N } the rarest pet ever hatched (1 in N)
 }
 
 local sessionData = {} -- [player] = data table while they're in game
@@ -82,10 +83,10 @@ local function load(player)
 	data.NeedsStarter = #data.Pets == 0 or nil
 
 	-- developer test money (Studio, or user ids in Config.DEV_MONEY)
-	local dev = Config.DEV_MONEY
-	if dev.Enabled and (RunService:IsStudio() or table.find(dev.UserIds, player.UserId)) then
-		data.Coins = math.max(data.Coins, dev.Coins)
-		data.Diamonds = math.max(data.Diamonds, dev.Diamonds)
+	if PlayerData.isDev(player) then
+		data.Coins = math.max(data.Coins, Config.DEV_MONEY.Coins)
+		data.Diamonds = math.max(data.Diamonds, Config.DEV_MONEY.Diamonds)
+		player:SetAttribute("Dev", true) -- the client shows free rebirths
 	end
 
 	-- leaderstats shows Coins/Rebirths on the player list
@@ -127,6 +128,13 @@ local function save(player)
 	if not ok then
 		warn("Save failed for", player.Name, err)
 	end
+end
+
+-- Developers (in Studio, or user ids in Config.DEV_MONEY) get test money and
+-- free rebirths.
+function PlayerData.isDev(player)
+	local dev = Config.DEV_MONEY
+	return dev.Enabled and (RunService:IsStudio() or table.find(dev.UserIds, player.UserId) ~= nil)
 end
 
 -- Returns the player's data, or nil if it hasn't loaded yet.
@@ -180,8 +188,8 @@ function PlayerData.addBoost(player, id, seconds)
 	PlayerData.Changed:Fire(player)
 end
 
--- Rebirth resets coins and shop upgrades. Pets, the index, diamonds, perks
--- and potions are kept.
+-- Rebirth resets coins and the upgrade board. Shop upgrades, pets, the
+-- index, diamonds, perks and potions are kept.
 function PlayerData.rebirth(player)
 	local data = sessionData[player]
 	if not data then
@@ -189,11 +197,11 @@ function PlayerData.rebirth(player)
 	end
 	data.Coins = 0
 	data.Rebirths += 1
-	data.Upgrades = {}
-	-- extra pet slots were reset, so unequip pets that no longer fit
-	while #data.Equipped > Config.totalSlots(data) do
-		table.remove(data.Equipped)
+	local kept = {}
+	for _, upgrade in ipairs(Config.UPGRADES) do
+		kept[upgrade.Id] = data.Upgrades[upgrade.Id]
 	end
+	data.Upgrades = kept
 	showCoins(player, data.Coins)
 	setStat(player, "Rebirths", data.Rebirths)
 	PlayerData.Changed:Fire(player)
@@ -228,6 +236,11 @@ function PlayerData.addPets(player, petNames)
 		local info = Config.PETS[petName]
 		if info and info.Base then
 			data.Index[info.Base] = true
+		end
+		-- remember the rarest hatch for the leaderboard
+		local odds = Config.odds(petName)
+		if odds and (not data.Rarest or odds > data.Rarest.Odds) then
+			data.Rarest = { Pet = petName, Odds = odds }
 		end
 	end
 	data.Hatched += #petNames

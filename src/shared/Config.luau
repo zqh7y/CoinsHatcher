@@ -345,11 +345,12 @@ function Config.mutationChances(data)
 	return list
 end
 
--- The base odds of hatching this exact pet (mutation included), e.g. "1 in 5K".
-function Config.chanceText(petName: string): string
+-- The base odds of hatching this exact pet (mutation included) as N in
+-- "1 in N", or nil for pets that don't come from an egg.
+function Config.odds(petName: string): number?
 	local info = Config.PETS[petName]
 	if not info then
-		return ""
+		return nil
 	end
 	local name = info.Base or petName
 	local chance = nil
@@ -359,7 +360,7 @@ function Config.chanceText(petName: string): string
 		end
 	end
 	if not chance then
-		return ""
+		return nil
 	end
 	if info.Mutation then
 		for _, mutation in ipairs(Config.MUTATIONS) do
@@ -368,7 +369,13 @@ function Config.chanceText(petName: string): string
 			end
 		end
 	end
-	return "1 in " .. Config.formatNumber(math.floor(1 / chance + 0.5))
+	return math.floor(1 / chance + 0.5)
+end
+
+-- The base odds as text, e.g. "1 in 5K".
+function Config.chanceText(petName: string): string
+	local odds = Config.odds(petName)
+	return if odds then "1 in " .. Config.formatNumber(odds) else ""
 end
 
 -- Rolls a pet from the egg, then maybe a mutation.
@@ -396,14 +403,14 @@ function Config.isRare(petName: string): boolean
 end
 
 -- Shop upgrades ----------------------------------------------------------------
--- Upgrades reset on rebirth (rebirth resets everything except pets).
+-- Shop upgrades are kept forever (rebirth only resets coins and the board).
 -- Cost = BaseCost * Growth^level, times SCALE^rebirths like everything else.
 Config.UPGRADES = {
-	{ Id = "Damage", Name = "Pet Damage", Icon = "⚔️", Max = 10, BaseCost = 600, Growth = 1.6, Info = "+20% pet damage" },
+	{ Id = "Damage", Name = "Pet Damage", Icon = "⚔️", Max = 15, BaseCost = 600, Growth = 1.55, Info = "Pet damage x20 at max" },
 	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 900, Growth = 1.6, Info = "Luck x1.6 every level (x100 at max)" },
 	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 450, Growth = 1.5, Info = "+2 walk speed" },
 	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 750, Growth = 1.7, Info = "+15% pet run speed" },
-	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 10, BaseCost = 1200, Growth = 1.6, Info = "+10% coins" },
+	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 15, BaseCost = 1200, Growth = 1.55, Info = "Coins x10 at max" },
 	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 3, BaseCost = 4500, Growth = 3, Info = "+1 pet you can equip" },
 }
 
@@ -509,8 +516,9 @@ function Config.breakablePayout(data, kind: number, baseValue: number): number
 	return math.floor(baseValue * Config.breakableValueMult(data, kind) * Config.totalCoins(data))
 end
 
+-- Damage and coins multiply every level too: x20 / x10 at max (level 15).
 function Config.damageMult(upgrades): number
-	return 1 + 0.2 * level(upgrades, "Damage")
+	return 20 ^ (level(upgrades, "Damage") / 15)
 end
 -- Luck grows fast: x1.6 per level, x100 at max level.
 function Config.luckMult(upgrades): number
@@ -523,7 +531,7 @@ function Config.petSpeedMult(upgrades): number
 	return 1 + 0.15 * level(upgrades, "PetSpeed")
 end
 function Config.coinMult(upgrades): number
-	return 1 + 0.1 * level(upgrades, "CoinBonus")
+	return 10 ^ (level(upgrades, "CoinBonus") / 15)
 end
 function Config.maxEquipped(upgrades): number
 	return Config.MAX_EQUIPPED + level(upgrades, "Slots")
@@ -596,7 +604,7 @@ function Config.totalLuck(data): number
 	return Config.luckMult(data and data.Upgrades) * (1 + 0.1 * perkLevel(data, "Luck")) * boosted(data, "Luck")
 end
 function Config.totalCoins(data): number
-	return (Config.coinMult(data and data.Upgrades) + 0.1 * perkLevel(data, "Coins")) * boosted(data, "Coins")
+	return Config.coinMult(data and data.Upgrades) * (1 + 0.1 * perkLevel(data, "Coins")) * boosted(data, "Coins")
 end
 function Config.totalSlots(data): number
 	return Config.maxEquipped(data and data.Upgrades) + perkLevel(data, "Slots")

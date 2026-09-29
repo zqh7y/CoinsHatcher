@@ -12,7 +12,7 @@ local Boosts = {}
 -- How each upgrade's boost is written, from the player's upgrade levels.
 local TEXT = {
 	Damage = function(u)
-		return ("+%d%%"):format(math.floor((Config.damageMult(u) - 1) * 100 + 0.5))
+		return Config.formatMult(Config.damageMult(u))
 	end,
 	Luck = function(u)
 		return Config.formatMult(Config.luckMult(u))
@@ -24,7 +24,7 @@ local TEXT = {
 		return ("+%d%%"):format(math.floor((Config.petSpeedMult(u) - 1) * 100 + 0.5))
 	end,
 	CoinBonus = function(u)
-		return ("+%d%%"):format(math.floor((Config.coinMult(u) - 1) * 100 + 0.5))
+		return Config.formatMult(Config.coinMult(u))
 	end,
 	Slots = function(u)
 		return ("+%d"):format(Config.maxEquipped(u) - Config.maxEquipped(nil))

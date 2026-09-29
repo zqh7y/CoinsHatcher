@@ -660,7 +660,7 @@ end
 
 -- is this angle clear of the spawn, shop and fountain?
 local function clearAngle(angle, margin)
-	for _, taken in ipairs({ SHOP_ANGLE, FOUNTAIN_ANGLE, SPAWN_ANGLE, BOARD_ANGLE }) do
+	for _, taken in ipairs({ SHOP_ANGLE, FOUNTAIN_ANGLE, SPAWN_ANGLE, BOARD_ANGLE, table.unpack(World.LEADERBOARD_ANGLES) }) do
 		local diff = math.abs((angle - taken + 180) % 360 - 180)
 		if diff < margin then
 			return false
@@ -724,7 +724,7 @@ local function mainArea()
 	upgradeBoard(mainSpot(BOARD_ANGLE, 43))
 	stonePath(mainSpot(BOARD_ANGLE, zoneRadius + 2), mainSpot(BOARD_ANGLE, 38))
 
-	for _, angle in ipairs({ 45, 135, 225, 315 }) do
+	for _, angle in ipairs({ 45, 135, 225, 345 }) do -- (the leaderboards stand at 300-330)
 		lamp(mainSpot(angle, 46))
 	end
 

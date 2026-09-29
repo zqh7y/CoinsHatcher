@@ -155,7 +155,7 @@ local function row(order, item)
 end
 
 local function upgradesTab(data)
-	header(0, "Bought with coins · resets when you rebirth")
+	header(0, "Bought with coins · kept forever")
 	local coins = player:GetAttribute("Coins") or 0
 	for order, upgrade in ipairs(Config.UPGRADES) do
 		local level = data.Upgrades[upgrade.Id] or 0

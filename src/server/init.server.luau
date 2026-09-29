@@ -13,6 +13,7 @@ local Shop = require(script.Shop)
 local Inventory = require(script.Inventory)
 local Gifts = require(script.Gifts)
 local Pickups = require(script.Pickups)
+local Leaderboards = require(script.Leaderboards)
 
 -- Remotes the client talks to
 local remotes = Instance.new("Folder")
@@ -54,6 +55,7 @@ Shop.start(remotes)
 Inventory.start(remotes)
 Gifts.start(remotes)
 Pickups.start(remotes)
+Leaderboards.start()
 
 -- Keep the client's copy of the data (pets, equipped, rebirths) up to date
 PlayerData.Changed.Event:Connect(function(player)
@@ -100,7 +102,8 @@ Rebirth.OnServerInvoke = function(player)
 	if data.Rebirths >= Config.MAX_REBIRTHS then
 		return false, "You're at max rebirth!"
 	end
-	local cost = Config.rebirthCost(data.Rebirths)
+	-- developers rebirth for free to test the game
+	local cost = if PlayerData.isDev(player) then 0 else Config.rebirthCost(data.Rebirths)
 	if data.Coins < cost then
 		return false, "You need " .. Config.formatNumber(cost) .. " coins to rebirth!"
 	end

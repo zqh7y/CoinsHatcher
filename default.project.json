@@ -162,6 +162,9 @@
             ],
             "Material": "SmoothPlastic",
             "Duration": 0,
+            "Transparency": 1,
+            "CanCollide": false,
+            "CastShadow": false,
             "TopSurface": "Smooth",
             "BottomSurface": "Smooth"
           }
@@ -4620,22 +4623,22 @@
     "Lighting": {
       "$properties": {
         "Ambient": [
-          0.52941,
-          0.52941,
-          0.58824
+          0.4,
+          0.4,
+          0.45
         ],
         "OutdoorAmbient": [
-          0.68627,
-          0.68627,
-          0.7451
+          0.5,
+          0.5,
+          0.55
         ],
-        "Brightness": 3.2,
+        "Brightness": 2.2,
         "ClockTime": 13.5,
         "GlobalShadows": true,
         "Outlines": false,
         "Technology": "ShadowMap",
-        "EnvironmentDiffuseScale": 0.8,
-        "EnvironmentSpecularScale": 1,
+        "EnvironmentDiffuseScale": 0.45,
+        "EnvironmentSpecularScale": 0.5,
         "ShadowSoftness": 0.35
       },
       "Sky": {
@@ -4661,15 +4664,15 @@
             1.0
           ],
           "Glare": 0,
-          "Haze": 0.8
+          "Haze": 0.5
         }
       },
       "ColorCorrection": {
         "$className": "ColorCorrectionEffect",
         "$properties": {
           "Saturation": 0.3,
-          "Contrast": 0.12,
-          "Brightness": 0.03,
+          "Contrast": 0.15,
+          "Brightness": -0.03,
           "TintColor": [
             1.0,
             0.98824,
@@ -4680,15 +4683,15 @@
       "Bloom": {
         "$className": "BloomEffect",
         "$properties": {
-          "Intensity": 0.5,
+          "Intensity": 0.3,
           "Size": 28,
-          "Threshold": 0.95
+          "Threshold": 1.2
         }
       },
       "SunRays": {
         "$className": "SunRaysEffect",
         "$properties": {
-          "Intensity": 0.05,
+          "Intensity": 0.02,
           "Spread": 0.5
         }
       }

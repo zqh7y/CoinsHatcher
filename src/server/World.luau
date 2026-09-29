@@ -7,6 +7,7 @@ World.MAIN_RADIUS = 51 -- the round main area's wall (floor is 104 wide)
 World.COIN_ZONE = 50 -- coins spawn in this circle in the middle (diameter)
 World.MAIN_SPAWN = Vector3.new(0, 0, 38) -- spawn pad, between the coins and the wall
 World.EGG_CENTER = Vector3.new(0, 0, 1000)
+World.LEADERBOARD_ANGLES = { 300, 315, 330 } -- degrees around the main area
 World.EGG_RADIUS = 52 -- the round hatchery's wall
 World.FLOOR_Y = 1 -- top of both floors
 
@@ -57,6 +58,10 @@ function World.build()
 			Size = Vector3.new(8, 1, 8),
 			Position = World.MAIN_CENTER + World.MAIN_SPAWN + Vector3.new(0, World.FLOOR_Y + 0.5, 0),
 			Duration = 0,
+			-- invisible: you just appear on the grass
+			Transparency = 1,
+			CanCollide = false,
+			CastShadow = false,
 			Parent = main,
 		})
 	end

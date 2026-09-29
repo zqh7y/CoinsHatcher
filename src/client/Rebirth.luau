@@ -118,7 +118,7 @@ local shownEgg, stopSpin
 
 -- what resets, as one small grey chip
 local resets = Ui.label(content, {
-	Text = "Resets: coins and coin upgrades",
+	Text = "Resets: coins and the upgrade board",
 	Font = Ui.FONT_BODY,
 	TextColor3 = Ui.COLORS.SubText,
 	AnchorPoint = Vector2.new(0.5, 0),
@@ -215,13 +215,18 @@ local function render()
 
 	local cost = Config.rebirthCost(r)
 	local coins = player:GetAttribute("Coins") or data.Coins or 0
-	local progress = math.clamp(coins / cost, 0, 1)
+	local dev = player:GetAttribute("Dev") == true
+	local progress = if dev then 1 else math.clamp(coins / cost, 0, 1)
 	TweenService:Create(fill, TweenInfo.new(0.25), { Size = UDim2.fromScale(math.max(progress, 0.04), 1) }):Play()
 	barText.Text = ("%s / %s  ·  %d%%"):format(
 		Config.formatNumber(coins),
 		Config.formatNumber(cost),
 		math.floor(progress * 100)
 	)
+
+	if dev then
+		barText.Text = "Developer: free rebirth"
+	end
 
 	ready = progress >= 1
 	if ready then
