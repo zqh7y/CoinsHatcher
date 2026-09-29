@@ -119,6 +119,7 @@ Config.EGGS = {
 		Color = Color3.fromRGB(255, 200, 60),
 		Pets = { "Party Dog", "Confetti Cat", "Balloon Bunny", "Firework Fox", "Launch Dragon" },
 		HugeOdds = 300000,
+		HugeBase = "Launch Dragon", -- its Huge is a giant Launch Dragon
 		Required = 0,
 		Tier = 3,
 		Cost = 50000,
@@ -197,14 +198,16 @@ Config.PET_COLORS = {
 --   Ears: "pointy", "round", "long", "floppy" or nil
 --   Tail: "short", "long", "fluffy", "fin" or nil
 --   Extras: any of "wings", "beak", "horns", "antlers", "shell", "claws",
---           "topfin", "fire", "nofeet"
+--           "topfin", "fire", "nofeet", "halo", "partyhat", "bowtie",
+--           "balloon", "giftbox", "mane"
+--   Pattern: "stripes" or "spots" (PatternColor sets their color)
 Config.PET_LOOKS = {
 	Dog = { Ears = "floppy", Tail = "short" },
-	Cat = { Ears = "pointy", Tail = "long" },
+	Cat = { Ears = "pointy", Tail = "long", Pattern = "stripes" },
 	Bunny = { Ears = "long", Tail = "fluffy" },
 	Bear = { Ears = "round", Tail = "short" },
 	Fox = { Ears = "pointy", Tail = "fluffy" },
-	Deer = { Ears = "pointy", Tail = "short", Extras = { "antlers" } },
+	Deer = { Ears = "pointy", Tail = "short", Extras = { "antlers" }, Pattern = "spots", PatternColor = Color3.fromRGB(255, 245, 230) },
 	Owl = { Ears = "pointy", Extras = { "beak", "wings" } },
 	Wolf = { Ears = "pointy", Tail = "fluffy" },
 	Fish = { Tail = "fin", Extras = { "topfin", "nofeet" } },
@@ -216,7 +219,7 @@ Config.PET_LOOKS = {
 	Phoenix = { Tail = "long", Extras = { "beak", "wings", "fire" } },
 	Dragon = { Tail = "long", Extras = { "horns", "wings" } },
 	["Gummy Bear"] = { Ears = "round", Tail = "short" },
-	["Candy Cat"] = { Ears = "pointy", Tail = "long" },
+	["Candy Cat"] = { Ears = "pointy", Tail = "long", Pattern = "stripes", PatternColor = Color3.fromRGB(255, 255, 255) },
 	["Jelly Bunny"] = { Ears = "long", Tail = "fluffy" },
 	Unicorn = { Ears = "pointy", Tail = "fluffy", Extras = { "horns" } },
 	Penguin = { Extras = { "beak", "wings" } },
@@ -225,8 +228,8 @@ Config.PET_LOOKS = {
 	Yeti = { Ears = "round", Extras = { "horns" } },
 	Monkey = { Ears = "round", Tail = "long" },
 	Parrot = { Tail = "long", Extras = { "beak", "wings" } },
-	Tiger = { Ears = "round", Tail = "long" },
-	Lion = { Ears = "round", Tail = "fluffy" },
+	Tiger = { Ears = "round", Tail = "long", Pattern = "stripes", PatternColor = Color3.fromRGB(60, 40, 30) },
+	Lion = { Ears = "round", Tail = "fluffy", Extras = { "mane" } },
 	Fennec = { Ears = "long", Tail = "fluffy" },
 	Camel = { Ears = "floppy", Tail = "short" },
 	Scorpion = { Tail = "long", Extras = { "claws" } },
@@ -250,7 +253,7 @@ Config.PET_LOOKS = {
 	["Inferno Wyrm"] = { Tail = "long", Extras = { "horns", "wings", "fire" } },
 	["Lollipop Dragon"] = { Tail = "long", Extras = { "horns", "wings" } },
 	["Frost Phoenix"] = { Tail = "long", Extras = { "beak", "wings" } },
-	["Jaguar King"] = { Ears = "round", Tail = "long" },
+	["Jaguar King"] = { Ears = "round", Tail = "long", Pattern = "spots", PatternColor = Color3.fromRGB(70, 45, 25), Extras = { "mane" } },
 	["Pharaoh Cat"] = { Ears = "pointy", Tail = "long", Extras = { "wings" } },
 	["Nebula Dragon"] = { Tail = "long", Extras = { "horns", "wings" } },
 	["Arcane Owl"] = { Ears = "pointy", Extras = { "beak", "wings", "halo" } },
@@ -326,21 +329,25 @@ for eggIndex, egg in ipairs(Config.EGGS) do
 	end
 
 	-- every egg's legendary has a Huge version (so older saves keep working),
-	-- but only eggs with HugeOdds can hatch it
-	local base = egg.Pets[4]
-	local hugeName = "Huge " .. base
-	if egg.HugeOdds then
-		egg.Huge = hugeName
+	-- but only eggs with HugeOdds can hatch one: the legendary's, or the pet
+	-- named in HugeBase (the Release egg's Huge is its mythical dragon)
+	local function makeHuge(base)
+		local hugeName = "Huge " .. base
+		Config.PETS[hugeName] = {
+			Egg = eggIndex,
+			Rarity = "Huge",
+			Power = Config.PETS[base].Power * Config.HUGE_POWER,
+			Color = Config.HUGE_COLOR,
+			BodyColor = Config.PETS[base].BodyColor,
+			Look = Config.PETS[base].Look,
+			Scale = Config.HUGE_SCALE,
+		}
+		return hugeName
 	end
-	Config.PETS[hugeName] = {
-		Egg = eggIndex,
-		Rarity = "Huge",
-		Power = Config.PETS[base].Power * Config.HUGE_POWER,
-		Color = Config.HUGE_COLOR,
-		BodyColor = Config.PETS[base].BodyColor,
-		Look = Config.PETS[base].Look,
-		Scale = Config.HUGE_SCALE,
-	}
+	local legendaryHuge = makeHuge(egg.Pets[4])
+	if egg.HugeOdds then
+		egg.Huge = if egg.HugeBase then makeHuge(egg.HugeBase) else legendaryHuge
+	end
 end
 
 -- Special pets that don't come from an egg (shown in their own index row).

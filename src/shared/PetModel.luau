@@ -107,26 +107,77 @@ function PetModel.build(petName: string, options)
 		fn(-1)
 	end
 
-	-- face: shiny eyes, pink cheeks and a little mouth
-	both(function(side)
-		add(side * 0.45, 0.2, -1.05, Vector3.one * 0.5, BLACK, BALL)
-		add(side * 0.45 + 0.1, 0.32, -1.25, Vector3.one * 0.16, WHITE, BALL)
-		add(side * 0.78, -0.18, -1.11, Vector3.new(0.38, 0.2, 0.05), Color3.fromRGB(255, 150, 175))
-	end)
-	add(0, -0.3, -1.11, Vector3.new(0.35, 0.09, 0.05), BLACK)
+	local function has(extra)
+		return table.find(extras, extra) ~= nil
+	end
+	local PINK = Color3.fromRGB(255, 165, 185)
+	-- furry pets (with ears, no beak, not a fish) get a snout and a nose
+	local furry = look.Ears ~= nil and not has("beak") and not has("nofeet")
 
-	-- ears
+	-- face: big shiny eyes with two highlights, blush and a mouth
+	both(function(side)
+		add(side * 0.46, 0.22, -1.04, Vector3.one * 0.56, BLACK, BALL)
+		add(side * 0.46 + 0.1, 0.35, -1.29, Vector3.one * 0.2, WHITE, BALL)
+		add(side * 0.46 - 0.1, 0.11, -1.3, Vector3.one * 0.09, WHITE, BALL)
+		add(side * 0.8, -0.16, -1.11, Vector3.new(0.36, 0.18, 0.05), Color3.fromRGB(255, 150, 175))
+	end)
+	if furry then
+		-- a lighter snout with a nose and a little "w" mouth
+		add(0, -0.33, -1.13, Vector3.new(1, 0.5, 0.12), lighter)
+		add(0, -0.17, -1.21, Vector3.new(0.3, 0.18, 0.1), BLACK)
+		add(0.05, -0.12, -1.265, Vector3.new(0.08, 0.05, 0.02), WHITE)
+		both(function(side)
+			add(side * 0.08, -0.4, -1.2, Vector3.new(0.16, 0.06, 0.04), BLACK, nil, CFrame.Angles(0, 0, side * 0.55))
+		end)
+	elseif not has("beak") then
+		add(0, -0.3, -1.11, Vector3.new(0.35, 0.09, 0.05), BLACK)
+	end
+	-- a lighter chest patch under the face
+	if not has("bowtie") and not has("giftbox") then
+		add(0, -0.84, -1.12, Vector3.new(1.2, 0.42, 0.08), lighter)
+	end
+
+	-- markings: stripes (bands over the back half) or spots
+	local markColor = look.PatternColor or darker:Lerp(Color3.new(0, 0, 0), 0.35)
+	if look.Pattern == "stripes" then
+		for _, z in ipairs({ -0.15, 0.3, 0.75 }) do
+			add(0, 0, z, Vector3.new(2.24, 2.24, 0.2), markColor)
+		end
+		both(function(side)
+			add(side * 0.25, 1.12, -0.7, Vector3.new(0.14, 0.04, 0.5), markColor)
+		end)
+	elseif look.Pattern == "spots" then
+		for _, spot in ipairs({
+			{ 0.5, 1.12, 0.3, "top" },
+			{ -0.4, 1.12, -0.25, "top" },
+			{ 0.05, 1.12, 0.75, "top" },
+			{ 1.12, 0.3, 0.4, "side" },
+			{ -1.12, -0.2, 0.2, "side" },
+			{ 1.12, -0.45, -0.35, "side" },
+			{ -1.12, 0.5, -0.4, "side" },
+		}) do
+			local size = if spot[4] == "top" then Vector3.new(0.42, 0.05, 0.36) else Vector3.new(0.05, 0.36, 0.42)
+			add(spot[1], spot[2], spot[3], size, markColor)
+		end
+	end
+
+	-- ears (with pink insides)
 	if look.Ears == "pointy" then
 		both(function(side)
-			add(side * 0.6, 1.35, -0.2, Vector3.new(0.55, 0.8, 0.3), darker, nil, CFrame.Angles(0, 0, side * -0.35))
+			local tilt = CFrame.Angles(0, 0, side * -0.35)
+			add(side * 0.6, 1.35, -0.2, Vector3.new(0.55, 0.8, 0.3), darker, nil, tilt)
+			add(side * 0.6, 1.3, -0.36, Vector3.new(0.28, 0.48, 0.05), PINK, nil, tilt)
 		end)
 	elseif look.Ears == "round" then
 		both(function(side)
 			add(side * 0.7, 1.15, -0.1, Vector3.one * 0.75, darker, BALL)
+			add(side * 0.7, 1.15, -0.3, Vector3.new(0.4, 0.4, 0.1), PINK)
 		end)
 	elseif look.Ears == "long" then
 		both(function(side)
-			add(side * 0.45, 1.85, 0, Vector3.new(0.45, 1.6, 0.3), darker, nil, CFrame.Angles(0, 0, side * -0.15))
+			local tilt = CFrame.Angles(0, 0, side * -0.15)
+			add(side * 0.45, 1.85, 0, Vector3.new(0.45, 1.6, 0.3), darker, nil, tilt)
+			add(side * 0.45, 1.8, -0.16, Vector3.new(0.24, 1.15, 0.05), PINK, nil, tilt)
 		end)
 	elseif look.Ears == "floppy" then
 		both(function(side)
@@ -134,42 +185,64 @@ function PetModel.build(petName: string, options)
 		end)
 	end
 
-	-- tail
+	-- tail (longer ones get a light tip)
 	if look.Tail == "short" then
 		add(0, 0.3, 1.25, Vector3.one * 0.6, darker, BALL)
 	elseif look.Tail == "long" then
 		add(0, 0.45, 1.65, Vector3.new(0.35, 0.35, 1.5), darker, nil, CFrame.Angles(0.5, 0, 0))
+		add(0, 0.12, 2.33, Vector3.one * 0.45, lighter, BALL)
 	elseif look.Tail == "fluffy" then
 		add(0, 0.4, 1.45, Vector3.one * 1.1, lighter, BALL)
+		add(0, 0.62, 1.9, Vector3.one * 0.62, WHITE:Lerp(lighter, 0.5), BALL)
 	elseif look.Tail == "fin" then
-		add(0, 0, 1.5, Vector3.new(0.2, 1.4, 0.9), darker)
+		-- a forked tail fin
+		for _, side in ipairs({ 1, -1 }) do
+			add(0, side * 0.35, 1.55, Vector3.new(0.16, 0.9, 0.7), darker, nil, CFrame.Angles(side * -0.5, 0, 0))
+		end
 	end
 
 	-- extras
 	for _, extra in ipairs(extras) do
 		if extra == "wings" then
+			-- feathered wings: three layers getting lighter toward the tips
 			both(function(side)
 				add(side * 1.55, 0.35, 0.15, Vector3.new(1.1, 0.18, 1), lighter, nil, CFrame.Angles(0, 0, side * 0.45))
+				add(side * 1.95, 0.6, 0.35, Vector3.new(0.8, 0.14, 0.75), lighter:Lerp(WHITE, 0.3), nil, CFrame.Angles(0, 0, side * 0.6))
+				add(side * 2.28, 0.84, 0.5, Vector3.new(0.5, 0.12, 0.5), lighter:Lerp(WHITE, 0.55), nil, CFrame.Angles(0, 0, side * 0.7))
 			end)
 		elseif extra == "beak" then
-			add(0, -0.2, -1.25, Vector3.new(0.5, 0.35, 0.4), Color3.fromRGB(255, 170, 40))
+			-- an open beak: top and bottom
+			add(0, -0.12, -1.28, Vector3.new(0.55, 0.25, 0.45), Color3.fromRGB(255, 175, 40))
+			add(0, -0.33, -1.24, Vector3.new(0.45, 0.14, 0.35), Color3.fromRGB(230, 130, 30))
 		elseif extra == "horns" then
+			-- curved horns in two parts
 			both(function(side)
-				add(side * 0.55, 1.4, -0.3, Vector3.new(0.3, 0.8, 0.3), Color3.fromRGB(255, 245, 215), nil, CFrame.Angles(0, 0, side * -0.3))
+				add(side * 0.55, 1.35, -0.3, Vector3.new(0.32, 0.55, 0.32), Color3.fromRGB(255, 245, 215), nil, CFrame.Angles(0, 0, side * -0.3))
+				add(side * 0.74, 1.76, -0.3, Vector3.new(0.22, 0.45, 0.22), Color3.fromRGB(235, 220, 185), nil, CFrame.Angles(0, 0, side * -0.65))
 			end)
 		elseif extra == "antlers" then
 			local brown = Color3.fromRGB(150, 100, 60)
 			both(function(side)
 				add(side * 0.55, 1.6, 0, Vector3.new(0.22, 1.2, 0.22), brown, nil, CFrame.Angles(0, 0, side * -0.35))
 				add(side * 0.95, 1.85, 0, Vector3.new(0.2, 0.6, 0.2), brown, nil, CFrame.Angles(0, 0, side * 0.6))
+				add(side * 0.72, 2.2, 0, Vector3.new(0.18, 0.5, 0.18), brown, nil, CFrame.Angles(0, 0, side * -0.1))
 			end)
 		elseif extra == "shell" then
 			local green = Color3.fromRGB(70, 150, 80)
 			add(0, 1.3, 0.1, Vector3.new(2.5, 0.5, 2.5), green)
+			add(0, 1.08, 0.1, Vector3.new(2.62, 0.14, 2.62), green:Lerp(WHITE, 0.45))
 			add(0, 1.7, 0.1, Vector3.new(1.7, 0.4, 1.7), green:Lerp(WHITE, 0.2))
+			for _, x in ipairs({ -0.42, 0.42 }) do
+				for _, z in ipairs({ -0.32, 0.52 }) do
+					add(x, 1.91, z, Vector3.new(0.5, 0.05, 0.5), green:Lerp(Color3.new(0, 0, 0), 0.25))
+				end
+			end
 		elseif extra == "claws" then
+			-- pincers: a round claw with two open tips
 			both(function(side)
 				add(side * 1.5, -0.2, -0.7, Vector3.one * 0.9, darker, BALL)
+				add(side * 1.62, -0.05, -1.22, Vector3.new(0.24, 0.22, 0.6), darker, nil, CFrame.Angles(0.35, side * -0.25, 0))
+				add(side * 1.62, -0.38, -1.2, Vector3.new(0.22, 0.2, 0.5), darker, nil, CFrame.Angles(-0.35, side * -0.25, 0))
 			end)
 		elseif extra == "topfin" then
 			add(0, 1.45, 0.3, Vector3.new(0.2, 0.9, 1), color, nil, CFrame.Angles(-0.35, 0, 0))
@@ -206,6 +279,13 @@ function PetModel.build(petName: string, options)
 				add(side * 0.45, 1.45, 0, Vector3.new(0.9, 0.6, 0.35), ribbon, nil, CFrame.Angles(0, 0, side * -0.5))
 			end)
 			add(0, 1.35, 0, Vector3.one * 0.5, ribbon:Lerp(WHITE, 0.2), BALL)
+		elseif extra == "mane" then
+			-- a fluffy mane all around the face
+			local maneColor = Color3.fromRGB(205, 120, 50)
+			for k = 0, 11 do
+				local a = k / 12 * math.pi * 2
+				add(math.cos(a) * 1.1, math.sin(a) * 1.05 + 0.05, -0.85, Vector3.one * 0.72, maneColor, BALL)
+			end
 		elseif extra == "balloon" then
 			add(1.3, 1.1, 0.4, Vector3.new(0.06, 2.2, 0.06), WHITE)
 			add(1.3, 2.8, 0.4, Vector3.new(1.2, 1.4, 1.2), Color3.fromRGB(255, 80, 120), BALL)
@@ -224,13 +304,18 @@ function PetModel.build(petName: string, options)
 		gem.Material = Enum.Material.Neon
 	end
 
-	-- feet
-	if not table.find(extras, "nofeet") then
+	-- feet (the front ones with light toes), or side fins for fish
+	if not has("nofeet") then
 		for _, x in ipairs({ -0.6, 0.6 }) do
 			for _, z in ipairs({ -0.6, 0.6 }) do
 				add(x, -1.25, z, Vector3.new(0.6, 0.3, 0.6), darker)
 			end
+			add(x, -1.27, -0.91, Vector3.new(0.46, 0.14, 0.04), lighter)
 		end
+	elseif not has("shell") then
+		both(function(side)
+			add(side * 1.25, -0.4, 0, Vector3.new(0.6, 0.1, 0.5), darker, nil, CFrame.Angles(0, 0, side * -0.5))
+		end)
 	end
 
 	if info.Rarity == "Legendary" or info.Rarity == "Mythical" or info.Rarity == "Huge" or info.Mutation then
