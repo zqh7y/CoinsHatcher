@@ -129,6 +129,7 @@ local function play(petNames)
 		local name = Ui.label(overlay, {
 			Text = petName,
 			TextColor3 = info.Color,
+			TextStrokeTransparency = 0.3,
 			AnchorPoint = Vector2.new(0.5, 0),
 			Position = UDim2.new(0.5, (i - (count + 1) / 2) * SLOT, 0.42, SLOT / 2 + 6),
 			Size = UDim2.fromOffset(SLOT - 10, 40),
@@ -136,6 +137,7 @@ local function play(petNames)
 		})
 		local detail = Ui.label(overlay, {
 			Text = ("%s · %s · ⚔️ %s"):format(info.Rarity, Config.chanceText(petName), Config.formatNumber(info.Power)),
+			TextColor3 = Color3.new(1, 1, 1),
 			AnchorPoint = Vector2.new(0.5, 0),
 			Position = UDim2.new(0.5, (i - (count + 1) / 2) * SLOT, 0.42, SLOT / 2 + 48),
 			Size = UDim2.fromOffset(SLOT - 10, 24),
@@ -166,6 +168,7 @@ local function play(petNames)
 		local banner = Ui.label(overlay, {
 			Text = "🎉 SO RARE! 🎉",
 			TextColor3 = Ui.COLORS.Gold,
+			TextStrokeTransparency = 0.3,
 			AnchorPoint = Vector2.new(0.5, 1),
 			Position = UDim2.new(0.5, 0, 0.42, -SLOT / 2 - 6),
 			Size = UDim2.fromOffset(420, 60),

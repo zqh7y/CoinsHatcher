@@ -549,29 +549,27 @@ end
 -- named "UpgradeBoard" (in MainArea) with a SurfaceGui.
 local function upgradeBoard(base)
 	local facing = CFrame.lookAt(base, Vector3.new(World.MAIN_CENTER.X, base.Y, World.MAIN_CENTER.Z))
-	local frame = Color3.fromRGB(255, 190, 90)
+	local frame = Color3.fromRGB(236, 239, 246)
 	local screen = part({
 		Name = "UpgradeBoard",
 		Size = Vector3.new(22, 14, 0.6),
 		CFrame = facing * CFrame.new(0, 9.5, 0),
-		Color = Color3.fromRGB(40, 70, 80),
+		Color = Color3.new(1, 1, 1),
 		Parent = workspace:WaitForChild("MainArea"),
 	})
-	-- cute frame, legs and a striped roof
+	-- clean white frame and legs with a blue accent roof
 	for _, x in ipairs({ -11.6, 11.6 }) do
 		part({ Name = "BoardLeg", Size = Vector3.new(1.2, 17.5, 1.2), CFrame = facing * CFrame.new(x, 8.75, 0), Color = frame })
 	end
 	for _, y in ipairs({ 2.2, 16.8 }) do
 		part({ Name = "BoardFrame", Size = Vector3.new(24.4, 0.8, 1), CFrame = facing * CFrame.new(0, y, 0), Color = frame })
 	end
-	for i = 0, 5 do
-		part({
-			Name = "BoardRoof",
-			Size = Vector3.new(26 / 6, 0.6, 3.4),
-			CFrame = facing * CFrame.new(-13 + 26 / 6 * (i + 0.5), 17.7, 0.4) * CFrame.Angles(math.rad(-12), 0, 0),
-			Color = if i % 2 == 0 then Color3.fromRGB(90, 200, 150) else Color3.new(1, 1, 1),
-		})
-	end
+	part({
+		Name = "BoardRoof",
+		Size = Vector3.new(26, 0.6, 3.4),
+		CFrame = facing * CFrame.new(0, 17.7, 0.4) * CFrame.Angles(math.rad(-12), 0, 0),
+		Color = Color3.fromRGB(95, 110, 255),
+	})
 	return screen
 end
 

@@ -99,17 +99,18 @@ local function onBroken(player, position, kind)
 		local step = combo.Count // Config.COMBO_STEP
 		local id = Config.COMBO_BOOSTS[(step - 1) % #Config.COMBO_BOOSTS + 1]
 		local boost = Config.BOOSTS_BY_ID[id]
-		PlayerData.addBoost(player, id, Config.COMBO_BOOST_SECONDS)
+		local seconds = Config.comboSeconds(PlayerData.get(player))
+		PlayerData.addBoost(player, id, seconds)
 		notify(
 			player,
-			("🔥 Combo x%d! %s for %ds!"):format(combo.Count, boost.Name, Config.COMBO_BOOST_SECONDS),
+			("🔥 Combo x%d! %s for %ds!"):format(combo.Count, boost.Name, seconds),
 			Color3.fromRGB(255, 160, 60),
 			true
 		)
 	end
 
 	-- boost orb drop
-	if math.random() < (Config.ORB_CHANCE[kind] or 0) then
+	if math.random() < Config.orbChance(PlayerData.get(player), kind) then
 		spawnOrb(player, position)
 	end
 end
@@ -129,10 +130,11 @@ local function update()
 		if root and (root.Position - orb.Position).Magnitude < Config.ORB_RANGE then
 			orbs[orb] = nil
 			orb:Destroy()
-			PlayerData.addBoost(info.Owner, info.Boost.Id, Config.ORB_SECONDS)
+			local seconds = Config.orbSeconds(PlayerData.get(info.Owner))
+			PlayerData.addBoost(info.Owner, info.Boost.Id, seconds)
 			notify(
 				info.Owner,
-				("🧪 Grabbed %s for %ds!"):format(info.Boost.Name, Config.ORB_SECONDS),
+				("🧪 Grabbed %s for %ds!"):format(info.Boost.Name, seconds),
 				ORB_COLORS[info.Boost.Id],
 				true
 			)

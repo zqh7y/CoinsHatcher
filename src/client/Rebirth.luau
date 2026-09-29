@@ -10,11 +10,11 @@ local remotes = ReplicatedStorage:WaitForChild("Remotes")
 
 local Rebirth = {}
 
-local panel = Ui.panel("Rebirth", "⭐", UDim2.fromOffset(460, 360))
+local panel = Ui.panel("Rebirth", nil, UDim2.fromOffset(480, 380), { Ui.COLORS.Accent2 })
 
 local info = Ui.label(panel.Content, {
 	Size = UDim2.new(1, 0, 0, 44),
-	TextColor3 = Ui.COLORS.Gold,
+	TextColor3 = Ui.COLORS.Accent2,
 })
 local details = Ui.label(panel.Content, {
 	Size = UDim2.new(1, -10, 0, 120),

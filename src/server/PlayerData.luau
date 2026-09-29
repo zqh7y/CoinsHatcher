@@ -77,12 +77,8 @@ local function load(player)
 		end
 	end
 
-	-- new players get a starter pet so they can break coins
-	if #data.Pets == 0 then
-		table.insert(data.Pets, Config.STARTER_PET)
-		table.insert(data.Equipped, 1)
-		data.Index[Config.STARTER_PET] = true
-	end
+	-- new players pick their first pet (Dog or Cat) when they join
+	data.NeedsStarter = #data.Pets == 0 or nil
 
 	-- leaderstats shows Coins/Rebirths on the player list
 	local stats = Instance.new("Folder")
@@ -193,6 +189,20 @@ function PlayerData.rebirth(player)
 	showCoins(player, data.Coins)
 	setStat(player, "Rebirths", data.Rebirths)
 	PlayerData.Changed:Fire(player)
+end
+
+-- Gives a new player the starter pet they picked (only once).
+function PlayerData.giveStarter(player, petName)
+	local data = sessionData[player]
+	if not data or not data.NeedsStarter or not table.find(Config.STARTER_CHOICES, petName) then
+		return false
+	end
+	data.NeedsStarter = nil
+	table.insert(data.Pets, petName)
+	data.Equipped = { #data.Pets }
+	data.Index[petName] = true
+	PlayerData.Changed:Fire(player)
+	return true
 end
 
 -- Adds hatched pets. Returns the new pets' indexes.

@@ -122,7 +122,7 @@ local function hatch(player, eggIndex, count)
 		notify(player, "🎒 Your pet inventory is full! Delete some pets.", RED)
 		return
 	end
-	local cost = Config.eggCost(eggIndex) * count
+	local cost = Config.eggPrice(data, eggIndex) * count
 	if data.Coins < cost then
 		notify(player, "💰 You need " .. Config.formatNumber(cost) .. " coins!", RED)
 		return

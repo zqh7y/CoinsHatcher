@@ -53,7 +53,7 @@ local tooltip = Ui.label(Ui.gui, {
 	AnchorPoint = Vector2.new(1, 1),
 	Size = UDim2.fromOffset(140, 22),
 	BackgroundTransparency = 0.2,
-	BackgroundColor3 = Ui.COLORS.PanelDark,
+	BackgroundColor3 = Ui.COLORS.Panel,
 	Visible = false,
 	ZIndex = 10,
 })
@@ -79,12 +79,12 @@ local function pill(order, icon, text, name, color)
 	local p = Instance.new("Frame")
 	p.AutomaticSize = Enum.AutomaticSize.X
 	p.Size = UDim2.fromOffset(0, 26)
-	p.BackgroundColor3 = color or Ui.COLORS.PanelDark
-	p.BackgroundTransparency = 0.15
+	-- white pill; potions and perks get a colored border
+	p.BackgroundColor3 = Ui.COLORS.Panel
 	p.LayoutOrder = order
 	p.Parent = holder
 	Ui.corner(p, 0.5)
-	Ui.stroke(p, Ui.COLORS.Outline, 2)
+	Ui.stroke(p, color or Ui.COLORS.Line, if color then 2 else 1.5)
 
 	local pad = Instance.new("UIPadding")
 	pad.PaddingLeft = UDim.new(0, 6)
@@ -118,8 +118,8 @@ local function pill(order, icon, text, name, color)
 	end)
 end
 
-local POTION_COLOR = Color3.fromRGB(40, 140, 110)
-local PERK_COLOR = Color3.fromRGB(40, 110, 170)
+local POTION_COLOR = Ui.COLORS.Green
+local PERK_COLOR = Ui.COLORS.Gem
 
 local function render()
 	Ui.clear(holder)

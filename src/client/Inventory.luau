@@ -1,6 +1,6 @@
--- The pets menu: stats at the top (pets, team power, best pet), filter tabs,
--- and every pet you own with its odds. Equip / Unequip, Equip Best, and a
--- delete mode (tap pets to pick them, then delete).
+-- The pets menu: a clean grid of square pet icons, 4 per row. Tap a pet to
+-- equip or unequip it. Filter tabs, Equip Best, and a delete mode (tap pets
+-- to pick them, then delete).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -12,41 +12,16 @@ local remotes = ReplicatedStorage:WaitForChild("Remotes")
 
 local Inventory = {}
 
-local panel = Ui.panel("Pets", "🐾", UDim2.fromOffset(780, 540), {
-	Color3.fromRGB(110, 150, 255),
-	Color3.fromRGB(80, 60, 180),
+local panel = Ui.panel("Pets", nil, UDim2.fromOffset(660, 600), { Ui.COLORS.Accent })
+
+-- small stats line under the title
+local stats = Ui.label(panel.Frame, {
+	Font = Ui.FONT_BODY,
+	TextColor3 = Ui.COLORS.SubText,
+	TextXAlignment = Enum.TextXAlignment.Left,
+	Position = UDim2.fromOffset(120, 24),
+	Size = UDim2.new(1, -200, 0, 18),
 })
-
--- Stats bar ---------------------------------------------------------------------
-
-local statsBar = Instance.new("Frame")
-statsBar.BackgroundTransparency = 1
-statsBar.Size = UDim2.new(1, 0, 0, 40)
-statsBar.Parent = panel.Content
-local statsLayout = Instance.new("UIListLayout")
-statsLayout.FillDirection = Enum.FillDirection.Horizontal
-statsLayout.Padding = UDim.new(0, 8)
-statsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-statsLayout.Parent = statsBar
-
-local function stat(color, order, width)
-	local l = Ui.label(statsBar, {
-		Size = UDim2.new(width, -6, 1, 0),
-		BackgroundTransparency = 0,
-		BackgroundColor3 = color,
-		LayoutOrder = order,
-	})
-	Ui.corner(l, 0.5)
-	Ui.stroke(l, Color3.new(1, 1, 1), 2)
-	local pad = Instance.new("UIPadding")
-	pad.PaddingTop = UDim.new(0, 6)
-	pad.PaddingBottom = UDim.new(0, 6)
-	pad.Parent = l
-	return l
-end
-local countStat = stat(Color3.fromRGB(90, 170, 255), 1, 0.22)
-local powerStat = stat(Color3.fromRGB(255, 120, 120), 2, 0.34)
-local bestStat = stat(Color3.fromRGB(255, 185, 50), 3, 0.44)
 
 -- Tabs + actions ----------------------------------------------------------------
 
@@ -64,8 +39,7 @@ local TABS = {
 local tabBar = Instance.new("ScrollingFrame")
 tabBar.BackgroundTransparency = 1
 tabBar.BorderSizePixel = 0
-tabBar.Position = UDim2.fromOffset(0, 48)
-tabBar.Size = UDim2.new(1, -330, 0, 44)
+tabBar.Size = UDim2.new(1, -250, 0, 36)
 tabBar.ScrollBarThickness = 0
 tabBar.ScrollingDirection = Enum.ScrollingDirection.X
 tabBar.AutomaticCanvasSize = Enum.AutomaticSize.X
@@ -73,7 +47,7 @@ tabBar.CanvasSize = UDim2.new()
 tabBar.Parent = panel.Content
 local tabLayout = Instance.new("UIListLayout")
 tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.Padding = UDim.new(0, 14)
+tabLayout.Padding = UDim.new(0, 16)
 tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 tabLayout.Parent = tabBar
@@ -81,8 +55,8 @@ tabLayout.Parent = tabBar
 local actions = Instance.new("Frame")
 actions.BackgroundTransparency = 1
 actions.AnchorPoint = Vector2.new(1, 0)
-actions.Position = UDim2.new(1, 0, 0, 48)
-actions.Size = UDim2.fromOffset(320, 44)
+actions.Position = UDim2.new(1, 0, 0, 0)
+actions.Size = UDim2.fromOffset(240, 36)
 actions.Parent = panel.Content
 local actionLayout = Instance.new("UIListLayout")
 actionLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -91,16 +65,16 @@ actionLayout.Padding = UDim.new(0, 8)
 actionLayout.SortOrder = Enum.SortOrder.LayoutOrder
 actionLayout.Parent = actions
 
-local equipBest = Ui.button(actions, "⚡ Best", Ui.COLORS.Gold, { Size = UDim2.fromOffset(100, 42), LayoutOrder = 1 })
-local deleteMode = Ui.button(actions, "🗑️", Ui.COLORS.Red, { Size = UDim2.fromOffset(60, 42), LayoutOrder = 2 })
-local deleteConfirm = Ui.button(actions, "Delete 0", Ui.COLORS.Red, { Size = UDim2.fromOffset(130, 42), LayoutOrder = 3, Visible = false })
+local equipBest = Ui.button(actions, "Equip Best", Ui.COLORS.Accent, { Size = UDim2.fromOffset(110, 36), LayoutOrder = 1 })
+local deleteMode = Ui.button(actions, "Delete", Ui.COLORS.Soft, { Size = UDim2.fromOffset(80, 36), LayoutOrder = 2 })
+local deleteConfirm = Ui.button(actions, "Delete 0", Ui.COLORS.Red, { Size = UDim2.fromOffset(100, 36), LayoutOrder = 3, Visible = false })
 
 local listHolder = Instance.new("Frame")
 listHolder.BackgroundTransparency = 1
-listHolder.Position = UDim2.fromOffset(0, 100)
-listHolder.Size = UDim2.new(1, 0, 1, -100)
+listHolder.Position = UDim2.fromOffset(0, 48)
+listHolder.Size = UDim2.new(1, 0, 1, -48)
 listHolder.Parent = panel.Content
-local list = Ui.grid(listHolder, UDim2.fromOffset(132, 188))
+local list = Ui.grid(listHolder, UDim2.fromOffset(140, 140), UDim2.fromOffset(12, 12))
 
 local filter = nil -- current tab's filter
 local deleting = false
@@ -120,13 +94,14 @@ end
 local function setDeleting(on)
 	deleting = on
 	selected = {}
-	deleteMode.Text = if on then "✖" else "🗑️"
+	deleteMode.Text = if on then "Cancel" else "Delete"
 	deleteConfirm.Visible = on
 	deleteConfirm.Text = "Delete 0"
+	equipBest.Visible = not on
 	render()
 end
 
--- minimal text tabs: the active one is bright with a thin underline
+-- minimal text tabs: the active one is dark with an accent underline
 for order, tab in ipairs(TABS) do
 	local button = Instance.new("TextButton")
 	button.AutomaticSize = Enum.AutomaticSize.X
@@ -134,18 +109,19 @@ for order, tab in ipairs(TABS) do
 	button.BackgroundTransparency = 1
 	button.Text = tab[1]
 	button.Font = Ui.FONT
-	button.TextSize = 17
-	button.TextColor3 = Color3.new(1, 1, 1)
+	button.TextSize = 15
+	button.TextColor3 = Ui.COLORS.Text
 	button.LayoutOrder = order
 	button.Parent = tabBar
 
 	local underline = Instance.new("Frame")
 	underline.AnchorPoint = Vector2.new(0.5, 1)
 	underline.Position = UDim2.fromScale(0.5, 1)
-	underline.Size = UDim2.new(1, 0, 0, 2)
-	underline.BackgroundColor3 = Color3.new(1, 1, 1)
+	underline.Size = UDim2.new(1, 0, 0, 3)
+	underline.BackgroundColor3 = Ui.COLORS.Accent
 	underline.BorderSizePixel = 0
 	underline.Parent = button
+	Ui.corner(underline, 0.5)
 
 	button.Activated:Connect(function()
 		filter = tab[2]
@@ -174,28 +150,24 @@ render = function()
 
 	for _, tab in ipairs(tabButtons) do
 		local active = tab.Filter == filter
-		tab.Button.TextTransparency = if active then 0 else 0.5
+		tab.Button.TextColor3 = if active then Ui.COLORS.Text else Ui.COLORS.SubText
 		tab.Underline.Visible = active
 	end
 
-	-- stats
-	local teamPower, best = 0, nil
+	local teamPower = 0
 	for _, index in ipairs(data.Equipped) do
 		local info = Config.PETS[data.Pets[index] or ""]
 		if info then
 			teamPower += info.Power
 		end
 	end
-	for _, petName in ipairs(data.Pets) do
-		local info = Config.PETS[petName]
-		if info and (not best or info.Power > Config.PETS[best].Power) then
-			best = petName
-		end
-	end
-	countStat.Text = ("🐾 %d/%d"):format(#data.Pets, Config.maxPets(data))
-	powerStat.Text = "⚔️ Team " .. Config.formatNumber(teamPower * Config.totalDamage(data))
-	bestStat.Text = "🏆 " .. (best or "-")
-	panel.Title.Text = ("🐾 Pets   ·   Equipped %d/%d"):format(#data.Equipped, Config.totalSlots(data))
+	stats.Text = ("%d/%d pets  ·  %d/%d equipped  ·  ⚔ %s team power"):format(
+		#data.Pets,
+		Config.maxPets(data),
+		#data.Equipped,
+		Config.totalSlots(data),
+		Config.formatNumber(teamPower * Config.totalDamage(data))
+	)
 
 	-- equipped first, then strongest first
 	local order = {}
@@ -215,7 +187,7 @@ render = function()
 	end)
 
 	if #order == 0 then
-		Ui.label(list, { Text = "No pets here yet! 🥚", LayoutOrder = 1 })
+		Ui.label(list, { Text = "No pets here yet", TextColor3 = Ui.COLORS.SubText, LayoutOrder = 1 })
 	end
 
 	for rank, index in ipairs(order) do
@@ -224,34 +196,20 @@ render = function()
 		local equipped = table.find(data.Equipped, index) ~= nil
 		local picked = selected[index] == true
 
+		-- tap the pet itself: equip/unequip (or pick it in delete mode)
 		local card = Cards.pet(list, petName, {
-			Detail = Config.chanceText(petName) .. " · ⚔️" .. Config.formatNumber(info.Power),
+			Compact = true,
+			Button = true,
+			Detail = "⚔ " .. Config.formatNumber(info.Power),
 			LayoutOrder = rank,
 			Equipped = equipped,
 			Picked = picked,
 		})
-		card.PetName.Size = UDim2.new(1, -10, 0.13, 0)
-		card.PetName.Position = UDim2.new(0, 5, 0.56, 0)
-		card.Detail.Size = UDim2.new(1, -10, 0.1, 0)
-		card.Detail.Position = UDim2.new(0, 5, 0.7, 0)
-
-		local text, color
-		if deleting then
-			text = if equipped then "Equipped" elseif picked then "✔ Picked" else "Pick"
-			color = if equipped then Ui.COLORS.PanelDark elseif picked then Ui.COLORS.Red else Color3.fromRGB(150, 140, 170)
-		else
-			text = if equipped then "Unequip" else "Equip"
-			color = if equipped then Ui.COLORS.Red else Ui.COLORS.Green
-		end
-		local button = Ui.button(card, text, color, {
-			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.new(0.5, 0, 1, -6),
-			Size = UDim2.new(1, -14, 0.15, 0),
-			ZIndex = 3,
-		})
-		button.Activated:Connect(function()
+		card.Activated:Connect(function()
 			if deleting then
-				if not equipped then
+				if equipped then
+					Ui.toast("Equipped pets can't be deleted", Ui.COLORS.Red)
+				else
 					selected[index] = if picked then nil else true
 					deleteConfirm.Text = "Delete " .. countSelected()
 					render()
@@ -269,7 +227,7 @@ end
 equipBest.Activated:Connect(function()
 	local ok, message = remotes.EquipBest:InvokeServer()
 	if message then
-		Ui.toast(message, if ok then Ui.COLORS.Gold else Ui.COLORS.Red)
+		Ui.toast(message, if ok then Ui.COLORS.Green else Ui.COLORS.Red)
 	end
 end)
 
@@ -283,12 +241,12 @@ deleteConfirm.Activated:Connect(function()
 		table.insert(indexes, index)
 	end
 	if #indexes == 0 then
-		Ui.toast("Tap pets to pick which ones to delete!", Ui.COLORS.White)
+		Ui.toast("Tap pets to pick which ones to delete", Ui.COLORS.Accent)
 		return
 	end
 	local ok, message = remotes.DeletePets:InvokeServer(indexes)
 	if message then
-		Ui.toast(message, if ok then Ui.COLORS.White else Ui.COLORS.Red)
+		Ui.toast(message, if ok then Ui.COLORS.Green else Ui.COLORS.Red)
 	end
 	setDeleting(false)
 end)

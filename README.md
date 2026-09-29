@@ -16,15 +16,20 @@ rojo serve
 
 For more help, check out [the Rojo documentation](https://rojo.space/docs).
 ## The game
+- **First join**: new players pick their first pet (Dog or Cat).
+- **Look**: clean white UI with a modern font, drawn icons (no emojis on the
+  buttons), futuristic coin/diamond counters with a live income rate, and a
+  "Rebirth ready!" reminder when you can afford a rebirth.
 - **Main area** (round): your pets run to coin stacks and chests in the round
   coin zone and break them. Stronger pets hit harder. Every rebirth makes the
   area's breakables tougher and worth more (and changes its color).
 - **Shop** (stall in the main area): upgrade pet damage, luck, walk speed,
   pet speed, coin bonus, pet slots, and buy a hoverboard.
-- **📈 Upgrade board** (big cartoon board in the main area, reset on rebirth):
-  incremental upgrades for the coin zone with lots of levels and Buy Max:
+- **📈 Upgrade board** (white board in the main area, reset on rebirth): 15
+  incremental upgrades on tall cards that scroll sideways, with Buy and Max:
   coin value, chest value, more things to break, chest luck, faster respawn,
-  diamond finder, crit chance.
+  diamond finder, crit chance, crit damage, hit speed, big chest luck, orb
+  luck, orb time, combo time, egg discount, stack gems.
 - **Boosts from playing**: 🔥 combos (every 25 breaks in a row = a free 2x
   boost) and 🧪 boost orbs that sometimes drop from breakables.
 - **Juice**: breakables pop in, flash on hit and burst into coins; coins and

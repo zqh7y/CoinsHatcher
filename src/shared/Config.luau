@@ -65,7 +65,7 @@ end
 
 Config.MAX_EQUIPPED = 3
 Config.MAX_PETS = 100
-Config.STARTER_PET = "Dog"
+Config.STARTER_CHOICES = { "Dog", "Cat" } -- new players pick one of these
 Config.PET_SPEED = 32 -- studs per second when running to a coin
 Config.PET_HIT_INTERVAL = 0.6 -- seconds between hits; each hit deals the pet's power
 Config.CRIT_CHANCE = 0.1 -- 10% of hits are critical hits...
@@ -403,7 +403,15 @@ Config.AREA_UPGRADES = {
 	{ Id = "ChestLuck", Name = "Chest Luck", Icon = "🍀", Max = 20, BaseCost = 350, Growth = 1.3, Info = "Chests spawn 10% more often" },
 	{ Id = "Respawn", Name = "Fast Respawn", Icon = "⏩", Max = 10, BaseCost = 300, Growth = 1.4, Info = "Things come back 5% faster" },
 	{ Id = "DiamondFinder", Name = "Diamond Finder", Icon = "💎", Max = 10, BaseCost = 500, Growth = 1.45, Info = "+5% coin piles carry diamonds" },
-	{ Id = "CritChance", Name = "Crit Chance", Icon = "💥", Max = 20, BaseCost = 450, Growth = 1.3, Info = "+1% critical hits" },
+	{ Id = "CritChance", Name = "Crit Chance", Icon = "🎯", Max = 20, BaseCost = 450, Growth = 1.3, Info = "+1% critical hits" },
+	{ Id = "CritDamage", Name = "Crit Damage", Icon = "💥", Max = 10, BaseCost = 600, Growth = 1.4, Info = "Crits hit harder" },
+	{ Id = "HitSpeed", Name = "Hit Speed", Icon = "⚡", Max = 10, BaseCost = 700, Growth = 1.4, Info = "Pets hit 3% faster" },
+	{ Id = "BigChestLuck", Name = "Big Chest Luck", Icon = "👑", Max = 15, BaseCost = 800, Growth = 1.35, Info = "Big chests spawn more" },
+	{ Id = "OrbLuck", Name = "Orb Luck", Icon = "🧪", Max = 15, BaseCost = 500, Growth = 1.3, Info = "Boost orbs drop more" },
+	{ Id = "OrbTime", Name = "Orb Time", Icon = "⏱️", Max = 10, BaseCost = 450, Growth = 1.35, Info = "Orb boosts last longer" },
+	{ Id = "ComboTime", Name = "Combo Time", Icon = "🔥", Max = 10, BaseCost = 450, Growth = 1.35, Info = "Combo boosts last longer" },
+	{ Id = "EggDiscount", Name = "Egg Discount", Icon = "🏷️", Max = 15, BaseCost = 900, Growth = 1.35, Info = "Eggs cost 2% less" },
+	{ Id = "StackGems", Name = "Stack Gems", Icon = "💠", Max = 10, BaseCost = 700, Growth = 1.4, Info = "Coin stacks can carry 💎" },
 }
 
 Config.UPGRADES_BY_ID = {}
@@ -435,6 +443,25 @@ end
 function Config.critChance(data): number
 	return Config.CRIT_CHANCE + 0.01 * areaLevel(data, "CritChance")
 end
+function Config.critMult(data): number
+	return Config.CRIT_MULT + 0.2 * areaLevel(data, "CritDamage")
+end
+function Config.hitInterval(data): number
+	return Config.PET_HIT_INTERVAL * (1 - 0.03 * areaLevel(data, "HitSpeed"))
+end
+function Config.orbChance(data, kind: number): number
+	return (Config.ORB_CHANCE[kind] or 0) * (1 + 0.1 * areaLevel(data, "OrbLuck"))
+end
+function Config.orbSeconds(data): number
+	return Config.ORB_SECONDS + 5 * areaLevel(data, "OrbTime")
+end
+function Config.comboSeconds(data): number
+	return Config.COMBO_BOOST_SECONDS + 5 * areaLevel(data, "ComboTime")
+end
+-- What an egg costs this player (Egg Discount upgrade).
+function Config.eggPrice(data, eggIndex: number): number
+	return math.floor(Config.eggCost(eggIndex) * (1 - 0.02 * areaLevel(data, "EggDiscount")))
+end
 -- Value multiplier for a kind of breakable (1-2 coins, 3-4 chests).
 function Config.breakableValueMult(data, kind: number): number
 	if kind >= 3 then
@@ -445,18 +472,24 @@ end
 -- Spawn weights with Chest Luck applied.
 function Config.breakableWeights(data)
 	local luck = 1 + 0.1 * areaLevel(data, "ChestLuck")
+	local bigLuck = 1 + 0.15 * areaLevel(data, "BigChestLuck")
 	local list = {}
 	for kind, b in ipairs(Config.BREAKABLES) do
-		table.insert(list, { Chance = b.Chance * (if kind >= 3 then luck else 1) })
+		local weight = b.Chance * (if kind >= 3 then luck else 1) * (if kind == #Config.BREAKABLES then bigLuck else 1)
+		table.insert(list, { Chance = weight })
 	end
 	return list
 end
 function Config.diamondChance(data, kind: number): number
-	local b = Config.BREAKABLES[kind]
-	if b.Diamonds == 0 then
-		return 0
+	if kind == 1 then
+		return 0.01 * areaLevel(data, "StackGems") -- plain coin stacks
 	end
+	local b = Config.BREAKABLES[kind]
 	return math.min(1, b.DiamondChance + (if kind == 2 then 0.05 * areaLevel(data, "DiamondFinder") else 0))
+end
+-- How many diamonds a breakable carries when it has some.
+function Config.breakableDiamonds(kind: number): number
+	return math.max(1, Config.BREAKABLES[kind].Diamonds)
 end
 -- Coins a broken breakable pays: its base value x area upgrades x bonuses.
 function Config.breakablePayout(data, kind: number, baseValue: number): number

@@ -15,7 +15,7 @@ local player = Players.LocalPlayer
 
 local Shop = {}
 
-local panel = Ui.panel("Shop", "🛒", UDim2.fromOffset(640, 500))
+local panel = Ui.panel("Shop", nil, UDim2.fromOffset(640, 540), { Ui.COLORS.Gold })
 
 -- minimal text tabs, like the pets menu
 local tabBar = Instance.new("Frame")
@@ -55,15 +55,15 @@ for order, def in ipairs({ { "Upgrades", "💰 Upgrades" }, { "Diamonds", "💎 
 	button.BackgroundTransparency = 1
 	button.Text = def[2]
 	button.Font = Ui.FONT
-	button.TextSize = 19
-	button.TextColor3 = Color3.new(1, 1, 1)
+	button.TextSize = 17
+	button.TextColor3 = Ui.COLORS.Text
 	button.LayoutOrder = order
 	button.Parent = tabBar
 	local underline = Instance.new("Frame")
 	underline.AnchorPoint = Vector2.new(0.5, 1)
 	underline.Position = UDim2.fromScale(0.5, 1)
-	underline.Size = UDim2.new(1, 0, 0, 2)
-	underline.BackgroundColor3 = Color3.new(1, 1, 1)
+	underline.Size = UDim2.new(1, 0, 0, 3)
+	underline.BackgroundColor3 = Ui.COLORS.Accent
 	underline.BorderSizePixel = 0
 	underline.Parent = button
 	button.Activated:Connect(function()
@@ -77,8 +77,9 @@ local function header(order, text)
 	Ui.label(list, {
 		Text = text,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = Color3.fromRGB(235, 230, 255),
-		Size = UDim2.new(1, -12, 0, 24),
+		Font = Ui.FONT_BODY,
+		TextColor3 = Ui.COLORS.SubText,
+		Size = UDim2.new(1, -12, 0, 20),
 		LayoutOrder = order,
 	})
 end
@@ -92,7 +93,7 @@ local function row(order, item)
 	r.LayoutOrder = order
 	r.Parent = list
 	Ui.corner(r, 14)
-	Ui.stroke(r, Ui.COLORS.Outline, 2)
+	Ui.stroke(r, Ui.COLORS.Line, 1.5)
 
 	Ui.label(r, { Text = item.Icon, Size = UDim2.fromOffset(56, 56), Position = UDim2.fromOffset(10, 10) })
 	Ui.label(r, {
@@ -104,7 +105,8 @@ local function row(order, item)
 	Ui.label(r, {
 		Text = item.Info,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		TextColor3 = Color3.fromRGB(230, 225, 255),
+		Font = Ui.FONT_BODY,
+		TextColor3 = Ui.COLORS.SubText,
 		Size = UDim2.new(1, -230, 0, 22),
 		Position = UDim2.fromOffset(76, 42),
 	})
@@ -129,7 +131,7 @@ local function row(order, item)
 	local color = if item.Maxed
 		then Ui.COLORS.PanelDark
 		elseif item.CanAfford then item.BuyColor
-		else Color3.fromRGB(150, 140, 170)
+		else Ui.COLORS.Disabled
 	local buy = Ui.button(r, if item.Maxed then "MAX" else item.Price, color, {
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -12, 0.5, 0),

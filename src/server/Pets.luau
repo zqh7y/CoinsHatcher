@@ -195,10 +195,10 @@ local function update(dt)
 					local pos = goal + Vector3.new(0, hop, 0)
 					part.CFrame = CFrame.lookAt(pos, Vector3.new(center.X, pos.Y, center.Z))
 
-					if t >= pet.LastHit + Config.PET_HIT_INTERVAL then
+					if t >= pet.LastHit + Config.hitInterval(data) then
 						pet.LastHit = t
 						local crit = math.random() < Config.critChance(data)
-						local damage = math.floor(pet.Power * damageMult * (if crit then Config.CRIT_MULT else 1))
+						local damage = math.floor(pet.Power * damageMult * (if crit then Config.critMult(data) else 1))
 						if Coins.damage(player, target, damage, crit) then
 							pet.Target = nil
 						end

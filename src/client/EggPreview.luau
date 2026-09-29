@@ -34,33 +34,15 @@ board.Parent = player:WaitForChild("PlayerGui")
 
 local popup = Instance.new("Frame")
 popup.Size = UDim2.fromScale(1, 1)
-popup.BackgroundColor3 = Color3.new(1, 1, 1)
+popup.BackgroundColor3 = Ui.COLORS.Panel
 popup.Parent = board
-Ui.corner(popup, 26)
-local popupStroke = Ui.stroke(popup, Color3.new(1, 1, 1), 4)
+Ui.corner(popup, 24)
+-- the border takes the egg's color, with a slow shimmer
+local popupStroke = Ui.stroke(popup, Color3.new(1, 1, 1), 3)
 local popupGradient = Instance.new("UIGradient")
-popupGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 110, 255)),
-	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(110, 80, 210)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(230, 110, 200)),
-})
-popupGradient.Rotation = 35
-popupGradient.Parent = popup
+popupGradient.Parent = popupStroke
 local popupScale = Instance.new("UIScale")
 popupScale.Parent = popup
-
--- little sparkles in the corners
-local corners = {}
-for i, pos in ipairs({ UDim2.fromOffset(-6, -6), UDim2.new(1, 6, 0, -6), UDim2.new(0, -6, 1, 6), UDim2.new(1, 6, 1, 6) }) do
-	corners[i] = Ui.label(popup, {
-		Text = "✨",
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = pos,
-		Size = UDim2.fromOffset(34, 34),
-		TextStrokeTransparency = 1,
-		ZIndex = 5,
-	})
-end
 
 local title = Ui.label(popup, {
 	Size = UDim2.new(0.62, 0, 0, 38),
@@ -73,7 +55,6 @@ local function chip(parent, color, props)
 	c.BackgroundTransparency = 0
 	c.BackgroundColor3 = color
 	Ui.corner(c, 0.5)
-	Ui.stroke(c, Color3.new(1, 1, 1), 2)
 	local pad = Instance.new("UIPadding")
 	pad.PaddingTop = UDim.new(0, 4)
 	pad.PaddingBottom = UDim.new(0, 4)
@@ -81,7 +62,8 @@ local function chip(parent, color, props)
 	return c
 end
 
-local priceChip = chip(popup, Color3.fromRGB(255, 180, 40), {
+local priceChip = chip(popup, Ui.COLORS.Gold, {
+	TextColor3 = Ui.COLORS.White,
 	AnchorPoint = Vector2.new(1, 0),
 	Position = UDim2.new(1, -16, 0, 12),
 	Size = UDim2.fromOffset(200, 34),
@@ -112,7 +94,8 @@ mutationLayout.Padding = UDim.new(0, 10)
 mutationLayout.Parent = mutationRow
 local mutationChips = {}
 for i, mutation in ipairs(Config.MUTATIONS) do
-	mutationChips[i] = chip(mutationRow, mutation.Color:Lerp(Color3.fromRGB(60, 30, 120), 0.45), {
+	mutationChips[i] = chip(mutationRow, mutation.Color:Lerp(Color3.new(1, 1, 1), 0.7), {
+		Font = Ui.FONT_BODY,
 		Size = UDim2.fromOffset(170, 30),
 		LayoutOrder = i,
 	})
@@ -162,7 +145,7 @@ local function canHatch(count)
 		Ui.toast("🎒 Your pet inventory is full! Delete some pets.", Ui.COLORS.Red)
 		return false
 	end
-	local cost = Config.eggCost(shownEgg) * count
+	local cost = Config.eggPrice(data, shownEgg) * count
 	if (player:GetAttribute("Coins") or 0) < cost then
 		Ui.toast("💰 You need " .. Config.formatNumber(cost) .. " coins!", Ui.COLORS.Red)
 		return false
@@ -218,10 +201,10 @@ local function show(eggIndex)
 		priceChip.Text = "🔒 Rebirth " .. required
 		priceChip.BackgroundColor3 = Ui.COLORS.Red
 	else
-		priceChip.Text = "💰 " .. Config.formatNumber(Config.eggCost(eggIndex))
+		priceChip.Text = "💰 " .. Config.formatNumber(Config.eggPrice(data, eggIndex))
 		priceChip.BackgroundColor3 = Color3.fromRGB(255, 180, 40)
 	end
-	popupStroke.Color = egg.Color:Lerp(Color3.new(1, 1, 1), 0.5)
+	popupGradient.Color = ColorSequence.new(egg.Color, Ui.COLORS.Accent2)
 
 	for i, entry in ipairs(Config.mutationChances(data)) do
 		mutationChips[i].Text = ("%s %s  %s"):format(entry.Mutation.Icon, entry.Mutation.Name, Ui.percent(entry.Chance))
@@ -279,16 +262,13 @@ task.spawn(function()
 	end
 end)
 
--- slowly shimmer the popup and spin the corner sparkles
+-- the border shimmer slowly spins around
 RunService.RenderStepped:Connect(function()
 	if not board.Enabled then
 		return
 	end
 	local t = os.clock()
-	popupGradient.Rotation = 35 + math.sin(t * 0.8) * 20
-	for i, sparkle in ipairs(corners) do
-		sparkle.Rotation = (t * 60 + i * 90) % 360
-	end
+	popupGradient.Rotation = (t * 40) % 360
 end)
 
 -- luck or rebirths changed: refresh the chances

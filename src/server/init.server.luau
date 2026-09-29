@@ -41,6 +41,7 @@ remote("RemoteFunction", "BuyUpgrade") -- client -> server: upgrade id, returns 
 remote("RemoteEvent", "ToggleHoverboard") -- client -> server
 remote("RemoteFunction", "BuyPerk") -- client -> server: perk id (costs diamonds)
 remote("RemoteFunction", "BuyBoost") -- client -> server: potion id (costs diamonds)
+local ChooseStarter = remote("RemoteFunction", "ChooseStarter") -- client -> server: "Dog" | "Cat"
 
 remotes.Parent = ReplicatedStorage
 
@@ -59,6 +60,13 @@ Pickups.start(remotes)
 PlayerData.Changed.Event:Connect(function(player)
 	DataChanged:FireClient(player, PlayerData.get(player))
 end)
+
+ChooseStarter.OnServerInvoke = function(player, petName)
+	if typeof(petName) ~= "string" then
+		return false
+	end
+	return PlayerData.giveStarter(player, petName)
+end
 
 GetData.OnServerInvoke = function(player)
 	return PlayerData.waitFor(player)

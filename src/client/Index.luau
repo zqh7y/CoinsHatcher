@@ -9,7 +9,7 @@ local Cards = require(script.Parent.Cards)
 
 local Index = {}
 
-local panel = Ui.panel("Index", "📖", UDim2.fromOffset(700, 480))
+local panel = Ui.panel("Index", nil, UDim2.fromOffset(700, 520), { Color3.fromRGB(255, 100, 150) })
 
 local list = Instance.new("ScrollingFrame")
 list.Size = UDim2.fromScale(1, 1)
@@ -75,7 +75,7 @@ local function render()
 		end
 	end
 
-	panel.Title.Text = ("📖 Index  ·  Found %d/%d"):format(found, total)
+	panel.Title.Text = ("Index  ·  %d/%d found"):format(found, total)
 end
 
 panel.OnOpen.Event:Connect(render)

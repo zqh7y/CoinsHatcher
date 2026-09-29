@@ -239,7 +239,7 @@ local function spawnCoin(player)
 	-- some breakables carry diamonds: a glowing gem floats above them
 	local breakable = Config.BREAKABLES[kind]
 	if math.random() < Config.diamondChance(data, kind) then
-		model:SetAttribute("Diamonds", breakable.Diamonds)
+		model:SetAttribute("Diamonds", Config.breakableDiamonds(kind))
 		local gem = piece(
 			model,
 			origin,
