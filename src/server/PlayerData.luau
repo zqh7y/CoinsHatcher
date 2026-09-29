@@ -17,6 +17,8 @@ local DEFAULT = {
 	Rebirths = 0,
 	Pets = {}, -- list of pet names the player owns
 	Equipped = {}, -- indexes into Pets for the pets following them
+	Upgrades = {}, -- [upgrade id] = level, bought in the shop
+	Index = {}, -- [pet name] = true for every pet ever hatched
 }
 
 local sessionData = {} -- [player] = data table while they're in game
@@ -42,16 +44,23 @@ local function load(player)
 	local data = table.clone(DEFAULT)
 	data.Pets = {}
 	data.Equipped = {}
+	data.Upgrades = {}
+	data.Index = {}
 	if ok and saved then
 		for k, v in pairs(saved) do
 			data[k] = v
 		end
+	end
+	-- older saves: fill in the index from the pets they already own
+	for _, petName in ipairs(data.Pets) do
+		data.Index[petName] = true
 	end
 
 	-- new players get a starter pet so they can break coins
 	if #data.Pets == 0 then
 		table.insert(data.Pets, Config.STARTER_PET)
 		table.insert(data.Equipped, 1)
+		data.Index[Config.STARTER_PET] = true
 	end
 
 	-- leaderstats shows Coins/Rebirths on the player list
@@ -112,7 +121,7 @@ function PlayerData.addCoins(player, amount)
 	setStat(player, "Coins", data.Coins)
 end
 
--- Rebirth resets everything except pets.
+-- Rebirth resets everything except pets (and the index of pets found).
 function PlayerData.rebirth(player)
 	local data = sessionData[player]
 	if not data then
@@ -120,6 +129,11 @@ function PlayerData.rebirth(player)
 	end
 	data.Coins = 0
 	data.Rebirths += 1
+	data.Upgrades = {}
+	-- extra pet slots were reset, so unequip pets that no longer fit
+	while #data.Equipped > Config.maxEquipped(data.Upgrades) do
+		table.remove(data.Equipped)
+	end
 	setStat(player, "Coins", data.Coins)
 	setStat(player, "Rebirths", data.Rebirths)
 	PlayerData.Changed:Fire(player)
@@ -131,8 +145,18 @@ function PlayerData.addPet(player, petName)
 		return
 	end
 	table.insert(data.Pets, petName)
+	data.Index[petName] = true
 	PlayerData.Changed:Fire(player)
 	return #data.Pets
+end
+
+function PlayerData.setUpgrade(player, id, level)
+	local data = sessionData[player]
+	if not data then
+		return
+	end
+	data.Upgrades[id] = level
+	PlayerData.Changed:Fire(player)
 end
 
 function PlayerData.setEquipped(player, equipped)

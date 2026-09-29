@@ -16,20 +16,28 @@ rojo serve
 
 For more help, check out [the Rojo documentation](https://rojo.space/docs).
 ## The game
-- **Main area**: your pets run to coins and break them. Stronger pets break coins faster.
-  Every rebirth makes the area's coins tougher and worth more (and changes its color).
-- **Egg area**: hatch pets with coins. Each rebirth unlocks a new egg with stronger pets.
-- **Rebirth**: resets everything except your pets. Max 3 rebirths for now.
-- Use the buttons on the left of the screen to teleport, rebirth and manage pets.
+- **Main area** (round): your pets run to coin stacks and chests in the round
+  coin zone and break them. Stronger pets hit harder. Every rebirth makes the
+  area's breakables tougher and worth more (and changes its color).
+- **Shop** (stall in the main area): upgrade pet damage, luck, walk speed,
+  pet speed, coin bonus, pet slots, and buy a hoverboard.
+- **Egg area**: walk up to an egg to see what's inside, press E to hatch.
+  Each rebirth unlocks a new egg. Every egg has a super rare **Huge** pet.
+- **Index**: collection book of every pet; unfound ones are silhouettes.
+- **Rebirth**: resets everything except your pets (and index). Max 3 for now.
 
-All numbers (costs, coin health, pet power, rarity chances, eggs) are in `src/shared/Config.luau`.
+All numbers (costs, coin health, pet power, chances, upgrades, pet looks)
+are in `src/shared/Config.luau`.
 
 ## Code layout
 - `src/shared/Config.luau`: game numbers and formulas
-- `src/server/PlayerData.luau`: saving/loading, coins, rebirths, pets
-- `src/server/World.luau`: builds the main area and egg area
-- `src/server/Coins.luau`: each player's coins in the main area
-- `src/server/Pets.luau`: pets following you and breaking coins
+- `src/shared/PetModel.luau`: builds pet models (used by server and UI previews)
+- `src/server/PlayerData.luau`: saving/loading, coins, rebirths, pets, upgrades, index
+- `src/server/World.luau` / `Decor.luau`: map helpers and decorations
+- `src/server/Coins.luau`: each player's breakables in the coin zone
+- `src/server/Pets.luau`: pets following you and breaking things
 - `src/server/Eggs.luau`: egg stands and hatching
+- `src/server/Shop.luau`: shop stall, upgrades, walk speed, hoverboard
 - `src/server/init.server.luau`: starts everything, handles teleport/rebirth/equip
-- `src/client/init.client.luau`: screen buttons, pet inventory, hatch popup
+- `src/client/`: UI (buttons, pets, shop, index, rebirth, egg popup,
+  hatch animation) and breakable effects

@@ -11,6 +11,8 @@ local Eggs = {}
 local SPACING = 22
 
 local remotes
+local lastHatch = {} -- [player] = time, so hatches can't be spammed during the animation
+local HATCH_COOLDOWN = 1.5
 
 local function notify(player, message, color)
 	remotes.Notify:FireClient(player, message, color)
@@ -19,6 +21,10 @@ end
 local function hatch(player, eggIndex)
 	local data = PlayerData.get(player)
 	if not data then
+		return
+	end
+	local now = os.clock()
+	if lastHatch[player] and now - lastHatch[player] < HATCH_COOLDOWN then
 		return
 	end
 
@@ -37,14 +43,14 @@ local function hatch(player, eggIndex)
 		return
 	end
 
+	lastHatch[player] = now
 	PlayerData.addCoins(player, -cost)
 
-	local rarityIndex = Config.rollRarity()
-	local petName = Config.EGGS[eggIndex].Pets[rarityIndex]
+	local petName = Config.rollHatch(eggIndex, data.Upgrades)
 	local index = PlayerData.addPet(player, petName)
 
 	-- auto-equip if there's a free slot
-	if index and #data.Equipped < Config.MAX_EQUIPPED then
+	if index and #data.Equipped < Config.maxEquipped(data.Upgrades) then
 		local equipped = table.clone(data.Equipped)
 		table.insert(equipped, index)
 		PlayerData.setEquipped(player, equipped)
@@ -108,7 +114,7 @@ local function setupEgg(eggIndex, parent)
 
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "Sign"
-	sign.Size = UDim2.fromOffset(220, 110)
+	sign.Size = UDim2.fromOffset(220, 90)
 	sign.StudsOffset = Vector3.new(0, 6, 0)
 	sign.MaxDistance = 100
 	sign.Parent = shell
@@ -135,12 +141,6 @@ local function setupEgg(eggIndex, parent)
 	-- the client shows/hides this depending on the player's rebirths
 	line("Lock", "🔒 Rebirth " .. Config.eggRequiredRebirths(eggIndex), Color3.fromRGB(255, 90, 90), 26)
 
-	-- show what's inside + chances
-	local chances = {}
-	for rarityIndex, petName in ipairs(egg.Pets) do
-		table.insert(chances, petName .. " " .. Config.RARITIES[rarityIndex].Chance .. "%")
-	end
-	line("Pets", table.concat(chances, " · "), Color3.fromRGB(220, 220, 220), 18)
 
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Hatch"
@@ -167,6 +167,10 @@ function Eggs.start(remoteFolder)
 	for eggIndex = 1, Config.EGG_COUNT do
 		setupEgg(eggIndex, eggsFolder)
 	end
+
+	game:GetService("Players").PlayerRemoving:Connect(function(player)
+		lastHatch[player] = nil
+	end)
 end
 
 return Eggs

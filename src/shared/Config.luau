@@ -130,12 +130,19 @@ function Config.eggRequiredRebirths(eggIndex: number): number
 	return eggIndex - 1
 end
 
--- Pet power = damage per second to coins. Stronger pets break coins faster.
+-- Pet power = damage per hit. Stronger pets break coins faster.
 function Config.petPower(eggIndex: number, rarityIndex: number): number
 	return 5 * Config.SCALE ^ (eggIndex - 1) * Config.RARITIES[rarityIndex].Power
 end
 
--- Lookup table built from the eggs: Config.PETS["Dog"] = { Egg, Rarity, Power, Color }
+-- Huge pets: every egg has a super rare giant version of its legendary pet.
+Config.HUGE_CHANCE = 0.5 -- percent per hatch, before luck
+Config.HUGE_POWER = 5 -- times the legendary's power
+Config.HUGE_SCALE = 2 -- times bigger
+Config.HUGE_COLOR = Color3.fromRGB(255, 90, 200)
+
+-- Lookup table built from the eggs:
+-- Config.PETS["Dog"] = { Egg, Rarity, Power, Color, BodyColor, Look, Scale }
 Config.PETS = {}
 for eggIndex, egg in ipairs(Config.EGGS) do
 	for rarityIndex, petName in ipairs(egg.Pets) do
@@ -146,8 +153,22 @@ for eggIndex, egg in ipairs(Config.EGGS) do
 			Power = Config.petPower(eggIndex, rarityIndex),
 			Color = rarity.Color,
 			BodyColor = Config.PET_COLORS[petName] or rarity.Color,
+			Look = Config.PET_LOOKS[petName] or {},
+			Scale = 1,
 		}
 	end
+
+	local base = egg.Pets[#egg.Pets]
+	egg.Huge = "Huge " .. base
+	Config.PETS[egg.Huge] = {
+		Egg = eggIndex,
+		Rarity = "Huge",
+		Power = Config.PETS[base].Power * Config.HUGE_POWER,
+		Color = Config.HUGE_COLOR,
+		BodyColor = Config.PETS[base].BodyColor,
+		Look = Config.PETS[base].Look,
+		Scale = Config.HUGE_SCALE,
+	}
 end
 
 -- Picks a random index from a list of { Chance = weight } entries.
@@ -166,9 +187,78 @@ function Config.rollWeighted(list): number
 	return 1
 end
 
-function Config.rollRarity(): number
-	return Config.rollWeighted(Config.RARITIES)
+-- The chance (in %) of each pet in an egg, including luck from upgrades.
+-- Returns a list of { Pet, Chance } with the huge pet last.
+function Config.eggChances(eggIndex: number, upgrades)
+	local luck = Config.luckMult(upgrades)
+	local egg = Config.EGGS[eggIndex]
+	local hugeChance = Config.HUGE_CHANCE * luck
+
+	-- luck makes Rare and better pets more likely
+	local weights, total = {}, 0
+	for i, rarity in ipairs(Config.RARITIES) do
+		weights[i] = rarity.Chance * (if i >= 3 then luck else 1)
+		total += weights[i]
+	end
+
+	local list = {}
+	for i, petName in ipairs(egg.Pets) do
+		table.insert(list, { Pet = petName, Chance = weights[i] / total * (100 - hugeChance) })
+	end
+	table.insert(list, { Pet = egg.Huge, Chance = hugeChance })
+	return list
 end
+
+function Config.rollHatch(eggIndex: number, upgrades): string
+	local list = Config.eggChances(eggIndex, upgrades)
+	return list[Config.rollWeighted(list)].Pet
+end
+
+-- Shop upgrades ----------------------------------------------------------------
+-- Upgrades reset on rebirth (rebirth resets everything except pets).
+-- Cost = BaseCost * Growth^level, times SCALE^rebirths like everything else.
+Config.UPGRADES = {
+	{ Id = "Damage", Name = "Pet Damage", Icon = "⚔️", Max = 10, BaseCost = 40, Growth = 1.6, Info = "+20% pet damage" },
+	{ Id = "Luck", Name = "Luck", Icon = "🍀", Max = 10, BaseCost = 60, Growth = 1.6, Info = "+15% rare & huge chance" },
+	{ Id = "WalkSpeed", Name = "Walk Speed", Icon = "👟", Max = 8, BaseCost = 30, Growth = 1.5, Info = "+2 walk speed" },
+	{ Id = "PetSpeed", Name = "Pet Speed", Icon = "💨", Max = 5, BaseCost = 50, Growth = 1.7, Info = "+15% pet run speed" },
+	{ Id = "CoinBonus", Name = "Coin Bonus", Icon = "💰", Max = 10, BaseCost = 80, Growth = 1.6, Info = "+10% coins" },
+	{ Id = "Slots", Name = "Pet Slots", Icon = "🐾", Max = 3, BaseCost = 300, Growth = 3, Info = "+1 pet you can equip" },
+	{ Id = "Hoverboard", Name = "Hoverboard", Icon = "🛹", Max = 1, BaseCost = 500, Growth = 1, Info = "Ride a super fast hoverboard!" },
+}
+
+Config.UPGRADES_BY_ID = {}
+for _, upgrade in ipairs(Config.UPGRADES) do
+	Config.UPGRADES_BY_ID[upgrade.Id] = upgrade
+end
+
+function Config.upgradeCost(upgrade, level: number, rebirths: number): number
+	return math.floor(upgrade.BaseCost * upgrade.Growth ^ level * Config.SCALE ^ rebirths)
+end
+
+local function level(upgrades, id)
+	return if upgrades then upgrades[id] or 0 else 0
+end
+
+function Config.damageMult(upgrades): number
+	return 1 + 0.2 * level(upgrades, "Damage")
+end
+function Config.luckMult(upgrades): number
+	return 1 + 0.15 * level(upgrades, "Luck")
+end
+function Config.walkSpeed(upgrades): number
+	return 16 + 2 * level(upgrades, "WalkSpeed")
+end
+function Config.petSpeedMult(upgrades): number
+	return 1 + 0.15 * level(upgrades, "PetSpeed")
+end
+function Config.coinMult(upgrades): number
+	return 1 + 0.1 * level(upgrades, "CoinBonus")
+end
+function Config.maxEquipped(upgrades): number
+	return Config.MAX_EQUIPPED + level(upgrades, "Slots")
+end
+Config.HOVERBOARD_SPEED = 14 -- extra walk speed while riding
 
 -- 12345 -> "12,345"
 function Config.formatNumber(n: number): string

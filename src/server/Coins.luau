@@ -266,7 +266,8 @@ function Coins.damage(player, model, amount)
 		return false
 	end
 
-	PlayerData.addCoins(player, model:GetAttribute("Value"))
+	local data = PlayerData.get(player)
+	PlayerData.addCoins(player, model:GetAttribute("Value") * Config.coinMult(data and data.Upgrades))
 	model:Destroy()
 	task.delay(Config.COIN_RESPAWN_TIME, spawnCoin, player)
 	return true

@@ -9,6 +9,7 @@ local Decor = require(script.Decor)
 local Coins = require(script.Coins)
 local Pets = require(script.Pets)
 local Eggs = require(script.Eggs)
+local Shop = require(script.Shop)
 
 -- Remotes the client talks to
 local remotes = Instance.new("Folder")
@@ -28,6 +29,8 @@ local GetData = remote("RemoteFunction", "GetData") -- client -> server, returns
 local DataChanged = remote("RemoteEvent", "DataChanged") -- server -> client: data
 remote("RemoteEvent", "Notify") -- server -> client: message, color
 remote("RemoteEvent", "Hatched") -- server -> client: petName
+remote("RemoteFunction", "BuyUpgrade") -- client -> server: upgrade id, returns ok, message
+remote("RemoteEvent", "ToggleHoverboard") -- client -> server
 
 remotes.Parent = ReplicatedStorage
 
@@ -37,6 +40,7 @@ PlayerData.start()
 Coins.start()
 Pets.start()
 Eggs.start(remotes)
+Shop.start(remotes)
 
 -- Keep the client's copy of the data (pets, equipped, rebirths) up to date
 PlayerData.Changed.Event:Connect(function(player)
@@ -98,8 +102,9 @@ SetEquipped.OnServerInvoke = function(player, petIndex, equip)
 	local equipped = table.clone(data.Equipped)
 	local pos = table.find(equipped, petIndex)
 	if equip and not pos then
-		if #equipped >= Config.MAX_EQUIPPED then
-			return false, "You can only equip " .. Config.MAX_EQUIPPED .. " pets!"
+		local max = Config.maxEquipped(data.Upgrades)
+		if #equipped >= max then
+			return false, "You can only equip " .. max .. " pets! Buy more slots in the shop."
 		end
 		table.insert(equipped, petIndex)
 	elseif not equip and pos then
