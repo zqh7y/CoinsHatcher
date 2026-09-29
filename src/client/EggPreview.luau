@@ -33,6 +33,7 @@ board.Name = "EggPopup"
 board.Size = UDim2.fromOffset(WIDTH, 300)
 board.SizeOffset = Vector2.new(0, 0.5) -- bottom edge sits at the anchor point
 board.AlwaysOnTop = true
+board.Active = true -- without this, clicks on its buttons are ignored
 board.LightInfluence = 0
 board.ResetOnSpawn = false
 board.Enabled = false

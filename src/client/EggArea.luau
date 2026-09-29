@@ -179,7 +179,7 @@ RunService.RenderStepped:Connect(function()
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if not root or not humanoid or #eggs == 0 or (root.Position - eggs[1].Base.Position).Magnitude > 260 then
+	if not root or not humanoid or #eggs == 0 or (root.Position - eggs[1].Base.Position).Magnitude > 400 then
 		return
 	end
 	local t = os.clock()

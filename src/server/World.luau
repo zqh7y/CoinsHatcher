@@ -8,10 +8,19 @@ World.COIN_ZONE = 50 -- coins spawn in this circle in the middle (diameter)
 World.MAIN_SPAWN = Vector3.new(0, 0, 38) -- spawn pad, between the coins and the wall
 World.EGG_CENTER = Vector3.new(0, 0, 1000)
 World.LEADERBOARD_ANGLES = { 300, 315, 330 } -- degrees around the main area
--- The hatchery is a long 30 x 200 strip: you arrive at the +Z end and walk
--- toward -Z with the eggs on your right (+X).
-World.EGG_HALF_X = 15
-World.EGG_HALF_Z = 100
+-- The hatchery is a long hall: you arrive at the gate (+Z end) and walk toward
+-- -Z. A walkway with the speed lane runs down the left half, the eggs stand
+-- on round platforms along the right side (+X), and the Release egg waits at
+-- the far end.
+World.EGG_HALF_X = 22
+World.EGG_HALF_Z = 155
+World.HALL = {
+	WalkX = -6, -- the walkway / speed lane / gate line
+	EggX = 10, -- where the eggs stand
+	FirstEggZ = 118, -- egg 1 (relative to EGG_CENTER)
+	EggSpacing = 24,
+	ReleaseZ = -143,
+}
 World.FLOOR_Y = 1 -- top of both floors
 
 local function part(props)
@@ -121,7 +130,7 @@ function World.build()
 			Name = "Floor",
 			Size = Vector3.new(World.EGG_HALF_X * 2 + 2, 1, World.EGG_HALF_Z * 2 + 2),
 			Position = World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y - 0.5, 0),
-			Color = Color3.fromRGB(235, 225, 250),
+			Color = Color3.fromRGB(237, 230, 249),
 			Material = Enum.Material.SmoothPlastic,
 			Parent = eggs,
 		})
@@ -134,7 +143,7 @@ end
 -- Where a player lands when they teleport to an area.
 function World.spawnCFrame(area: string): CFrame
 	local center = if area == "Eggs"
-		then World.EGG_CENTER + Vector3.new(-3, 0, World.EGG_HALF_Z - 12) -- in front of the gate, facing the eggs
+		then World.EGG_CENTER + Vector3.new(World.HALL.WalkX, 0, World.EGG_HALF_Z - 17) -- in front of the gate, facing the eggs
 		else World.MAIN_CENTER + World.MAIN_SPAWN
 	return CFrame.new(center + Vector3.new(0, World.FLOOR_Y + 3, 0))
 end

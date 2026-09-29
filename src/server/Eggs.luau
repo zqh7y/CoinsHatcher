@@ -11,20 +11,14 @@ local Shrines = require(script.Parent.Shrines)
 
 local Eggs = {}
 
--- The hatchery is a long strip: the eggs stand along its right side (+X),
--- one every 15 studs from the gate end, and the Release egg sits across the
--- far end.
-local EGG_X = 7.5
-local FIRST_Z = World.EGG_HALF_Z - 25
-local SPACING = 15
-
--- Floor position of egg N, and the direction its shrine faces away from the
--- walkway.
+-- The eggs stand along the hall's right side, one every EggSpacing studs
+-- from the gate end; the Release egg sits across the far end (see World.HALL).
 function Eggs.position(eggIndex)
+	local hall = World.HALL
 	if Config.EGGS[eggIndex].Release then
-		return World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, -World.EGG_HALF_Z + 12)
+		return World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, hall.ReleaseZ)
 	end
-	return World.EGG_CENTER + Vector3.new(EGG_X, World.FLOOR_Y, FIRST_Z - (eggIndex - 1) * SPACING)
+	return World.EGG_CENTER + Vector3.new(hall.EggX, World.FLOOR_Y, hall.FirstEggZ - (eggIndex - 1) * hall.EggSpacing)
 end
 
 function Eggs.outward(eggIndex)
@@ -142,8 +136,7 @@ local function hatch(player, eggIndex, count)
 end
 
 -- Builds an egg stand: a tiered pedestal with a gold rim and a glowing ring,
--- little gem posts, the decorated egg floating on top, a soft light beam and
--- sparkles. Parts named Glow / Top / Egg are used by the client.
+-- the decorated egg floating on top, a soft light beam and sparkles. Parts named Glow / Top / Egg are used by the client.
 local function createEggModel(eggIndex, parent)
 	local egg = Config.EGGS[eggIndex]
 	local base = Eggs.position(eggIndex)
@@ -172,28 +165,6 @@ local function createEggModel(eggIndex, parent)
 	cylinder("Middle", 0.8, 7.4 * w, 1.6, Color3.fromRGB(255, 250, 245))
 	cylinder("Top", 0.5, 6 * w, 2.25, soft)
 	cylinder("TopRim", 0.15, 6.2 * w, 2.55, gold)
-
-	-- four little gem posts around the pedestal
-	for k = 0, 3 do
-		local a = k * math.pi / 2 + math.pi / 4
-		local pos = base + Vector3.new(math.cos(a) * 4.1 * w, 0, math.sin(a) * 4.1 * w)
-		World.part({
-			Name = "GemPost",
-			Size = Vector3.new(0.6, 2.4, 0.6),
-			Position = pos + Vector3.new(0, 1.2, 0),
-			Color = Color3.fromRGB(255, 250, 240),
-			Parent = model,
-		})
-		World.part({
-			Name = "Gem",
-			Size = Vector3.one * 0.8,
-			CFrame = CFrame.new(pos + Vector3.new(0, 2.8, 0)) * CFrame.Angles(math.rad(45), 0, math.rad(45)),
-			Color = egg.Color,
-			Material = Enum.Material.Neon,
-			CastShadow = false,
-			Parent = model,
-		})
-	end
 
 	local eggSize = if big then 7.5 else 6
 	local shell = World.part({

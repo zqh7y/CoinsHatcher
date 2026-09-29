@@ -38,14 +38,16 @@ For more help, check out [the Rojo documentation](https://rojo.space/docs).
 - **Juice**: breakables pop in, flash on hit and burst into coins; coins and
   diamonds fly into rolling counters; confetti for purchases, new pets,
   gifts and rare hatches; a big celebration on rebirth.
-- **Hatchery** (a long 30 x 200 hall): you arrive at the gate and walk down
-  the hall. A glowing **speed lane** runs down the middle (you run much
-  faster on it). The eggs stand along the right side, one every 15 studs,
-  each on a detailed stand with its own themed **shrine** (meadow, forest,
-  ocean, lava, candy, snow, jungle, desert, space, magic, mythic). Eggs you
-  haven't unlocked are plain black eggs with just "Rebirth N" over them.
-  The **Release Egg** (party pets, open for everyone) waits at the far end
-  under a party arch.
+- **Hatchery** (a long 44 x 310 hall): you arrive at the gate, which lines
+  up with a light walkway down the left half. A glowing **speed lane** runs
+  down the walkway (you run much faster on it). On the left, a tidy garden
+  strip has a planter across from every egg and a lamp between them. The
+  eggs stand along the right side, 24 studs apart, each on a round platform
+  in its theme's color with a matching prop mirrored on both sides behind
+  it (meadow, forest, ocean, lava, candy, snow, jungle, desert, space,
+  magic, mythic). Eggs you haven't unlocked are plain black eggs with just
+  "Rebirth N" over them. The **Release Egg** (party pets, open for
+  everyone) waits at the far end under a party arch.
 - **Hatching**: walk up to an egg for a small popup on top of it: its pets in
   a 3-wide grid with the chance under each ("1 in 4", tiny ones as
   "0.00004%") and three buttons with the price: **E** buy 1, **F** buy 3,

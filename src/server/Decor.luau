@@ -2,7 +2,9 @@
 -- feels like it keeps going), lollipop trees, flowers, fence posts and clouds.
 -- Uses a fixed seed so the map looks the same every time.
 local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Config = require(ReplicatedStorage.Shared.Config)
 local World = require(script.Parent.World)
 
 local Decor = {}
@@ -14,7 +16,14 @@ local folder
 -- The main area is round; the egg area is a rectangle.
 local AREAS = {
 	{ Center = World.MAIN_CENTER, Radius = World.MAIN_RADIUS },
-	{ Center = World.EGG_CENTER, HalfX = World.EGG_HALF_X, HalfZ = World.EGG_HALF_Z },
+	{
+		Center = World.EGG_CENTER,
+		HalfX = World.EGG_HALF_X,
+		HalfZ = World.EGG_HALF_Z,
+		-- fence posts between the eggs
+		PostStep = World.HALL.EggSpacing,
+		PostStart = World.HALL.FirstEggZ + World.HALL.EggSpacing / 2,
+	},
 }
 
 local NEAR_HILL_COLORS = {
@@ -249,14 +258,18 @@ local function fencePosts(area)
 		return
 	end
 
-	local step = 12
-	for x = -area.HalfX, area.HalfX, step do
+	-- rectangle: posts at the corners and middle of the short walls, and
+	-- along the long walls every PostStep studs (lined up with the eggs)
+	for _, x in ipairs({ -area.HalfX, 0, area.HalfX }) do
 		post(x, -area.HalfZ)
 		post(x, area.HalfZ)
 	end
-	for z = -area.HalfZ + step, area.HalfZ - step, step do
+	local step = area.PostStep or 12
+	local z = area.PostStart or (area.HalfZ - step)
+	while z > -area.HalfZ + 2 do
 		post(-area.HalfX, z)
 		post(area.HalfX, z)
+		z -= step
 	end
 end
 
@@ -760,36 +773,53 @@ local function outside(area, index)
 end
 
 -- Hatchery decorations -------------------------------------------------------
+-- The hall is laid out in lanes along its length (see World.HALL):
+--   left wall | garden strip (planters + lamps) | walkway with the speed lane | egg platforms | right wall
+-- and everything repeats on the same rhythm as the eggs, so it stays tidy.
+
+local HALL = World.HALL
 
 -- a spot in the hatchery: x across (+X = the egg side), z along (+Z = gate end)
 local function hatcherySpot(x, z, y)
 	return World.EGG_CENTER + Vector3.new(x, y or World.FLOOR_Y, z)
 end
 
--- The speed lane down the middle: a glowing strip with arrows. Standing on it
--- makes you run much faster (the client checks the part named "SpeedLane").
-local LANE_X, LANE_WIDTH = -4, 6
-local LANE_FROM, LANE_TO = World.EGG_HALF_Z - 16, -World.EGG_HALF_Z + 28
+local GARDEN_X = -17.5 -- planters and lamps
+local WALK_LEFT, WALK_RIGHT = -13, 1 -- the walkway band
+local LANE_WIDTH = 6
+local LANE_FROM = World.EGG_HALF_Z - 20
+local LANE_TO = HALL.FirstEggZ - (Config.REBIRTH_EGGS - 1) * HALL.EggSpacing + 8
 
+-- z of every egg along the right side
+local function eggZs()
+	local list = {}
+	for i = 1, Config.REBIRTH_EGGS do
+		table.insert(list, HALL.FirstEggZ - (i - 1) * HALL.EggSpacing)
+	end
+	return list
+end
+
+-- The speed lane down the walkway: a glowing strip with arrows. Standing on
+-- it makes you run much faster (the client checks the part named
+-- "SpeedLane").
 local function speedLane()
 	local eggArea = workspace:WaitForChild("EggArea")
 	local length = LANE_FROM - LANE_TO
-	local center = hatcherySpot(LANE_X, (LANE_FROM + LANE_TO) / 2)
+	local center = hatcherySpot(HALL.WalkX, (LANE_FROM + LANE_TO) / 2)
 	part({
 		Name = "SpeedLane",
 		Size = Vector3.new(LANE_WIDTH, 0.2, length),
 		Position = center + Vector3.new(0, 0.1, 0),
-		Color = Color3.fromRGB(90, 200, 255),
+		Color = Color3.fromRGB(110, 205, 255),
 		CanCollide = false,
 		CastShadow = false,
 		Parent = eggArea,
 	})
-	-- white side rails
 	for _, side in ipairs({ -1, 1 }) do
 		part({
 			Name = "LaneRail",
-			Size = Vector3.new(0.5, 0.35, length),
-			Position = center + Vector3.new(side * (LANE_WIDTH / 2 + 0.25), 0.17, 0),
+			Size = Vector3.new(0.4, 0.3, length),
+			Position = center + Vector3.new(side * (LANE_WIDTH / 2 + 0.2), 0.15, 0),
 			Color = Color3.new(1, 1, 1),
 			CanCollide = false,
 		})
@@ -799,14 +829,14 @@ local function speedLane()
 	local arrows = Instance.new("Folder")
 	arrows.Name = "LaneArrows"
 	arrows.Parent = eggArea
-	local count = math.floor(length / 5)
+	local count = math.floor(length / 6)
 	for i = 0, count - 1 do
-		local z = LANE_FROM - 2.5 - i * 5
+		local z = LANE_FROM - 3 - i * 6
 		for _, side in ipairs({ -1, 1 }) do
 			local arrow = part({
 				Name = "Arrow",
-				Size = Vector3.new(2.6, 0.08, 0.6),
-				CFrame = CFrame.new(hatcherySpot(LANE_X + side * 0.9, z + 0.6, World.FLOOR_Y + 0.24)) * CFrame.Angles(0, -side * math.rad(35), 0),
+				Size = Vector3.new(2.4, 0.06, 0.5),
+				CFrame = CFrame.new(hatcherySpot(HALL.WalkX + side * 0.85, z + 0.55, World.FLOOR_Y + 0.23)) * CFrame.Angles(0, -side * math.rad(35), 0),
 				Color = Color3.new(1, 1, 1),
 				Material = Enum.Material.Neon,
 				CanCollide = false,
@@ -818,50 +848,68 @@ local function speedLane()
 	end
 end
 
+-- A neat round planter: a white pot with a gold band and a trimmed hedge ball.
+local function planter(pos)
+	part({ Name = "Pot", Shape = Enum.PartType.Cylinder, Size = Vector3.new(1.6, 3.2, 3.2), CFrame = CFrame.new(pos + Vector3.new(0, 0.8, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.new(1, 1, 1) })
+	part({ Name = "PotBand", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.3, 3.3, 3.3), CFrame = CFrame.new(pos + Vector3.new(0, 1.45, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(255, 205, 70) })
+	part({ Name = "Hedge", Shape = Enum.PartType.Ball, Size = Vector3.one * 3.4, Position = pos + Vector3.new(0, 3.1, 0), Color = Color3.fromRGB(105, 190, 100) })
+end
+
 local function hatchery()
-	-- candy gate at the entrance, with the portal home in it
-	local gateBase = hatcherySpot(0, World.EGG_HALF_Z - 6)
-	gate(gateBase, "🥚 HATCHERY 🥚", Color3.fromRGB(255, 120, 160), Color3.fromRGB(200, 170, 255))
-	gatePortal(gateBase, "Main", "🏠 Home", Color3.fromRGB(255, 130, 200), Color3.fromRGB(255, 220, 120))
+	local halfZ = World.EGG_HALF_Z
 
-	speedLane()
-
-	-- a party arch in front of the Release egg at the far end
-	gate(hatcherySpot(0, -World.EGG_HALF_Z + 18.5), "🎉 RELEASE 🎉", Color3.fromRGB(255, 200, 60), Color3.fromRGB(255, 110, 170))
-
-	-- round hedges and lamps along the left wall, flowers in between
-	for z = -World.EGG_HALF_Z + 6, World.EGG_HALF_Z - 12, 8 do
+	-- the walkway: a lighter band with soft edges, divided between eggs
+	part({
+		Name = "Walkway",
+		Size = Vector3.new(WALK_RIGHT - WALK_LEFT, 0.04, halfZ * 2 - 2),
+		Position = hatcherySpot((WALK_LEFT + WALK_RIGHT) / 2, 0, World.FLOOR_Y + 0.02),
+		Color = Color3.fromRGB(250, 248, 255),
+		CanCollide = false,
+		CastShadow = false,
+	})
+	for _, x in ipairs({ WALK_LEFT, WALK_RIGHT }) do
 		part({
-			Name = "Hedge",
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * 3.4,
-			Position = hatcherySpot(-12.6, z, World.FLOOR_Y + 1.4),
-			Color = Color3.fromRGB(100, 185, 95),
-			CanCollide = false,
-		})
-		flower(hatcherySpot(-11.2, z + 4))
-	end
-	for z = -World.EGG_HALF_Z + 30, World.EGG_HALF_Z - 20, 30 do
-		lamp(hatcherySpot(-10, z))
-	end
-
-	-- soft stripes across the floor of the walkway
-	for z = -World.EGG_HALF_Z + 4, World.EGG_HALF_Z - 4, 10 do
-		part({
-			Name = "FloorStripe",
-			Size = Vector3.new(14, 0.05, 5),
-			Position = hatcherySpot(-7, z, World.FLOOR_Y + 0.02),
-			Color = Color3.fromRGB(245, 238, 255),
+			Name = "WalkwayEdge",
+			Size = Vector3.new(0.35, 0.05, halfZ * 2 - 2),
+			Position = hatcherySpot(x, 0, World.FLOOR_Y + 0.025),
+			Color = Color3.fromRGB(215, 200, 245),
 			CanCollide = false,
 			CastShadow = false,
 		})
 	end
 
+	-- the gate at the entrance, lined up with the walkway, with the portal home
+	local gateBase = hatcherySpot(HALL.WalkX, halfZ - 8)
+	gate(gateBase, "🥚 HATCHERY 🥚", Color3.fromRGB(255, 120, 160), Color3.fromRGB(200, 170, 255))
+	gatePortal(gateBase, "Main", "🏠 Home", Color3.fromRGB(255, 130, 200), Color3.fromRGB(255, 220, 120))
+
+	speedLane()
+
+	-- the garden strip: a planter across from every egg, a lamp between them,
+	-- and a thin divider across the walkway between eggs
+	for _, z in ipairs(eggZs()) do
+		planter(hatcherySpot(GARDEN_X, z))
+		local between = z - HALL.EggSpacing / 2
+		lamp(hatcherySpot(GARDEN_X, between))
+		part({
+			Name = "WalkwayDivider",
+			Size = Vector3.new(WALK_RIGHT - WALK_LEFT, 0.05, 0.3),
+			Position = hatcherySpot((WALK_LEFT + WALK_RIGHT) / 2, between, World.FLOOR_Y + 0.03),
+			Color = Color3.fromRGB(215, 200, 245),
+			CanCollide = false,
+			CastShadow = false,
+		})
+	end
+	lamp(hatcherySpot(GARDEN_X, HALL.FirstEggZ + HALL.EggSpacing / 2))
+
+	-- a party arch in front of the Release egg at the far end
+	gate(hatcherySpot(0, HALL.ReleaseZ + 12), "🎉 RELEASE 🎉", Color3.fromRGB(255, 200, 60), Color3.fromRGB(255, 110, 170))
+
 	-- a few soft sparkles floating in the air
 	local air = part({
 		Name = "SparkleAir",
-		Size = Vector3.new(World.EGG_HALF_X * 2 - 2, 10, World.EGG_HALF_Z * 2 - 4),
-		Position = World.EGG_CENTER + Vector3.new(0, 9, 0),
+		Size = Vector3.new(World.EGG_HALF_X * 2 - 4, 8, halfZ * 2 - 10),
+		Position = World.EGG_CENTER + Vector3.new(0, 10, 0),
 		Transparency = 1,
 		CanCollide = false,
 		CanQuery = false,
@@ -871,21 +919,17 @@ local function hatchery()
 	local sparkles = Instance.new("ParticleEmitter")
 	sparkles.Shape = Enum.ParticleEmitterShape.Box
 	sparkles.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
-	sparkles.Rate = 8
+	sparkles.Rate = 6
 	sparkles.Lifetime = NumberRange.new(3, 5)
-	sparkles.Speed = NumberRange.new(0.5, 1.2)
+	sparkles.Speed = NumberRange.new(0.4, 1)
 	sparkles.SpreadAngle = Vector2.new(180, 180)
 	sparkles.LightEmission = 1
 	sparkles.Size = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0),
-		NumberSequenceKeypoint.new(0.3, 0.4),
+		NumberSequenceKeypoint.new(0.3, 0.35),
 		NumberSequenceKeypoint.new(1, 0),
 	})
-	sparkles.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 190, 230)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(210, 190, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 250, 220)),
-	})
+	sparkles.Color = ColorSequence.new(Color3.fromRGB(255, 200, 235), Color3.fromRGB(200, 230, 255))
 	sparkles.Parent = air
 end
 

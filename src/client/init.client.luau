@@ -343,7 +343,7 @@ end
 
 local function atEggs()
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	return root ~= nil and (root.Position - EGG_CENTER).Magnitude < 150
+	return root ~= nil and (root.Position - EGG_CENTER).Magnitude < 250
 end
 
 local EGG_COLOR = Color3.fromRGB(255, 160, 60)
