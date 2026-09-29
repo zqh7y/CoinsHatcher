@@ -52,13 +52,13 @@ local bestStat = stat(Color3.fromRGB(255, 185, 50), 3, 0.44)
 
 local TABS = {
 	{ "All", nil },
-	{ "✔ Equipped", "Equipped" },
+	{ "Equipped", "Equipped" },
 	{ "Common", "Common" },
 	{ "Uncommon", "Uncommon" },
 	{ "Rare", "Rare" },
 	{ "Legendary", "Legendary" },
-	{ "💎 Huge", "Huge" },
-	{ "✨ Mutated", "Mutated" },
+	{ "Huge", "Huge" },
+	{ "Mutated", "Mutated" },
 }
 
 local tabBar = Instance.new("ScrollingFrame")
@@ -73,7 +73,7 @@ tabBar.CanvasSize = UDim2.new()
 tabBar.Parent = panel.Content
 local tabLayout = Instance.new("UIListLayout")
 tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.Padding = UDim.new(0, 6)
+tabLayout.Padding = UDim.new(0, 14)
 tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 tabLayout.Parent = tabBar
@@ -126,16 +126,32 @@ local function setDeleting(on)
 	render()
 end
 
+-- minimal text tabs: the active one is bright with a thin underline
 for order, tab in ipairs(TABS) do
-	local button = Ui.button(tabBar, tab[1], Color3.fromRGB(120, 100, 200), {
-		Size = UDim2.fromOffset(if #tab[1] > 8 then 118 else 96, 38),
-		LayoutOrder = order,
-	})
+	local button = Instance.new("TextButton")
+	button.AutomaticSize = Enum.AutomaticSize.X
+	button.Size = UDim2.fromOffset(0, 30)
+	button.BackgroundTransparency = 1
+	button.Text = tab[1]
+	button.Font = Ui.FONT
+	button.TextSize = 17
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.LayoutOrder = order
+	button.Parent = tabBar
+
+	local underline = Instance.new("Frame")
+	underline.AnchorPoint = Vector2.new(0.5, 1)
+	underline.Position = UDim2.fromScale(0.5, 1)
+	underline.Size = UDim2.new(1, 0, 0, 2)
+	underline.BackgroundColor3 = Color3.new(1, 1, 1)
+	underline.BorderSizePixel = 0
+	underline.Parent = button
+
 	button.Activated:Connect(function()
 		filter = tab[2]
 		render()
 	end)
-	tabButtons[order] = { Button = button, Filter = tab[2] }
+	tabButtons[order] = { Button = button, Underline = underline, Filter = tab[2] }
 end
 
 local function matches(info, equipped)
@@ -157,7 +173,9 @@ render = function()
 	end
 
 	for _, tab in ipairs(tabButtons) do
-		tab.Button.BackgroundColor3 = if tab.Filter == filter then Color3.fromRGB(255, 150, 60) else Color3.fromRGB(120, 100, 200)
+		local active = tab.Filter == filter
+		tab.Button.TextTransparency = if active then 0 else 0.5
+		tab.Underline.Visible = active
 	end
 
 	-- stats
