@@ -1,6 +1,8 @@
 -- Decorations: rolling hills (with bigger hazy hills behind them so the world
 -- feels like it keeps going), lollipop trees, flowers, fence posts and clouds.
 -- Uses a fixed seed so the map looks the same every time.
+local CollectionService = game:GetService("CollectionService")
+
 local World = require(script.Parent.World)
 
 local Decor = {}
@@ -174,10 +176,37 @@ local function fencePosts(area)
 	end
 
 	if area.Radius then
-		-- one post between each of the 24 wall pieces
+		-- one post between each of the 24 wall pieces, with party bunting
+		-- (a rope with little diamond flags) strung between them
+		local posts = {}
 		for i = 0, 23 do
 			local angle = (i + 0.5) / 24 * math.pi * 2
-			post(math.cos(angle) * area.Radius, math.sin(angle) * area.Radius)
+			local x, z = math.cos(angle) * area.Radius, math.sin(angle) * area.Radius
+			post(x, z)
+			table.insert(posts, area.Center + Vector3.new(x, 7.4, z))
+		end
+		for i, from in ipairs(posts) do
+			local to = posts[i % #posts + 1]
+			local dir = (to - from).Unit
+			part({
+				Name = "Rope",
+				Size = Vector3.new(0.1, 0.1, (to - from).Magnitude),
+				CFrame = CFrame.lookAt((from + to) / 2, to),
+				Color = Color3.new(1, 1, 1),
+				CanCollide = false,
+				CastShadow = false,
+			})
+			for f = 1, 3 do
+				local pos = from:Lerp(to, f / 4) - Vector3.new(0, 0.55, 0)
+				part({
+					Name = "Flag",
+					Size = Vector3.new(0.1, 0.85, 0.85),
+					CFrame = CFrame.lookAt(pos, pos + dir) * CFrame.Angles(math.rad(45), 0, 0),
+					Color = CAP_COLORS[(i + f) % #CAP_COLORS + 1],
+					CanCollide = false,
+					CastShadow = false,
+				})
+			end
 		end
 		return
 	end
@@ -208,7 +237,7 @@ local function cloud(pos)
 	end
 end
 
--- Hatchery decorations -------------------------------------------------------
+-- Detail pieces ---------------------------------------------------------------
 
 local PASTELS = {
 	Color3.fromRGB(255, 190, 220),
@@ -217,12 +246,6 @@ local PASTELS = {
 	Color3.fromRGB(190, 240, 200),
 	Color3.fromRGB(255, 235, 160),
 }
-
--- a spot inside the hatchery; angle 90 is the gate side (+Z)
-local function hatcherySpot(angleDegrees, dist, y)
-	local a = math.rad(angleDegrees)
-	return World.EGG_CENTER + Vector3.new(math.cos(a) * dist, y or World.FLOOR_Y, math.sin(a) * dist)
-end
 
 -- A candy-striped cylinder standing up.
 local function candyPole(base, height, width, colorA, colorB)
@@ -236,6 +259,369 @@ local function candyPole(base, height, width, colorA, colorB)
 			Color = if i % 2 == 0 then colorA else colorB,
 		})
 	end
+end
+
+-- An arch of two candy poles and a beam with a sign on top (spans along X).
+local function gate(base, text, poleColor, beamColor)
+	for _, x in ipairs({ -6, 6 }) do
+		candyPole(base + Vector3.new(x, 0, 0), 12, 1.6, poleColor, Color3.new(1, 1, 1))
+		part({
+			Name = "GateCap",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * 2.6,
+			Position = base + Vector3.new(x, 13, 0),
+			Color = Color3.fromRGB(255, 220, 90),
+		})
+	end
+	local beam = part({
+		Name = "GateBeam",
+		Size = Vector3.new(14, 1.6, 1.6),
+		Position = base + Vector3.new(0, 11.5, 0),
+		Color = beamColor,
+	})
+	local sign = Instance.new("BillboardGui")
+	sign.Size = UDim2.fromOffset(260, 60)
+	sign.StudsOffsetWorldSpace = Vector3.new(0, 2.8, 0)
+	sign.MaxDistance = 150
+	sign.Parent = beam
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.fromRGB(255, 235, 200)
+	label.TextStrokeTransparency = 0
+	label.TextStrokeColor3 = Color3.fromRGB(110, 50, 130)
+	label.Font = Enum.Font.FredokaOne
+	label.TextScaled = true
+	label.Parent = sign
+end
+
+-- A candy lamp post with a warm glowing bulb.
+local function lamp(base)
+	candyPole(base, 8, 0.9, Color3.fromRGB(255, 110, 130), Color3.new(1, 1, 1))
+	local bulb = part({
+		Name = "LampBulb",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * 2,
+		Position = base + Vector3.new(0, 9, 0),
+		Color = Color3.fromRGB(255, 235, 170),
+		Material = Enum.Material.Neon,
+		CastShadow = false,
+	})
+	local light = Instance.new("PointLight")
+	light.Color = Color3.fromRGB(255, 220, 160)
+	light.Range = 18
+	light.Brightness = 1.2
+	light.Parent = bulb
+end
+
+local BUSH_COLORS = { Color3.fromRGB(90, 180, 80), Color3.fromRGB(110, 200, 95), Color3.fromRGB(75, 160, 90) }
+
+-- A round bush of a few green balls, sometimes with berries.
+local function bush(base)
+	local size = rng:NextNumber(2.5, 4)
+	for _ = 1, 3 do
+		part({
+			Name = "Bush",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * size * rng:NextNumber(0.8, 1.1),
+			Position = base + Vector3.new(rng:NextNumber(-1.2, 1.2), size * 0.3, rng:NextNumber(-1.2, 1.2)),
+			Color = pick(BUSH_COLORS),
+			CanCollide = false,
+		})
+	end
+	if rng:NextNumber() < 0.5 then
+		for _ = 1, 4 do
+			part({
+				Name = "Berry",
+				Shape = Enum.PartType.Ball,
+				Size = Vector3.one * 0.45,
+				Position = base + Vector3.new(rng:NextNumber(-1.4, 1.4), size * rng:NextNumber(0.4, 0.7), rng:NextNumber(-1.4, 1.4)),
+				Color = Color3.fromRGB(255, 80, 110),
+				CanCollide = false,
+				CastShadow = false,
+			})
+		end
+	end
+end
+
+-- A smooth grey rock.
+local function rock(base, size)
+	local r = part({
+		Name = "Rock",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * size,
+		CFrame = CFrame.new(base + Vector3.new(0, size * 0.15, 0)) * CFrame.Angles(0, rng:NextNumber(0, 6.28), 0),
+		Color = Color3.fromRGB(160, 160, 175):Lerp(Color3.fromRGB(200, 195, 210), rng:NextNumber()),
+	})
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.Sphere
+	mesh.Scale = Vector3.new(1.2, 0.6, 1)
+	mesh.Parent = r
+end
+
+local CAP_SHROOM = { Color3.fromRGB(255, 90, 100), Color3.fromRGB(255, 140, 200), Color3.fromRGB(170, 120, 255) }
+
+-- A cute mushroom with a spotted cap.
+local function mushroom(base, scale)
+	part({
+		Name = "Stem",
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(1.6, 0.8, 0.8) * scale,
+		CFrame = CFrame.new(base + Vector3.new(0, 0.8 * scale, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+		Color = Color3.fromRGB(255, 245, 225),
+		CanCollide = false,
+	})
+	local capColor = pick(CAP_SHROOM)
+	local cap = part({
+		Name = "Cap",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * 2.4 * scale,
+		Position = base + Vector3.new(0, 1.7 * scale, 0),
+		Color = capColor,
+		CanCollide = false,
+	})
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.Sphere
+	mesh.Scale = Vector3.new(1, 0.55, 1)
+	mesh.Parent = cap
+	for i = 1, 4 do
+		local a = i * math.pi / 2 + rng:NextNumber(-0.3, 0.3)
+		part({
+			Name = "CapSpot",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * 0.4 * scale,
+			Position = base + Vector3.new(math.cos(a) * 0.6 * scale, 2.2 * scale, math.sin(a) * 0.6 * scale),
+			Color = Color3.new(1, 1, 1),
+			CanCollide = false,
+			CastShadow = false,
+		})
+	end
+end
+
+-- Round stepping stones from one point to another.
+local function stonePath(from, to)
+	local dist = (to - from).Magnitude
+	local count = math.floor(dist / 3)
+	local side = (to - from).Unit:Cross(Vector3.yAxis)
+	for i = 0, count do
+		local pos = from:Lerp(to, i / count) + side * (if i % 2 == 0 then 0.7 else -0.7)
+		part({
+			Name = "Stone",
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(0.3, 2.4, 2.4),
+			CFrame = CFrame.new(pos + Vector3.new(0, 0.2, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+			Color = Color3.fromRGB(235, 225, 210),
+			CastShadow = false,
+		})
+	end
+end
+
+-- A wooden bench facing `facing`.
+local function bench(base, facing)
+	local cf = CFrame.lookAt(base, Vector3.new(facing.X, base.Y, facing.Z))
+	local wood = Color3.fromRGB(200, 140, 90)
+	part({ Name = "Seat", Size = Vector3.new(5, 0.4, 1.6), CFrame = cf * CFrame.new(0, 1.4, 0), Color = wood })
+	part({ Name = "Back", Size = Vector3.new(5, 1.4, 0.3), CFrame = cf * CFrame.new(0, 2.4, 0.7), Color = wood })
+	for _, x in ipairs({ -2, 2 }) do
+		part({ Name = "Leg", Size = Vector3.new(0.4, 1.2, 1.4), CFrame = cf * CFrame.new(x, 0.6, 0), Color = Color3.fromRGB(120, 90, 70) })
+	end
+end
+
+-- A fountain with a stone basin, water and a spray of droplets.
+local function fountain(base)
+	local stone = Color3.fromRGB(235, 230, 245)
+	local water = Color3.fromRGB(120, 200, 255)
+	local function disc(name, height, width, y, color, transparency)
+		return part({
+			Name = name,
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(height, width, width),
+			CFrame = CFrame.new(base + Vector3.new(0, y, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+			Color = color,
+			Transparency = transparency or 0,
+		})
+	end
+	disc("Basin", 1.2, 13, 0.6, stone)
+	disc("Water", 0.2, 11.4, 1.15, water, 0.25)
+	disc("Pillar", 4, 1.8, 3, stone)
+	disc("Bowl", 0.7, 5.5, 5.2, stone)
+	disc("BowlWater", 0.2, 4.6, 5.5, water, 0.25)
+	local spout = part({
+		Name = "Spout",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * 1.4,
+		Position = base + Vector3.new(0, 6.2, 0),
+		Color = Color3.fromRGB(255, 190, 220),
+	})
+	local spray = Instance.new("ParticleEmitter")
+	spray.EmissionDirection = Enum.NormalId.Top
+	spray.Rate = 45
+	spray.Lifetime = NumberRange.new(0.8, 1.1)
+	spray.Speed = NumberRange.new(9, 11)
+	spray.SpreadAngle = Vector2.new(25, 25)
+	spray.Acceleration = Vector3.new(0, -30, 0)
+	spray.Size = NumberSequence.new(0.35)
+	spray.Transparency = NumberSequence.new(0.2, 0.8)
+	spray.Color = ColorSequence.new(Color3.fromRGB(170, 225, 255))
+	spray.LightEmission = 0.4
+	spray.Parent = spout
+end
+
+-- A windmill; its blades are spun by the client (tag "Spin").
+local function windmill(base, lookAt)
+	local facing = CFrame.lookAt(base, Vector3.new(lookAt.X, base.Y, lookAt.Z))
+	part({ Name = "Tower", Size = Vector3.new(5, 16, 5), CFrame = facing * CFrame.new(0, 8, 0), Color = Color3.fromRGB(255, 245, 230) })
+	part({
+		Name = "Roof",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * 6.5,
+		CFrame = facing * CFrame.new(0, 16, 0),
+		Color = Color3.fromRGB(255, 110, 130),
+	})
+	part({ Name = "Door", Size = Vector3.new(1.8, 3, 0.2), CFrame = facing * CFrame.new(0, 1.5, -2.55), Color = Color3.fromRGB(170, 110, 70) })
+
+	local blades = Instance.new("Model")
+	blades.Name = "WindmillBlades"
+	local hubCFrame = facing * CFrame.new(0, 13, -3)
+	local hub = part({
+		Name = "Hub",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * 1.6,
+		CFrame = hubCFrame,
+		Color = Color3.fromRGB(255, 210, 80),
+		Parent = blades,
+	})
+	for k = 0, 3 do
+		part({
+			Name = "Blade",
+			Size = Vector3.new(1.6, 8, 0.2),
+			CFrame = hubCFrame * CFrame.Angles(0, 0, k * math.pi / 2) * CFrame.new(0, 4.6, 0),
+			Color = if k % 2 == 0 then Color3.fromRGB(255, 255, 255) else Color3.fromRGB(180, 220, 255),
+			Parent = blades,
+		})
+	end
+	blades.PrimaryPart = hub
+	blades:SetAttribute("SpinSpeed", 0.8)
+	blades.Parent = folder
+	CollectionService:AddTag(blades, "Spin")
+end
+
+-- Main area details --------------------------------------------------------------
+
+local SHOP_ANGLE, FOUNTAIN_ANGLE, SPAWN_ANGLE = 180, 0, 90
+
+local function mainSpot(angleDegrees, dist, y)
+	local a = math.rad(angleDegrees)
+	return World.MAIN_CENTER + Vector3.new(math.cos(a) * dist, y or World.FLOOR_Y, math.sin(a) * dist)
+end
+
+-- is this angle clear of the spawn, shop and fountain?
+local function clearAngle(angle, margin)
+	for _, taken in ipairs({ SHOP_ANGLE, FOUNTAIN_ANGLE, SPAWN_ANGLE }) do
+		local diff = math.abs((angle - taken + 180) % 360 - 180)
+		if diff < margin then
+			return false
+		end
+	end
+	return true
+end
+
+local function mainArea()
+	local zoneRadius = World.COIN_ZONE / 2
+
+	-- gold trim around the round coin zone
+	local pieces = 32
+	for i = 0, pieces - 1 do
+		local a = (i + 0.5) / pieces * math.pi * 2
+		local pos = mainSpot(math.deg(a), zoneRadius + 0.4, World.FLOOR_Y + 0.45)
+		part({
+			Name = "ZoneTrim",
+			Size = Vector3.new(0.9, 0.5, 2 * math.pi * (zoneRadius + 0.4) / pieces + 0.2),
+			CFrame = CFrame.lookAt(pos, World.MAIN_CENTER + Vector3.new(0, pos.Y, 0)) * CFrame.Angles(0, math.rad(90), 0),
+			Color = if i % 2 == 0 then Color3.fromRGB(255, 205, 60) else Color3.fromRGB(255, 245, 210),
+		})
+	end
+
+	-- glowing gem posts around the coin zone
+	for k = 0, 7 do
+		local angle = 22.5 + k * 45
+		local base = mainSpot(angle, zoneRadius + 3)
+		part({
+			Name = "GemPost",
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(2.4, 1, 1),
+			CFrame = CFrame.new(base + Vector3.new(0, 1.2, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+			Color = Color3.fromRGB(255, 250, 240),
+		})
+		local gem = part({
+			Name = "Gem",
+			Size = Vector3.one * 1.1,
+			CFrame = CFrame.new(base + Vector3.new(0, 3, 0)) * CFrame.Angles(math.rad(45), math.rad(45), 0),
+			Color = PASTELS[k % #PASTELS + 1],
+			Material = Enum.Material.Neon,
+			CastShadow = false,
+		})
+		local light = Instance.new("PointLight")
+		light.Color = gem.Color
+		light.Range = 8
+		light.Brightness = 0.8
+		light.Parent = gem
+	end
+
+	-- gate behind the spawn, benches and stone paths
+	gate(World.MAIN_CENTER + World.MAIN_SPAWN + Vector3.new(0, World.FLOOR_Y, 7), "🐾 PET PARK 🐾", Color3.fromRGB(110, 190, 255), Color3.fromRGB(255, 190, 90))
+	for _, x in ipairs({ -10, 10 }) do
+		bench(World.MAIN_CENTER + Vector3.new(x, World.FLOOR_Y, 42), World.MAIN_CENTER)
+	end
+	stonePath(mainSpot(SPAWN_ANGLE, 34), mainSpot(SPAWN_ANGLE, zoneRadius + 2))
+	stonePath(mainSpot(SHOP_ANGLE, zoneRadius + 2), mainSpot(SHOP_ANGLE, 32))
+	stonePath(mainSpot(FOUNTAIN_ANGLE, zoneRadius + 2), mainSpot(FOUNTAIN_ANGLE, 30))
+
+	fountain(mainSpot(FOUNTAIN_ANGLE, 38))
+
+	for _, angle in ipairs({ 45, 135, 225, 315 }) do
+		lamp(mainSpot(angle, 46))
+	end
+
+	-- bushes, mushrooms and rocks along the fence inside
+	for _ = 1, 22 do
+		local angle = rng:NextNumber(0, 360)
+		if clearAngle(angle, 16) then
+			bush(mainSpot(angle, rng:NextNumber(46.5, 48.5)))
+		end
+	end
+	for _ = 1, 8 do
+		local angle = rng:NextNumber(0, 360)
+		if clearAngle(angle, 16) then
+			mushroom(mainSpot(angle, rng:NextNumber(40, 44)), rng:NextNumber(0.7, 1.2))
+		end
+	end
+end
+
+-- Outside both fences: bushes, rocks, mushrooms and a windmill on the hills.
+local function outside(area, index)
+	for _ = 1, 30 do
+		bush(spotNearWall(area, 3, 26, 0))
+	end
+	for _ = 1, 24 do
+		rock(spotNearWall(area, 4, 30, 0), rng:NextNumber(1.5, 4))
+	end
+	for _ = 1, 16 do
+		mushroom(spotNearWall(area, 3, 22, 0), rng:NextNumber(0.9, 2))
+	end
+	local angle = if index == 1 then math.rad(215) else math.rad(330)
+	local dist = area.Radius + 32
+	windmill(area.Center + Vector3.new(math.cos(angle) * dist, 0, math.sin(angle) * dist), area.Center)
+end
+
+-- Hatchery decorations -------------------------------------------------------
+
+
+-- a spot inside the hatchery; angle 90 is the gate side (+Z)
+local function hatcherySpot(angleDegrees, dist, y)
+	local a = math.rad(angleDegrees)
+	return World.EGG_CENTER + Vector3.new(math.cos(a) * dist, y or World.FLOOR_Y, math.sin(a) * dist)
 end
 
 -- A big spotted decoration egg.
@@ -299,37 +685,7 @@ end
 
 local function hatchery()
 	-- candy gate over the arrival spot with a sign
-	for _, x in ipairs({ -6, 6 }) do
-		candyPole(World.EGG_CENTER + Vector3.new(x, World.FLOOR_Y, 36), 12, 1.6, Color3.fromRGB(255, 120, 160), Color3.new(1, 1, 1))
-		part({
-			Name = "GateCap",
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * 2.6,
-			Position = World.EGG_CENTER + Vector3.new(x, World.FLOOR_Y + 13, 36),
-			Color = Color3.fromRGB(255, 220, 90),
-		})
-	end
-	local beam = part({
-		Name = "GateBeam",
-		Size = Vector3.new(14, 1.6, 1.6),
-		Position = World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y + 11.5, 36),
-		Color = Color3.fromRGB(200, 170, 255),
-	})
-	local sign = Instance.new("BillboardGui")
-	sign.Size = UDim2.fromOffset(260, 60)
-	sign.StudsOffsetWorldSpace = Vector3.new(0, 2.8, 0)
-	sign.MaxDistance = 150
-	sign.Parent = beam
-	local text = Instance.new("TextLabel")
-	text.Size = UDim2.fromScale(1, 1)
-	text.BackgroundTransparency = 1
-	text.Text = "🥚 HATCHERY 🥚"
-	text.TextColor3 = Color3.fromRGB(255, 200, 230)
-	text.TextStrokeTransparency = 0
-	text.TextStrokeColor3 = Color3.fromRGB(110, 50, 130)
-	text.Font = Enum.Font.FredokaOne
-	text.TextScaled = true
-	text.Parent = sign
+	gate(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 36), "🥚 HATCHERY 🥚", Color3.fromRGB(255, 120, 160), Color3.fromRGB(200, 170, 255))
 
 	-- giant spotted eggs around the edge
 	for _, angle in ipairs({ 0, 25, 155, 180, 205, 335 }) do
@@ -352,23 +708,20 @@ local function hatchery()
 
 	-- candy lamp posts with a warm glow
 	for _, angle in ipairs({ 40, 140, 228, 312 }) do
-		local base = hatcherySpot(angle, 37)
-		candyPole(base, 8, 0.9, Color3.fromRGB(255, 110, 130), Color3.new(1, 1, 1))
-		local bulb = part({
-			Name = "LampBulb",
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * 2,
-			Position = base + Vector3.new(0, 9, 0),
-			Color = Color3.fromRGB(255, 235, 170),
-			Material = Enum.Material.Neon,
-			CastShadow = false,
-		})
-		local light = Instance.new("PointLight")
-		light.Color = Color3.fromRGB(255, 220, 160)
-		light.Range = 18
-		light.Brightness = 1.2
-		light.Parent = bulb
+		lamp(hatcherySpot(angle, 37))
 	end
+
+	-- bushes and mushrooms along the fence, a stone path from the gate
+	for _ = 1, 14 do
+		local angle = rng:NextNumber(0, 360)
+		if math.abs(angle - 90) > 22 then -- keep the gate clear
+			bush(hatcherySpot(angle, rng:NextNumber(37, 38.5)))
+		end
+	end
+	for _ = 1, 6 do
+		mushroom(hatcherySpot(rng:NextNumber(150, 390) % 360, rng:NextNumber(30, 36)), rng:NextNumber(0.8, 1.3))
+	end
+	stonePath(World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 34), World.EGG_CENTER + Vector3.new(0, World.FLOOR_Y, 6))
 
 	-- soft sparkles floating in the air
 	local air = part({
@@ -411,6 +764,7 @@ function Decor.build()
 	hillRing(1, 18, 45, 90, 14, NEAR_HILL_COLORS)
 	hillRing(1, 18, 90, 150, 50, NEAR_HILL_COLORS)
 	hillRing(1, 18, 180, 320, 150, FAR_HILL_COLORS)
+	mainArea()
 	hatchery()
 
 	hillRing(2, 20, 40, 90, 10, NEAR_HILL_COLORS)
@@ -419,6 +773,7 @@ function Decor.build()
 
 	for index, area in ipairs(AREAS) do
 		fencePosts(area)
+		outside(area, index)
 
 		-- trees between the fence and the hills
 		for _ = 1, if index == 1 then 30 else 24 do

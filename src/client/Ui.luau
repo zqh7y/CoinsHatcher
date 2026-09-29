@@ -140,8 +140,9 @@ end
 local panels = {}
 
 -- A pop-up window with a title and close button. Only one is open at a time.
+-- theme = { top color, bottom color } for the gradient (purple by default).
 -- Returns { Frame, Content, open(), close(), isOpen(), OnOpen }.
-function Ui.panel(title, icon, size)
+function Ui.panel(title, icon, size, theme)
 	local frame = Instance.new("Frame")
 	frame.Name = title
 	frame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -149,12 +150,19 @@ function Ui.panel(title, icon, size)
 	-- fills most of small screens, but never bigger than `size`
 	local maxSize = size or UDim2.fromOffset(600, 420)
 	frame.Size = UDim2.fromScale(0.92, 0.82)
-	frame.BackgroundColor3 = Ui.COLORS.Panel
+	frame.BackgroundColor3 = Color3.new(1, 1, 1)
 	frame.Visible = false
 	frame.ZIndex = 5
 	frame.Parent = Ui.gui
 	Ui.corner(frame, 22)
-	Ui.stroke(frame, Ui.COLORS.Outline, 5)
+	Ui.stroke(frame, Color3.new(1, 1, 1), 4)
+
+	local top = theme and theme[1] or Color3.fromRGB(135, 105, 230)
+	local bottom = theme and theme[2] or Color3.fromRGB(85, 60, 170)
+	local gradient = Instance.new("UIGradient")
+	gradient.Color = ColorSequence.new(top, bottom)
+	gradient.Rotation = 90
+	gradient.Parent = frame
 
 	local sizeLimit = Instance.new("UISizeConstraint")
 	sizeLimit.MaxSize = Vector2.new(maxSize.X.Offset, maxSize.Y.Offset)
@@ -165,9 +173,12 @@ function Ui.panel(title, icon, size)
 
 	local header = Instance.new("Frame")
 	header.Size = UDim2.new(1, 0, 0, 58)
-	header.BackgroundColor3 = Ui.COLORS.PanelDark
+	header.BackgroundColor3 = Color3.new(1, 1, 1)
 	header.Parent = frame
 	Ui.corner(header, 22)
+	local headerGradient = Instance.new("UIGradient")
+	headerGradient.Color = ColorSequence.new(top:Lerp(Color3.fromRGB(255, 140, 210), 0.45), top:Lerp(Color3.new(0, 0, 0), 0.2))
+	headerGradient.Parent = header
 
 	local titleLabel = Ui.label(header, {
 		Name = "Title",

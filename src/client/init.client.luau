@@ -19,8 +19,10 @@ require(script.EggPreview)
 require(script.Breakables)
 require(script.Boosts)
 require(script.EggArea)
+require(script.WorldFx)
 
 local player = Players.LocalPlayer
+local EGG_CENTER = Vector3.new(0, 0, 1000) -- same as World.EGG_CENTER on the server
 
 -- Coin + rebirth counter (top left) -------------------------------------------
 
@@ -75,7 +77,7 @@ end)
 local side = Instance.new("Frame")
 side.AnchorPoint = Vector2.new(0, 0.5)
 side.Position = UDim2.new(0, 12, 0.55, 0)
-side.Size = UDim2.fromOffset(170, 350)
+side.Size = UDim2.fromOffset(170, 260)
 side.BackgroundTransparency = 1
 side.Parent = Ui.gui
 
@@ -86,11 +88,11 @@ grid.SortOrder = Enum.SortOrder.LayoutOrder
 grid.Parent = side
 
 local buttons = {
-	{ "🏠", "Home", Color3.fromRGB(90, 190, 100), function()
-		remotes.Teleport:FireServer("Main")
-	end },
+	-- one teleport button: goes to the eggs from home, and home from the eggs
 	{ "🥚", "Eggs", Color3.fromRGB(255, 170, 60), function()
-		remotes.Teleport:FireServer("Eggs")
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		local atEggs = root and (root.Position - EGG_CENTER).Magnitude < 150
+		remotes.Teleport:FireServer(if atEggs then "Main" else "Eggs")
 	end },
 	{ "🐾", "Pets", Color3.fromRGB(80, 160, 240), Inventory.toggle },
 	{ "📖", "Index", Color3.fromRGB(240, 110, 150), Index.toggle },
@@ -100,18 +102,32 @@ local buttons = {
 		remotes.ToggleHoverboard:FireServer()
 	end },
 }
-local boardButton
+local boardButton, teleportButton
 for order, def in ipairs(buttons) do
 	local button = Ui.iconButton(side, def[1], def[2], def[3])
 	button.LayoutOrder = order
 	button.Activated:Connect(def[4])
-	if def[2] == "Board" then
+	if def[2] == "Eggs" then
+		teleportButton = button
+	elseif def[2] == "Board" then
 		boardButton = button
 		button.Visible = false -- shows up once you buy the hoverboard
 	elseif def[2] == "Gifts" then
 		Gifts.attach(button)
 	end
 end
+
+-- the teleport button shows where it will take you
+task.spawn(function()
+	while true do
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		local atEggs = root and (root.Position - EGG_CENTER).Magnitude < 150
+		teleportButton.Icon.Text = if atEggs then "🏠" else "🥚"
+		teleportButton.Caption.Text = if atEggs then "Home" else "Eggs"
+		teleportButton.BackgroundColor3 = if atEggs then Color3.fromRGB(90, 190, 100) else Color3.fromRGB(255, 170, 60)
+		task.wait(0.4)
+	end
+end)
 
 remotes.Notify.OnClientEvent:Connect(Ui.toast)
 remotes.Hatched.OnClientEvent:Connect(Hatch.play)
