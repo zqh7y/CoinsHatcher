@@ -108,11 +108,18 @@ are in `src/shared/Config.luau`.
 - `src/server/Gifts.luau`: playtime mystery gifts
 - `src/server/Pickups.luau`: combos and boost orbs
 - `src/server/Leaderboards.luau`: the three leaderboards in the main area
+- `src/server/Access.luau`: the coming-soon lock (who can play before release)
 - `src/server/init.server.luau`: starts everything, handles teleport/rebirth/equip
 - `src/client/`: UI (buttons, pets, shop, index, rebirth, egg popup,
   hatch animation) and breakable effects
 
 ## Before publishing (checklist)
+
+0. **Coming-soon lock**: while `Config.ACCESS.Open = false` (in
+   `src/shared/Config.luau`) the game can be Public (so it shows on your
+   profile) but only you (the owner), the ids in `AllowedUserIds` and Studio
+   can play; everyone else gets "Pet Park is coming soon!". Set `Open = true`
+   and publish on release day.
 
 1. **Turn off developer money and free rebirths**: in `src/shared/Config.luau`
    set `Config.DEV_MONEY.Enabled = false` (or keep it on and only list your own

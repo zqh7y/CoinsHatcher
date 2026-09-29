@@ -3,6 +3,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Access = require(script.Access)
 local PlayerData = require(script.PlayerData)
 local World = require(script.World)
 local Decor = require(script.Decor)
@@ -46,6 +47,7 @@ local ChooseStarter = remote("RemoteFunction", "ChooseStarter") -- client -> ser
 
 remotes.Parent = ReplicatedStorage
 
+Access.start() -- the coming-soon lock goes first, before anything else runs for a player
 World.build()
 Decor.build()
 PlayerData.start()

@@ -67,6 +67,17 @@ Config.MAX_EQUIPPED = 3
 Config.MAX_PETS = 100
 Config.STARTER_CHOICES = { "Dog", "Cat" } -- new players pick one of these
 
+-- Coming-soon lock: while Open = false, only the game's owner, the user ids
+-- below and Studio can play; everyone else sees Message and is sent back.
+-- The game can be Public (so it shows on your profile) while it's closed.
+-- Set Open = true on release day.
+Config.ACCESS = {
+	Open = false,
+	AllowedUserIds = {}, -- friends who may test, e.g. { 123456789, 987654321 }
+	GroupMinRank = 254, -- for a group-owned game: this rank and up can play (255 = owner)
+	Message = "🐾 Pet Park is coming soon! ⭐ Favorite the game so you don't miss the release!",
+}
+
 -- Developer test money: when testing in Studio (and for the user ids listed
 -- here) your coins and diamonds are topped up to these amounts when you
 -- join. Set Enabled = false before releasing the game.
