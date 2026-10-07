@@ -9,19 +9,27 @@ that picture on your screen and clicks its center whenever it shows up.
    click **More info**, then **Run anyway** (the app isn't signed, that's all).
 2. **Step 1:** press **Take from screen**, then drag a box around the button
    you want clicked. You can add more than one picture.
-3. **Step 2:** press **START** (or **F8**) and open your game. The window
-   hides itself and watches the screen nonstop. When the picture shows up it
-   glides the mouse there (0.12 s) and clicks it twice, about 0.15-0.25 s
-   after it appeared. Games like Roblox ignore a mouse that just teleports,
-   which is why it glides.
-4. Press **F8** to stop. Pushing the mouse into a screen corner also stops it.
+3. **Step 2:** press **START** (or your start/stop key, **F8** unless you
+   change it) and open your game. The window hides itself and watches the
+   screen nonstop. When the picture shows up it glides the mouse there
+   (0.12 s), looks once more in case it moved, and clicks it twice, about
+   0.2-0.25 s after it appeared. Games like Roblox ignore a mouse that just
+   teleports, which is why it glides.
+4. Press the start/stop key again to stop. Pushing the mouse into a screen
+   corner also stops it.
+5. **Start / stop key:** click the key button and press any key to use that
+   one instead of F8 (some keyboards send F8 only with Fn).
+6. **Step 3, Anti-AFK (optional):** switch it **ON** and it presses Space
+   every N seconds, so games don't kick you for being idle. It runs on its
+   own, whether the clicker is started or not.
 
-By default it matches the picture's shape, not its colors, so a button
-that changes color (pink, white, on a grey or purple background...) is
-still found. Untick "Find it in any color" in **Settings** to match colors
-exactly. If it clicks wrong things or misses the picture, move "How exact
-must it match?" there too. Pictures and settings are kept for next time
-(in `%APPDATA%\ImageAutoClicker`).
+By default it matches the picture's outline and edge directions, not its
+colors, so a button that flashes colors, shakes, tilts up to about 25°, or
+gets motion-blurred is still found. "How exact must it match?" (in
+**Settings...**) starts at 30%: 0% is what random screen content scores and
+100% is a perfect copy. If it clicks wrong things, raise it; if it misses
+the picture, lower it. Pictures and settings are kept for next time (in
+`%APPDATA%\ImageAutoClicker`).
 
 The .exe is built by the "Build Auto Clicker .exe" GitHub Action on every
 change to this folder (download it from the run's artifacts). To run from
