@@ -19,13 +19,12 @@ from tkinter import filedialog, messagebox
 import cv2
 import numpy as np
 
-from autoclicker import Finder, click, grab, load_template, open_screen, press_space
+from autoclicker import Finder, click, grab, load_template, open_screen
 
 APP_NAME = "Auto Clicker"
-DEFAULT_HOTKEY = "f8"
+HOTKEY = "f8"
 SIZE_SCALES = (0.9, 1.0, 1.1)
-SETTINGS_VERSION = 3
-ROTATIONS = (-24, -12, 0, 12, 24)  # a shaking icon tilts
+SETTINGS_VERSION = 2
 SAME_SPOT_COOLDOWN = 0.35  # don't click the same spot again right away
 START_DELAY = 3
 THUMB = 88
@@ -114,9 +113,8 @@ class ClickerThread(threading.Thread):
     """Watches the screen and clicks. Talks to the window through `events`."""
 
     def __init__(self, images, confidence, interval, click_all, any_size, any_color,
-                 move_time, clicks, hotkey, events):
+                 move_time, clicks, events):
         super().__init__(daemon=True)
-        self.hotkey = hotkey
         self.move_time = move_time
         self.clicks = clicks
         self.any_color = any_color
@@ -127,7 +125,6 @@ class ClickerThread(threading.Thread):
         self.scales = SIZE_SCALES if any_size else (1.0,)
         self.events = events
         self.stop_event = threading.Event()
-        self.hide_rect = None  # our own window (screen x, y, w, h) while it is visible
 
     def stop(self):
         self.stop_event.set()
@@ -146,10 +143,7 @@ class ClickerThread(threading.Thread):
         pyautogui.PAUSE = 0.02
         pyautogui.FAILSAFE = True  # mouse into a screen corner = emergency stop
 
-        finders = [Finder(*load_template(path), scales=self.scales,
-                          shape="orient" if self.any_color else False,
-                          rotations=ROTATIONS if self.any_color else (0,),
-                          smooth=1.0 if self.any_color else 0.0)
+        finders = [Finder(*load_template(path), scales=self.scales, shape=self.any_color)
                    for path in self.images]
 
         for left in range(START_DELAY, 0, -1):
@@ -157,7 +151,7 @@ class ClickerThread(threading.Thread):
             if self.stop_event.wait(1):
                 return
         self.events.put(("status", ("Looking for your picture...",
-                                    f"Press {key_label(self.hotkey)} to stop")))
+                                    f"Press {HOTKEY.upper()} to stop")))
 
         clicks = 0
         recent = []  # (x, y, time) of the last clicks
@@ -165,11 +159,6 @@ class ClickerThread(threading.Thread):
             area = sct.monitors[0]  # every screen together
             while not self.stop_event.is_set():
                 screen, factor = grab(sct, area)
-                if self.hide_rect:  # never click our own window's picture preview
-                    hx, hy, hw, hh = self.hide_rect
-                    x0 = max(0, int((hx - area["left"]) / factor))
-                    y0 = max(0, int((hy - area["top"]) / factor))
-                    screen[y0:y0 + int(hh / factor) + 1, x0:x0 + int(hw / factor) + 1] = 0
                 for finder in finders:
                     for cx, cy, _ in finder.find(screen, self.confidence, self.click_all):
                         if self.stop_event.is_set():
@@ -180,84 +169,11 @@ class ClickerThread(threading.Thread):
                         recent = [r for r in recent if now - r[2] < SAME_SPOT_COOLDOWN]
                         if any(abs(x - rx) < 20 and abs(y - ry) < 20 for rx, ry, _ in recent):
                             continue
-                        if self.move_time > 0:
-                            # glide there, then look again: a shaking icon may
-                            # have moved while the mouse was on its way
-                            click(pyautogui, x, y, "left", 0, self.move_time)
-                            x, y = self.aim_again(sct, finder, x, y)
-                        click(pyautogui, x, y, "left", self.clicks, 0.02)
+                        click(pyautogui, x, y, "left", self.clicks, self.move_time)
                         recent.append((x, y, time.monotonic()))
                         clicks += 1
                         self.events.put(("click", clicks))
                 self.stop_event.wait(self.interval)
-
-
-    def aim_again(self, sct, finder, x, y):
-        """Find the picture again right around (x, y); return where it is now."""
-        w = int(finder.max_w / finder.factor * 1.6) + 40
-        h = int(finder.max_h / finder.factor * 1.6) + 40
-        region = {"left": x - w // 2, "top": y - h // 2, "width": w, "height": h}
-        try:
-            shot, factor = grab(sct, region)
-            found = finder.find(shot, self.confidence)
-        except Exception:
-            return x, y
-        if not found:
-            return x, y
-        cx, cy, _ = found[0]
-        return region["left"] + round(cx * factor), region["top"] + round(cy * factor)
-
-
-class AntiAfkThread(threading.Thread):
-    """Taps Space every `every` seconds so games don't kick you for being idle."""
-
-    def __init__(self, every, events):
-        super().__init__(daemon=True)
-        self.every = every
-        self.events = events
-        self.stop_event = threading.Event()
-
-    def stop(self):
-        self.stop_event.set()
-
-    def run(self):
-        try:
-            import pyautogui
-            presses = 0
-            while True:
-                next_at = time.monotonic() + self.every
-                while (left := next_at - time.monotonic()) > 0:
-                    self.events.put(("afk", f"Next Space in {int(left) + 1} s"))
-                    if self.stop_event.wait(min(1.0, left)):
-                        return
-                press_space(pyautogui)
-                presses += 1
-                self.events.put(("afk", f"Pressed Space ({presses}x)"))
-        except Exception as e:
-            self.events.put(("error", f"Anti-AFK stopped: {e}"))
-
-
-def key_name(key):
-    """A pynput key as a short stable name: 'f8', 'q', 'esc', 'vk96'..."""
-    name = getattr(key, "name", None)
-    if name:
-        return name.lower()
-    char = getattr(key, "char", None)
-    if char and char.isprintable() and char.strip():
-        return char.lower()
-    vk = getattr(key, "vk", None)
-    return f"vk{vk}" if vk is not None else None
-
-
-def match_score(percent):
-    """Slider % -> raw match score. Random screen content scores about 0.5 on
-    the raw scale, so 0% means 'like random stuff' and 100% a perfect copy."""
-    return 0.5 + 0.5 * percent / 100
-
-
-def key_label(name):
-    """'f8' -> 'F8', 'q' -> 'Q', 'page_down' -> 'PAGE DOWN'."""
-    return name.replace("_", " ").upper()
 
 
 # ---------------------------------------------------------------------------
@@ -395,11 +311,7 @@ class App:
         except tk.TclError:
             pass
 
-        self.confidence = tk.IntVar(value=30)
-        self.hotkey = DEFAULT_HOTKEY
-        self.capturing_key = False
-        self.afk_worker = None
-        self.afk_every = tk.IntVar(value=60)
+        self.confidence = tk.IntVar(value=70)
         self.interval = tk.DoubleVar(value=0.0)
         self.click_all = tk.BooleanVar(value=False)
         self.any_size = tk.BooleanVar(value=True)
@@ -409,7 +321,6 @@ class App:
 
         self.build()
         self.load_settings()
-        self.show_key()
         self.show_pictures()
         self.start_hotkey()
         root.protocol("WM_DELETE_WINDOW", self.close)
@@ -455,43 +366,19 @@ class App:
         self.start_btn.pack(fill="x")
         self.status = tk.Label(step2, text="Ready", bg=CARD, fg=TEXT, font=(FONT, 13, "bold"))
         self.status.pack(pady=(12, 0))
-        self.substatus = tk.Label(step2, text="", bg=CARD, fg=MUTED, font=(FONT, 9))
+        self.substatus = tk.Label(step2, text=f"Tip: you can press {HOTKEY.upper()} "
+                                  "to start and stop, even inside the game",
+                                  bg=CARD, fg=MUTED, font=(FONT, 9))
         self.substatus.pack()
-        keyrow = tk.Frame(step2, bg=CARD)
-        keyrow.pack(pady=(10, 0))
-        tk.Label(keyrow, text="Start / stop key:", bg=CARD, fg=TEXT,
-                 font=(FONT, 10)).pack(side="left")
-        self.key_btn = flat_button(keyrow, "", self.change_key, LIGHT_BTN, LIGHT_BTN_HOVER,
-                                   fg=ACCENT, size=10, padx=10, pady=3)
-        self.key_btn.pack(side="left", padx=8)
-        tk.Label(keyrow, text="click to change", bg=CARD, fg=MUTED,
-                 font=(FONT, 9)).pack(side="left")
-
-        # Step 3: anti-AFK
-        step3 = self.card(3, "Anti-AFK (optional)")
-        tk.Label(step3, text="Presses Space every few seconds so the game doesn't kick you "
-                 "for being away.", bg=CARD, fg=MUTED, font=(FONT, 9), wraplength=380,
-                 justify="left").pack(anchor="w")
-        afkrow = tk.Frame(step3, bg=CARD)
-        afkrow.pack(fill="x", pady=(8, 0))
-        self.afk_btn = flat_button(afkrow, "OFF", self.toggle_afk, BORDER, LIGHT_BTN_HOVER,
-                                   fg=TEXT, size=12, padx=18, pady=6, width=5)
-        self.afk_btn.pack(side="left")
-        tk.Label(afkrow, text="every", bg=CARD, fg=TEXT, font=(FONT, 10)).pack(side="left",
-                                                                                padx=(12, 4))
-        tk.Spinbox(afkrow, from_=5, to=1200, increment=5, width=5, textvariable=self.afk_every,
-                   font=(FONT, 10), command=self.save_settings).pack(side="left")
-        tk.Label(afkrow, text="seconds", bg=CARD, fg=TEXT, font=(FONT, 10)).pack(side="left",
-                                                                                  padx=4)
-        self.afk_status = tk.Label(step3, text="", bg=CARD, fg=MUTED, font=(FONT, 9))
-        self.afk_status.pack(anchor="w", pady=(6, 0))
 
         # Settings (hidden until opened)
-        self.settings_btn = tk.Label(root, text="Settings...", bg=BG, fg=ACCENT,
+        self.settings_btn = tk.Label(root, text="Settings  ▸", bg=BG, fg=ACCENT,
                                      cursor="hand2", font=(FONT, 10, "bold"))
         self.settings_btn.pack(anchor="w", padx=20)
         self.settings_btn.bind("<Button-1>", lambda e: self.toggle_settings())
-        self.settings_win = None
+        self.settings = tk.Frame(root, bg=BG, padx=20)
+        self.settings_open = False
+        self.build_settings(self.settings)
         tk.Frame(root, bg=BG, height=16).pack(side="bottom")
 
     def build_settings(self, frame):
@@ -514,12 +401,11 @@ class App:
                                         self.save_settings())).pack(side="left", padx=6)
             tk.Label(line, text=right, bg=BG, fg=MUTED, font=(FONT, 9)).pack(side="left")
 
-        slider_row("How exact must it match?", "Loose", "Exact", self.confidence, 5, 95, 1,
+        slider_row("How exact must it match?", "Loose", "Exact", self.confidence, 50, 99, 1,
                    lambda v: f"{int(v)}%")
-        tk.Label(frame, text="0% = looks like random stuff, 100% = a perfect copy. If it "
-                 "clicks wrong things, go higher; if it misses the picture, go lower.",
-                 bg=BG, fg=MUTED, font=(FONT, 9), wraplength=400,
-                 justify="left").pack(anchor="w")
+        tk.Label(frame, text="If it clicks wrong things, go more exact. "
+                 "If it misses the picture, go looser.",
+                 bg=BG, fg=MUTED, font=(FONT, 9)).pack(anchor="w")
         slider_row("Pause between looks", "None", "Long", self.interval, 0.0, 1.0, 0.05,
                    lambda v: "none (fastest)" if float(v) == 0 else f"{float(v):.2f} s")
         slider_row("Mouse travel time", "Instant", "Slow", self.move_time, 0.0, 1.0, 0.05,
@@ -537,18 +423,13 @@ class App:
                  bg=BG, fg=MUTED, font=(FONT, 9)).pack(anchor="w", pady=(10, 0))
 
     def toggle_settings(self):
-        """Settings open in their own small window so the main one stays short."""
-        if self.settings_win and self.settings_win.winfo_exists():
-            self.settings_win.lift()
-            return
-        win = self.settings_win = tk.Toplevel(self.root)
-        win.title(f"{APP_NAME} - Settings")
-        win.configure(bg=BG)
-        win.resizable(False, False)
-        frame = tk.Frame(win, bg=BG, padx=20, pady=10)
-        frame.pack(fill="both")
-        self.build_settings(frame)
-        tk.Frame(frame, bg=BG, height=10).pack()
+        self.settings_open = not self.settings_open
+        if self.settings_open:
+            self.settings.pack(fill="x", after=self.settings_btn)
+            self.settings_btn.configure(text="Settings  ▾")
+        else:
+            self.settings.pack_forget()
+            self.settings_btn.configure(text="Settings  ▸")
 
     # --- pictures -----------------------------------------------------------
 
@@ -640,58 +521,16 @@ class App:
             messagebox.showinfo(APP_NAME, "First choose what to click (step 1).")
             return
         self.save_settings()
-        self.worker = ClickerThread(list(self.pictures), match_score(self.confidence.get()),
+        self.worker = ClickerThread(list(self.pictures), self.confidence.get() / 100,
                                     max(0.0, self.interval.get()), self.click_all.get(),
                                     self.any_size.get(), self.any_color.get(),
-                                    self.move_time.get(), self.clicks_each.get(), self.hotkey,
-                                    self.events)
+                                    self.move_time.get(), self.clicks_each.get(), self.events)
         self.worker.start()
         self.clicks = 0
         self.start_btn.configure(text="STOP")
         recolor(self.start_btn, RED, RED_HOVER)
         # get out of the way, and don't let the clicker see our own preview
         self.root.iconify()
-
-    def change_key(self):
-        self.capturing_key = True
-        self.key_btn.configure(text="Press any key...")
-
-    def set_key(self, name):
-        if not self.capturing_key:
-            return
-        self.capturing_key = False
-        if name == "space":
-            messagebox.showinfo(APP_NAME, "Space is used by Anti-AFK, pick another key.")
-        else:
-            self.hotkey = name
-            self.save_settings()
-        self.show_key()
-
-    def show_key(self):
-        self.key_btn.configure(text=key_label(self.hotkey))
-        if not self.worker:
-            self.substatus.configure(text=f"Tip: press {key_label(self.hotkey)} to start "
-                                     "and stop, even inside the game")
-
-    def toggle_afk(self):
-        if self.afk_worker:
-            self.afk_worker.stop()
-            self.afk_worker = None
-            self.afk_btn.configure(text="OFF")
-            recolor(self.afk_btn, BORDER, LIGHT_BTN_HOVER)
-            self.afk_btn.configure(fg=TEXT, activeforeground=TEXT)
-            self.afk_status.configure(text="")
-            return
-        try:
-            every = max(1, int(self.afk_every.get()))
-        except (tk.TclError, ValueError):
-            every = 60
-        self.save_settings()
-        self.afk_worker = AntiAfkThread(every, self.events)
-        self.afk_worker.start()
-        self.afk_btn.configure(text="ON")
-        recolor(self.afk_btn, GREEN, GREEN_HOVER)
-        self.afk_btn.configure(fg="white", activeforeground="white")
 
     def set_status(self, title, sub):
         self.status.configure(text=title)
@@ -704,12 +543,7 @@ class App:
             return
 
         def on_press(key):
-            name = key_name(key)
-            if not name:
-                return
-            if self.capturing_key:
-                self.root.after(0, lambda: self.set_key(name))
-            elif name == self.hotkey:
+            if getattr(key, "name", None) == HOTKEY:
                 self.root.after(0, self.toggle)
 
         listener = keyboard.Listener(on_press=on_press)
@@ -717,11 +551,6 @@ class App:
         listener.start()
 
     def poll_events(self):
-        if self.worker:
-            visible = self.root.state() != "iconic"
-            self.worker.hide_rect = (self.root.winfo_rootx(), self.root.winfo_rooty(),
-                                     self.root.winfo_width(), self.root.winfo_height()) \
-                if visible else None
         while True:
             try:
                 kind, data = self.events.get_nowait()
@@ -733,7 +562,7 @@ class App:
             elif kind == "click":
                 self.clicks = data
                 text = "Clicked 1 time" if data == 1 else f"Clicked {data} times"
-                self.set_status(text, f"Press {key_label(self.hotkey)} to stop")
+                self.set_status(text, f"Press {HOTKEY.upper()} to stop")
                 self.root.title(f"{APP_NAME} - {text}")
             elif kind == "error":
                 if "FailSafe" in data:
@@ -741,8 +570,6 @@ class App:
                 else:
                     self.root.deiconify()
                     messagebox.showerror(APP_NAME, data)
-            elif kind == "afk":
-                self.afk_status.configure(text=data)
             elif kind == "note":
                 self.set_status("Stopped", data)
                 continue
@@ -752,7 +579,7 @@ class App:
                 recolor(self.start_btn, GREEN, GREEN_HOVER)
                 done = {0: "Stopped", 1: "Stopped after 1 click"}.get(
                     self.clicks, f"Stopped after {self.clicks} clicks")
-                self.set_status(done, f"Press START or {key_label(self.hotkey)} to go again")
+                self.set_status(done, "Press START to go again")
                 self.root.title(APP_NAME)
                 self.root.deiconify()
         self.root.after(100, self.poll_events)
@@ -774,22 +601,14 @@ class App:
         self.pictures = [p for p in data.get("pictures", []) if Path(p).exists()]
         if str(example_copy) in self.pictures and example.exists():
             shutil.copyfile(example, example_copy)  # keep the example up to date
-        self.hotkey = data.get("hotkey", DEFAULT_HOTKEY)
-        self.afk_every.set(data.get("afk_every", 60))
         if data.get("version", 1) >= SETTINGS_VERSION:  # older saves keep new defaults
-            self.confidence.set(data.get("confidence", 30))
+            self.confidence.set(data.get("confidence", 70))
             self.interval.set(data.get("interval", 0.0))
             self.move_time.set(data.get("move_time", 0.12))
         self.click_all.set(data.get("click_all", False))
         self.any_size.set(data.get("any_size", True))
         self.any_color.set(data.get("any_color", True))
         self.clicks_each.set(data.get("clicks", 2))
-
-    def _afk_every(self):
-        try:
-            return max(1, int(self.afk_every.get()))
-        except (tk.TclError, ValueError):
-            return 60
 
     def save_settings(self):
         data = {
@@ -802,8 +621,6 @@ class App:
             "any_color": self.any_color.get(),
             "move_time": round(self.move_time.get(), 2),
             "clicks": self.clicks_each.get(),
-            "hotkey": self.hotkey,
-            "afk_every": self._afk_every(),
         }
         try:
             self.settings_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
@@ -813,8 +630,6 @@ class App:
     def close(self):
         if self.worker:
             self.worker.stop()
-        if self.afk_worker:
-            self.afk_worker.stop()
         self.save_settings()
         self.root.destroy()
 
@@ -828,15 +643,14 @@ def selftest():
         import pyautogui
         from pynput import keyboard  # noqa: F401
         click(pyautogui, 200, 150, clicks=0, move_time=0.2)  # glide only
-        press_space(pyautogui)
         mouse_at = tuple(pyautogui.position())
         finder = Finder(*load_template(resource("assets/example.png")),
-                        scales=SIZE_SCALES, shape="orient", rotations=ROTATIONS, smooth=1.0)
+                        scales=SIZE_SCALES, shape=True)
         with open_screen() as sct:
             start = time.perf_counter()
             for _ in range(10):
                 shot, _ = grab(sct, sct.monitors[0])
-                finder.find(shot, match_score(30))
+                finder.find(shot, 0.7)
             per_look = (time.perf_counter() - start) * 100  # ms per look
         root = tk.Tk()
         App(root)

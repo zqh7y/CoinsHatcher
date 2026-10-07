@@ -57,18 +57,6 @@ def shape_map(image):
     return cv2.magnitude(gx, gy)
 
 
-def orient_map(image):
-    """Edge directions as two channels, the same for light-on-dark and
-    dark-on-light (angles are doubled, so a flipped edge looks identical).
-    Unlike plain edge strength, a circle or blob no longer looks like a hand."""
-    gray = image if image.ndim == 2 else cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray, (3, 3), 0)
-    gx = cv2.Sobel(gray, cv2.CV_32F, 1, 0)
-    gy = cv2.Sobel(gray, cv2.CV_32F, 0, 1)
-    mag = cv2.magnitude(gx, gy) + 1e-3
-    return cv2.merge([(gx * gx - gy * gy) / mag, 2 * gx * gy / mag])
-
-
 def find_matches(screen, template, confidence, scales=(1.0,), mask=None,
                  find_all=False, shape=False):
     """Return [(x, y, score), ...] centers of matches in `screen`, best first
@@ -123,37 +111,6 @@ def find_matches(screen, template, confidence, scales=(1.0,), mask=None,
     return [(cx, cy, score) for cx, cy, score, _, _ in _suppress_overlaps(matches)]
 
 
-def _energy(features):
-    """Edge strength of a feature map (one or two channels)."""
-    if features.ndim == 3 and features.shape[2] == 2:
-        return cv2.magnitude(features[:, :, 0], features[:, :, 1])
-    return features
-
-
-def _soften(features, sigma):
-    return cv2.GaussianBlur(features, (0, 0), sigma)
-
-
-def _rotate(template, mask, angle):
-    """Turn a picture by `angle` degrees on a bigger canvas. The corners that
-    come in from outside the picture are masked out."""
-    if not angle:
-        return template, mask
-    h, w = template.shape[:2]
-    if mask is None:
-        mask = np.full((h, w), 255, np.uint8)
-    rad = np.deg2rad(abs(angle))
-    nw = int(np.ceil(w * np.cos(rad) + h * np.sin(rad)))
-    nh = int(np.ceil(h * np.cos(rad) + w * np.sin(rad)))
-    m = cv2.getRotationMatrix2D((w / 2, h / 2), angle, 1.0)
-    m[0, 2] += (nw - w) / 2
-    m[1, 2] += (nh - h) / 2
-    tpl = cv2.warpAffine(template, m, (nw, nh), flags=cv2.INTER_LINEAR,
-                         borderMode=cv2.BORDER_REPLICATE)
-    mask = cv2.warpAffine(mask, m, (nw, nh), flags=cv2.INTER_NEAREST, borderValue=0)
-    return tpl, mask
-
-
 def _resize(template, mask, scale):
     if scale == 1.0:
         return template, mask
@@ -174,9 +131,9 @@ def _match(screen, tpl, mask, threshold, find_all, shape=False):
     if shape:
         # A plain area has almost no edges; its score means nothing.
         rh, rw = result.shape
-        local = cv2.boxFilter(_energy(screen), -1, (tw, th), anchor=(0, 0),
+        local = cv2.boxFilter(screen, -1, (tw, th), anchor=(0, 0),
                               borderType=cv2.BORDER_CONSTANT)[:rh, :rw]
-        result[local < MIN_EDGE_RATIO * float(_energy(tpl).mean())] = 0
+        result[local < MIN_EDGE_RATIO * float(tpl.mean())] = 0
 
     if not find_all:
         _, score, _, (x, y) = cv2.minMaxLoc(result)
@@ -206,102 +163,87 @@ def _suppress_overlaps(matches):
 class Finder:
     """Fast repeated search for one picture, for the live click loop.
 
-    Everything about the picture is prepared once. Each screen is shrunk to
-    half size (for pictures big enough) and searched in two steps: a quick
-    pass over the whole screen finds the few places that could be it, then
-    only those spots are checked closely, at every size in `scales` and every
-    turn in `rotations`.
-
-    With `shape`, outlines are compared instead of colors; `shape="orient"`
-    also compares which way each edge runs, which tells a hand from a round
-    blob much better. `smooth` blurs the outlines a little so a shaking,
-    motion-blurred icon still lines up.
+    Everything about the picture is prepared once. Each screen is then
+    searched in two steps: a quick pass on a half-size copy finds the few
+    places that could be it, and only those spots are checked at full size,
+    at every size in `scales`. A full-HD screen takes about 10-20 ms.
     """
 
-    def __init__(self, template, mask=None, scales=(1.0,), shape=False, rotations=(0,),
-                 smooth=0.0):
+    def __init__(self, template, mask=None, scales=(1.0,), shape=False, coarse_shape=None):
         self.shape = shape
-        base = orient_map if shape == "orient" else shape_map if shape else None
-        if base is None:
-            self.prep = lambda image: image
-        elif smooth:
-            self.prep = lambda image: _soften(base(image), smooth)
-        else:
-            self.prep = base
-        quick = (lambda image: _soften(shape_map(image), smooth)) if smooth else shape_map
-        self.quick = quick if shape else self.prep
+        self.prep = shape_map if shape else (lambda image: image)
         if shape and mask is not None and mask.ndim == 3:
             mask = mask[:, :, 0]
-
-        # Work at half size when the picture is big enough to survive it.
-        self.factor = f = 0.5 if min(template.shape[:2]) >= 32 else 1.0
-        self.levels = []  # (features, mask, w, h) per size and turn, at factor f
+        self.levels = []  # (template features, mask, w, h) for each size
         for scale in sorted(set(scales)):
-            for angle in sorted(set(rotations), key=abs):
-                tpl, tpl_mask = _rotate(*_resize(template, mask, scale * f), angle)
-                if min(tpl.shape[:2]) >= 4:
-                    self.levels.append((self.prep(tpl), tpl_mask, tpl.shape[1], tpl.shape[0]))
+            tpl, tpl_mask = _resize(template, mask, scale)
+            if min(tpl.shape[:2]) >= 4:
+                self.levels.append((self.prep(tpl), tpl_mask, tpl.shape[1], tpl.shape[0]))
         if not self.levels:
             raise ValueError("picture is too small")
         self.max_w = max(level[2] for level in self.levels)
         self.max_h = max(level[3] for level in self.levels)
 
-        # The quick pass: one size, no mask (masks are slow), blanked outside it.
+        # The quick pass: one size, half resolution, no mask (masks are slow).
+        self.half = min(template.shape[:2]) >= 24
+        f = 0.5 if self.half else 1.0
         coarse, coarse_mask = _resize(template, mask, f)
-        coarse = self.quick(coarse)
-        if coarse_mask is not None:
+        coarse = self.prep(coarse)
+        if coarse_mask is not None:  # blank out what the mask hides
             m = coarse_mask if coarse_mask.ndim == coarse.ndim else coarse_mask[..., None]
             coarse = (coarse * (m > 0)).astype(coarse.dtype)
         self.coarse = coarse
+        self.factor = f
 
     def find(self, screen, confidence, find_all=False, max_spots=None):
         """[(x, y, score), ...] like find_matches, best first."""
         f = self.factor
         small = screen if f == 1.0 else cv2.resize(screen, None, fx=f, fy=f,
                                                    interpolation=cv2.INTER_AREA)
+        small = self.prep(small)
         ch, cw = self.coarse.shape[:2]
         if ch > small.shape[0] or cw > small.shape[1]:
             return []
-        quick = self.quick(small)
-        rough = cv2.matchTemplate(quick, self.coarse, cv2.TM_CCOEFF_NORMED)
+        rough = cv2.matchTemplate(small, self.coarse, cv2.TM_CCOEFF_NORMED)
         rough = np.nan_to_num(rough, nan=0.0, posinf=0.0, neginf=0.0)
         rough[rough > 1.001] = 0
         if self.shape:
             rh, rw = rough.shape
-            local = cv2.boxFilter(_energy(quick), -1, (cw, ch), anchor=(0, 0),
+            local = cv2.boxFilter(small, -1, (cw, ch), anchor=(0, 0),
                                   borderType=cv2.BORDER_CONSTANT)[:rh, :rw]
-            rough[local < MIN_EDGE_RATIO * float(_energy(self.coarse).mean())] = 0
+            rough[local < MIN_EDGE_RATIO * float(self.coarse.mean())] = 0
 
-        spots = max_spots or (20 if find_all else 5)
+        spots = max_spots or (20 if find_all else 4)
+        floor = max(0.2, confidence - 0.4)  # the quick pass is only a hint
         matches = []
         for _ in range(spots):
             _, score, _, (x, y) = cv2.minMaxLoc(rough)
-            if score < 0.15:
+            if score < floor:
                 break
             # blank this spot so the next round finds the next one
             rough[max(0, y - ch // 2):y + ch // 2 + 1, max(0, x - cw // 2):x + cw // 2 + 1] = 0
-            best = self._refine(small, x + cw / 2, y + ch / 2)
+            cx, cy = (x + cw / 2) / f, (y + ch / 2) / f
+            best = self._refine(screen, cx, cy)
             if best and best[2] >= confidence:
-                cx, cy, score, w, h = best
-                matches.append((cx / f, cy / f, score, w / f, h / f))
+                matches.append(best)
                 if not find_all:
                     break
         matches.sort(key=lambda m: m[2], reverse=True)
         return [(cx, cy, score) for cx, cy, score, _, _ in _suppress_overlaps(matches)]
 
-    def _refine(self, small, cx, cy):
-        """Best match near (cx, cy) of the shrunk screen, trying every size and turn."""
-        pad = REFINE_MARGIN
+    def _refine(self, screen, cx, cy):
+        """Best full-size match near (cx, cy), trying every size."""
+        pad = REFINE_MARGIN + int(4 / self.factor)
         x0 = max(0, int(cx - self.max_w / 2) - pad)
         y0 = max(0, int(cy - self.max_h / 2) - pad)
-        x1 = min(small.shape[1], int(cx + self.max_w / 2) + pad + 1)
-        y1 = min(small.shape[0], int(cy + self.max_h / 2) + pad + 1)
-        window = self.prep(small[y0:y1, x0:x1])
+        x1 = min(screen.shape[1], int(cx + self.max_w / 2) + pad + 1)
+        y1 = min(screen.shape[0], int(cy + self.max_h / 2) + pad + 1)
+        window = self.prep(screen[y0:y1, x0:x1])
         best = None
         for tpl, mask, w, h in self.levels:
             if h > window.shape[0] or w > window.shape[1]:
                 continue
-            for x, y, score, _, _ in _match(window, tpl, mask, -1.0, False, bool(self.shape)):
+            for x, y, score, _, _ in _match(window, tpl, mask, -1.0, False, self.shape):
                 if best is None or score > best[2]:
                     best = (x + x0, y + y0, score, w, h)
         return best
@@ -441,30 +383,6 @@ class _PyAutoGuiMouse:
         self.p.mouseUp(button=button, _pause=False)
 
 
-def _win_input():
-    """SendInput structures (built on first use, Windows only)."""
-    import ctypes
-    from ctypes import wintypes
-
-    class MOUSEINPUT(ctypes.Structure):
-        _fields_ = [("dx", wintypes.LONG), ("dy", wintypes.LONG),
-                    ("mouseData", wintypes.DWORD), ("dwFlags", wintypes.DWORD),
-                    ("time", wintypes.DWORD), ("dwExtraInfo", ctypes.c_size_t)]
-
-    class KEYBDINPUT(ctypes.Structure):
-        _fields_ = [("wVk", wintypes.WORD), ("wScan", wintypes.WORD),
-                    ("dwFlags", wintypes.DWORD), ("time", wintypes.DWORD),
-                    ("dwExtraInfo", ctypes.c_size_t)]
-
-    class _U(ctypes.Union):
-        _fields_ = [("mi", MOUSEINPUT), ("ki", KEYBDINPUT)]
-
-    class INPUT(ctypes.Structure):
-        _fields_ = [("type", wintypes.DWORD), ("u", _U)]
-
-    return ctypes, wintypes, MOUSEINPUT, KEYBDINPUT, INPUT
-
-
 class _WinMouse:
     """Real mouse input through SendInput, which games read like a physical
     mouse (SetCursorPos-style jumps are often ignored)."""
@@ -474,15 +392,26 @@ class _WinMouse:
                "middle": (0x0020, 0x0040)}
 
     def __init__(self):
-        self.ctypes, self.wintypes, self.MOUSEINPUT, _, self.INPUT = _win_input()
-        self.user32 = self.ctypes.windll.user32
+        import ctypes
+        from ctypes import wintypes
+
+        class MOUSEINPUT(ctypes.Structure):
+            _fields_ = [("dx", wintypes.LONG), ("dy", wintypes.LONG),
+                        ("mouseData", wintypes.DWORD), ("dwFlags", wintypes.DWORD),
+                        ("time", wintypes.DWORD), ("dwExtraInfo", ctypes.c_size_t)]
+
+        class INPUT(ctypes.Structure):
+            _fields_ = [("type", wintypes.DWORD), ("mi", MOUSEINPUT)]
+
+        self.ctypes, self.wintypes = ctypes, wintypes
+        self.MOUSEINPUT, self.INPUT = MOUSEINPUT, INPUT
+        self.user32 = ctypes.windll.user32
         metric = self.user32.GetSystemMetrics
         self.vx, self.vy = metric(76), metric(77)  # virtual desktop origin
         self.vw, self.vh = max(2, metric(78)), max(2, metric(79))
 
     def _send(self, flags, dx=0, dy=0):
-        inp = self.INPUT(0)
-        inp.u.mi = self.MOUSEINPUT(dx, dy, 0, flags, 0, 0)
+        inp = self.INPUT(0, self.MOUSEINPUT(dx, dy, 0, flags, 0, 0))
         self.user32.SendInput(1, self.ctypes.byref(inp), self.ctypes.sizeof(inp))
 
     def position(self):
@@ -500,26 +429,6 @@ class _WinMouse:
 
     def up(self, button):
         self._send(self.BUTTONS[button][1])
-
-
-def press_space(pyautogui=None, hold=0.05):
-    """Tap the Space bar. On Windows it is sent as a hardware scan code, which
-    games (Roblox included) read like a real key press."""
-    if sys.platform == "win32":
-        ctypes, _, _, KEYBDINPUT, INPUT = _win_input()
-        user32 = ctypes.windll.user32
-        for flags in (0x0008, 0x0008 | 0x0002):  # SCANCODE, then SCANCODE|KEYUP
-            inp = INPUT(1)
-            inp.u.ki = KEYBDINPUT(0, 0x39, flags, 0, 0)
-            user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(inp))
-            if not flags & 0x0002:
-                time.sleep(hold)
-    else:
-        if pyautogui is None:
-            import pyautogui
-        pyautogui.keyDown("space", _pause=False)
-        time.sleep(hold)
-        pyautogui.keyUp("space", _pause=False)
 
 
 def run(args):

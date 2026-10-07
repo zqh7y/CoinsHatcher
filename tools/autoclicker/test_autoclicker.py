@@ -139,11 +139,10 @@ def test_shape_mode_ignores_plain_areas():
 def test_finder_matches_find_matches():
     screen, big = make_big_scene()
     finder = Finder(big, scales=(0.9, 1.0, 1.1))
-    near = lambda p, q: abs(p[0] - q[0]) <= 2 and abs(p[1] - q[1]) <= 2  # half-size search
     best = finder.find(screen, 0.9)
-    assert len(best) == 1 and any(near(best[0], c) for c in [(393, 146), (1261, 645)])
-    found = sorted(finder.find(screen, 0.9, find_all=True))
-    assert len(found) == 2 and near(found[0], (393, 146)) and near(found[1], (1261, 645))
+    assert len(best) == 1 and best[0][:2] in [(393, 146), (1261, 645)]
+    found = finder.find(screen, 0.9, find_all=True)
+    assert sorted((x, y) for x, y, _ in found) == [(393, 146), (1261, 645)]
 
 
 def test_finder_any_color_and_size():
