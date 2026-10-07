@@ -319,10 +319,8 @@ def grab(sct, area):
     return bgr, factor
 
 
-CLICK_GAP = 0.04   # seconds between the clicks of one hit
-CLICK_HOLD = 0.03  # how long the button stays down per click
-NUDGE = ((3, 2), (-2, -3), (0, 0))  # pixel offsets visited after arriving
-NUDGE_STEP = 0.006  # seconds per nudge step (about 0.025 s in total)
+CLICK_GAP = 0.03   # seconds between the clicks of one hit
+CLICK_HOLD = 0.02  # how long the button stays down per click
 
 
 def _ease(t):
@@ -355,12 +353,7 @@ def click(pyautogui, x, y, button="left", clicks=2, move_time=0.05):
         mouse.move(round(sx + (x - sx) * k), round(sy + (y - sy) * k))
         time.sleep(0.008)
     mouse.move(x, y)
-    # quick nudge of a few pixels so the game notices the mouse is over the
-    # button (it sometimes misses a click right after the mouse arrives)
-    for dx, dy in NUDGE:
-        time.sleep(NUDGE_STEP)
-        mouse.move(x + dx, y + dy)
-    time.sleep(NUDGE_STEP)
+    time.sleep(0.005)
 
     for i in range(clicks):
         if i:

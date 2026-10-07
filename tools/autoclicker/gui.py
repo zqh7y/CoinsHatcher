@@ -26,7 +26,7 @@ HOTKEY = "p"
 HOTKEY_VK = 0x50  # the P key on every keyboard layout
 SIZE_SCALES = (0.9, 1.0, 1.1)
 SETTINGS_VERSION = 3
-SAME_SPOT_COOLDOWN = 0.35  # don't click the same spot again right away
+SAME_SPOT_COOLDOWN = 0.1  # don't click the same spot again right away
 START_DELAY = 3
 THUMB = 88
 
