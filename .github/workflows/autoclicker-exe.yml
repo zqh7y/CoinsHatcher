@@ -1,0 +1,52 @@
+name: Build Auto Clicker .exe
+
+on:
+  push:
+    paths:
+      - "tools/autoclicker/**"
+      - ".github/workflows/autoclicker-exe.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: tools/autoclicker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller pillow pytest
+
+      - name: Test matching
+        run: python -m pytest -q
+
+      - name: Build
+        run: >
+          pyinstaller --noconfirm --onefile --windowed
+          --name AutoClicker
+          --icon assets/icon.png
+          --add-data "assets;assets"
+          --hidden-import pynput.keyboard._win32
+          --hidden-import pynput.mouse._win32
+          gui.py
+
+      - name: Check the .exe starts
+        shell: pwsh
+        run: |
+          $env:SELFTEST_OUT = "$PWD\selftest.txt"
+          $p = Start-Process dist\AutoClicker.exe -ArgumentList "--selftest" -PassThru -Wait
+          Get-Content selftest.txt
+          if ($p.ExitCode -ne 0) { exit 1 }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoClicker
+          path: tools/autoclicker/dist/AutoClicker.exe

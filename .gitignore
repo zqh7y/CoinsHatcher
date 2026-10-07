@@ -11,5 +11,6 @@ sourcemap.json
 __pycache__/
 .pytest_cache/
 tools/autoclicker/.venv/
-tools/autoclicker/settings.json
-tools/autoclicker/images/
+tools/autoclicker/build/
+tools/autoclicker/dist/
+tools/autoclicker/*.spec

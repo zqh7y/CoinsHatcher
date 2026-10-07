@@ -3,22 +3,23 @@
 Give it a picture of a button (or anything else), and it keeps looking for
 that picture on your screen and clicks its center whenever it shows up.
 
-## Easy way: the app (Windows)
+## Easy way: AutoClicker.exe (Windows)
 
-1. Install Python from https://www.python.org/downloads/ (tick **Add
-   python.exe to PATH** in the installer).
-2. Double-click **Start Auto Clicker.bat**. The first time it sets itself up,
-   which takes a minute.
-3. In the window, press **Add picture...** and pick your screenshot of the
-   thing to click. If the screenshot has a lot of background around it, press
-   **Crop selected**, drag a box around just the button and press Enter.
-4. Press **Start** (or **F8**), switch to the game within 3 seconds. It now
-   clicks the picture whenever it shows up. **F8** stops it again, and so does
-   moving the mouse into a screen corner.
+1. Open **AutoClicker.exe**. If Windows says "Windows protected your PC",
+   click **More info**, then **Run anyway** (the app isn't signed, that's all).
+2. **Step 1:** press **Take from screen**, then drag a box around the button
+   you want clicked. You can add more than one picture.
+3. **Step 2:** press **START** (or **F8**) and open your game. The window
+   hides itself and clicks the picture every time it shows up.
+4. Press **F8** to stop. Pushing the mouse into a screen corner also stops it.
 
-If it clicks wrong things, move **Match strictness** up; if it doesn't find
-the picture, move it down a bit. Your pictures and settings are remembered
-for next time.
+If it clicks wrong things or misses the picture, open **Settings** and move
+"How exact must it match?". Pictures and settings are kept for next time
+(in `%APPDATA%\ImageAutoClicker`).
+
+The .exe is built by the "Build Auto Clicker .exe" GitHub Action on every
+change to this folder (download it from the run's artifacts). To run from
+source instead: `pip install -r requirements.txt`, then `python gui.py`.
 
 ## Command line
 

@@ -188,6 +188,12 @@ class Controls:
         return self.stop.wait(seconds)
 
 
+def open_screen():
+    """Screen grabber (newer mss renamed mss.mss to mss.MSS)."""
+    import mss
+    return mss.MSS() if hasattr(mss, "MSS") else mss.mss()
+
+
 def grab(sct, area):
     """Screenshot `area` as BGR, plus the factor from image pixels to mouse
     coordinates (Retina / HiDPI screens capture more pixels than points)."""
@@ -207,7 +213,6 @@ def click(pyautogui, x, y, button, clicks):
 
 
 def run(args):
-    import mss
     import pyautogui
 
     pyautogui.PAUSE = 0.02
@@ -220,7 +225,7 @@ def run(args):
 
     controls = Controls(args.stop_key.lower(), args.pause_key.lower())
 
-    with mss.mss() as sct:
+    with open_screen() as sct:
         if args.region:
             area = args.region
         else:
