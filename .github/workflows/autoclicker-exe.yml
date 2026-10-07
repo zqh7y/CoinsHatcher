@@ -7,6 +7,9 @@ on:
       - ".github/workflows/autoclicker-exe.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write  # to publish the .exe as a release download
+
 jobs:
   build:
     runs-on: windows-latest
@@ -50,3 +53,17 @@ jobs:
         with:
           name: AutoClicker
           path: tools/autoclicker/dist/AutoClicker.exe
+
+      - name: Publish download link
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude/project-thread-ie5jp9'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: autoclicker
+          target_commitish: ${{ github.sha }}
+          name: Auto Clicker
+          body: |
+            Download **AutoClicker.exe** below and open it.
+            If Windows says "Windows protected your PC", click **More info**, then **Run anyway**.
+            How to use: see tools/autoclicker/README.md.
+          files: tools/autoclicker/dist/AutoClicker.exe
+          make_latest: true
