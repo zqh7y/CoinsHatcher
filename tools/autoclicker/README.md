@@ -9,12 +9,18 @@ that picture on your screen and clicks its center whenever it shows up.
    click **More info**, then **Run anyway** (the app isn't signed, that's all).
 2. **Step 1:** press **Take from screen**, then drag a box around the button
    you want clicked. You can add more than one picture.
-3. **Step 2:** press **START** (or **F8**) and open your game. The window
+3. **Step 2:** press **START** (or **P**) and open your game. The window
    hides itself and watches the screen nonstop. When the picture shows up it
    glides the mouse there (0.12 s) and clicks it twice, about 0.15-0.25 s
    after it appeared. Games like Roblox ignore a mouse that just teleports,
    which is why it glides.
-4. Press **F8** to stop. Pushing the mouse into a screen corner also stops it.
+4. Press **P** to stop. Pushing the mouse into a screen corner also stops it.
+
+**Keep using your mouse while it clicks:** in step 2, set **Click in** to your
+game's window instead of "Whole screen". Then the clicker looks only inside
+that window and clicks it without moving your real mouse, so you can use
+other apps. The game can sit behind other windows, but not minimized. Some
+games ignore clicks sent this way; if yours does, go back to "Whole screen".
 
 By default it matches the picture's shape, not its colors, so a button
 that changes color (pink, white, on a grey or purple background...) is

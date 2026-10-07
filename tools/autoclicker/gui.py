@@ -1,7 +1,7 @@
 """Auto Clicker: clicks a picture whenever it shows up on your screen.
 
 1. Take a picture of the thing to click (straight from the screen, or a file).
-2. Press START (or F8) and switch to your game.
+2. Press START (or P) and switch to your game.
 """
 
 import ctypes
@@ -19,10 +19,13 @@ from tkinter import filedialog, messagebox
 import cv2
 import numpy as np
 
+import winbg
 from autoclicker import Finder, click, grab, load_template, open_screen
 
 APP_NAME = "Auto Clicker"
-HOTKEY = "f8"
+HOTKEY = "p"
+HOTKEY_VK = 0x50  # the P key on every keyboard layout
+WHOLE_SCREEN = "Whole screen (uses your mouse)"
 SIZE_SCALES = (0.9, 1.0, 1.1)
 SETTINGS_VERSION = 2
 SAME_SPOT_COOLDOWN = 0.35  # don't click the same spot again right away
@@ -113,8 +116,9 @@ class ClickerThread(threading.Thread):
     """Watches the screen and clicks. Talks to the window through `events`."""
 
     def __init__(self, images, confidence, interval, click_all, any_size, any_color,
-                 move_time, clicks, events):
+                 move_time, clicks, events, window=None):
         super().__init__(daemon=True)
+        self.window = window  # title of the window to click in the background
         self.move_time = move_time
         self.clicks = clicks
         self.any_color = any_color
@@ -153,6 +157,9 @@ class ClickerThread(threading.Thread):
         self.events.put(("status", ("Looking for your picture...",
                                     f"Press {HOTKEY.upper()} to stop")))
 
+        if self.window:
+            return self._run_window(finders)
+
         clicks = 0
         recent = []  # (x, y, time) of the last clicks
         with open_screen() as sct:
@@ -170,6 +177,52 @@ class ClickerThread(threading.Thread):
                         if any(abs(x - rx) < 20 and abs(y - ry) < 20 for rx, ry, _ in recent):
                             continue
                         click(pyautogui, x, y, "left", self.clicks, self.move_time)
+                        recent.append((x, y, time.monotonic()))
+                        clicks += 1
+                        self.events.put(("click", clicks))
+                self.stop_event.wait(self.interval)
+
+    def _run_window(self, finders):
+        """Background mode: look inside one window and click it with window
+        messages, so the real mouse stays free for the user."""
+        hwnd = winbg.find_window(self.window)
+        if not hwnd:
+            raise RuntimeError(f'Can\'t find the window "{self.window}".\n'
+                               "Open it, then pick it again in \"Click in\".")
+        looking = ("Looking for your picture...",
+                   f"Background mode: use your PC freely. Press {HOTKEY.upper()} to stop")
+        self.events.put(("status", looking))
+        clicks = 0
+        recent = []
+        paused = False
+        with open_screen() as sct:
+            while not self.stop_event.is_set():
+                if not winbg.is_alive(hwnd):
+                    raise RuntimeError(f'The window "{self.window}" was closed.')
+                if winbg.is_minimized(hwnd):
+                    if not paused:
+                        self.events.put(("status", ("Waiting: the game is minimized",
+                                                    "Open it again. It can stay behind "
+                                                    "other windows, just not minimized.")))
+                        paused = True
+                    self.stop_event.wait(0.3)
+                    continue
+                if paused:
+                    self.events.put(("status", looking))
+                    paused = False
+                view = winbg.capture(hwnd)
+                if view is None or view.max() < 8:  # some games draw black here
+                    view, _ = grab(sct, winbg.client_area(hwnd))
+                for finder in finders:
+                    for cx, cy, _ in finder.find(view, self.confidence, self.click_all):
+                        if self.stop_event.is_set():
+                            return
+                        x, y = round(cx), round(cy)
+                        now = time.monotonic()
+                        recent = [r for r in recent if now - r[2] < SAME_SPOT_COOLDOWN]
+                        if any(abs(x - rx) < 20 and abs(y - ry) < 20 for rx, ry, _ in recent):
+                            continue
+                        winbg.click(hwnd, x, y, self.clicks, self.move_time)
                         recent.append((x, y, time.monotonic()))
                         clicks += 1
                         self.events.put(("click", clicks))
@@ -318,6 +371,7 @@ class App:
         self.any_color = tk.BooleanVar(value=True)
         self.move_time = tk.DoubleVar(value=0.12)
         self.clicks_each = tk.IntVar(value=2)
+        self.target = tk.StringVar(value=WHOLE_SCREEN)
 
         self.build()
         self.load_settings()
@@ -361,6 +415,21 @@ class App:
 
         # Step 2: start
         step2 = self.card(2, "Press Start, then open your game")
+        if winbg.SUPPORTED:
+            where = tk.Frame(step2, bg=CARD)
+            where.pack(fill="x", pady=(0, 10))
+            tk.Label(where, text="Click in:", bg=CARD, fg=TEXT,
+                     font=(FONT, 10, "bold")).pack(side="left")
+            self.target_menu = tk.OptionMenu(where, self.target, WHOLE_SCREEN)
+            self.target_menu.configure(bg=LIGHT_BTN, fg=TEXT, activebackground=LIGHT_BTN_HOVER,
+                                       relief="flat", highlightthickness=0, font=(FONT, 10),
+                                       width=30, anchor="w")
+            self.target_menu.pack(side="left", padx=8)
+            self.target_menu.bind("<Button-1>", lambda e: self.fill_targets(), add="+")
+            tk.Label(step2, text="Pick your game window to keep using your mouse "
+                     "while it clicks (the game can be behind other windows).",
+                     bg=CARD, fg=MUTED, font=(FONT, 9), wraplength=380,
+                     justify="left").pack(anchor="w", pady=(0, 10))
         self.start_btn = flat_button(step2, "START", self.toggle, GREEN, GREEN_HOVER,
                                      size=18, pady=12)
         self.start_btn.pack(fill="x")
@@ -419,8 +488,22 @@ class App:
                            activebackground=BG, selectcolor=CARD, font=(FONT, 10),
                            highlightthickness=0, bd=0,
                            command=self.save_settings).pack(anchor="w", pady=(6, 0))
-        tk.Label(frame, text="Emergency stop: push the mouse into any corner of the screen.",
+        tk.Label(frame, text="Emergency stop (whole screen): push the mouse into a screen corner.",
                  bg=BG, fg=MUTED, font=(FONT, 9)).pack(anchor="w", pady=(10, 0))
+
+    def fill_targets(self):
+        """Refresh the "Click in" list with the windows open right now."""
+        menu = self.target_menu["menu"]
+        menu.delete(0, "end")
+        for title in [WHOLE_SCREEN] + winbg.list_windows(skip_titles=(APP_NAME,)):
+            if title.startswith(APP_NAME + " - "):
+                continue
+            label = title if len(title) <= 45 else title[:44] + "…"
+            menu.add_command(label=label, command=lambda t=title: self.pick_target(t))
+
+    def pick_target(self, title):
+        self.target.set(title)
+        self.save_settings()
 
     def toggle_settings(self):
         self.settings_open = not self.settings_open
@@ -524,13 +607,18 @@ class App:
         self.worker = ClickerThread(list(self.pictures), self.confidence.get() / 100,
                                     max(0.0, self.interval.get()), self.click_all.get(),
                                     self.any_size.get(), self.any_color.get(),
-                                    self.move_time.get(), self.clicks_each.get(), self.events)
+                                    self.move_time.get(), self.clicks_each.get(), self.events,
+                                    window=self.window_target())
         self.worker.start()
         self.clicks = 0
         self.start_btn.configure(text="STOP")
         recolor(self.start_btn, RED, RED_HOVER)
         # get out of the way, and don't let the clicker see our own preview
         self.root.iconify()
+
+    def window_target(self):
+        target = self.target.get()
+        return None if target == WHOLE_SCREEN or not winbg.SUPPORTED else target
 
     def set_status(self, title, sub):
         self.status.configure(text=title)
@@ -543,7 +631,8 @@ class App:
             return
 
         def on_press(key):
-            if getattr(key, "name", None) == HOTKEY:
+            if getattr(key, "vk", None) == HOTKEY_VK or \
+                    (getattr(key, "char", None) or "").lower() == HOTKEY:
                 self.root.after(0, self.toggle)
 
         listener = keyboard.Listener(on_press=on_press)
@@ -609,6 +698,7 @@ class App:
         self.any_size.set(data.get("any_size", True))
         self.any_color.set(data.get("any_color", True))
         self.clicks_each.set(data.get("clicks", 2))
+        self.target.set(data.get("target") or WHOLE_SCREEN)
 
     def save_settings(self):
         data = {
@@ -621,6 +711,7 @@ class App:
             "any_color": self.any_color.get(),
             "move_time": round(self.move_time.get(), 2),
             "clicks": self.clicks_each.get(),
+            "target": self.target.get(),
         }
         try:
             self.settings_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
@@ -655,13 +746,52 @@ def selftest():
         root = tk.Tk()
         App(root)
         root.update()
+        background = background_selftest(root, finder) if winbg.SUPPORTED else "skipped"
         root.destroy()
         out.write_text(f"OK screen {shot.shape[1]}x{shot.shape[0]}, one look {per_look:.0f} ms, "
-                       f"mouse glided to {mouse_at} (asked 200,150)", encoding="utf-8")
+                       f"mouse glided to {mouse_at} (asked 200,150), "
+                       f"background: {background}", encoding="utf-8")
         return 0
     except Exception:
         out.write_text(traceback.format_exc(), encoding="utf-8")
         return 1
+
+
+def background_selftest(root, finder):
+    """Show the example picture in a test window, cover it with another
+    window, then find and click it in background mode."""
+    import pyautogui
+    win = tk.Toplevel(root)
+    win.title("Background test")
+    win.geometry("500x400+300+200")
+    canvas = tk.Canvas(win, bg="white", highlightthickness=0)
+    canvas.pack(fill="both", expand=True)
+    photo = to_photo(read_bgr(resource("assets/example.png")))
+    canvas.create_image(300, 220, image=photo)
+    clicked = []
+    canvas.bind("<Button-1>", lambda e: clicked.append((e.x, e.y)))
+    cover = tk.Toplevel(root)
+    cover.geometry("300x250+400+300")  # on top of the picture
+    for _ in range(20):
+        root.update()
+        time.sleep(0.02)
+    hwnd = winbg.find_window("Background test")
+    assert hwnd, "test window not found"
+    view = winbg.capture(hwnd)
+    assert view is not None and view.max() > 8, "window capture is empty"
+    found = finder.find(view, 0.7)
+    assert found, "picture not found in the covered window"
+    cx, cy, _ = found[0]
+    mouse_before = tuple(pyautogui.position())
+    winbg.click(hwnd, round(cx), round(cy), clicks=2, move_time=0.05)
+    for _ in range(20):
+        root.update()
+        time.sleep(0.02)
+    assert len(clicked) == 2, f"window got {len(clicked)} clicks, expected 2"
+    assert tuple(pyautogui.position()) == mouse_before, "the real mouse moved"
+    win.destroy()
+    cover.destroy()
+    return f"found at {round(cx)},{round(cy)} under another window, clicked {clicked}, mouse untouched"
 
 
 def main():
