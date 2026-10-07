@@ -202,6 +202,7 @@ def borrow_click(pyautogui, click, hwnd, x, y, clicks=2, move_time=0.05):
         bring_to_front(hwnd)
         sx, sy = to_screen(hwnd, x, y)
         click(pyautogui, sx, sy, "left", clicks, move_time)
+        time.sleep(0.03)  # let the game read the click before we switch back
     finally:
         if before and before != hwnd:
             bring_to_front(before)

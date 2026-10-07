@@ -810,12 +810,22 @@ def background_selftest(root, finder):
     active_before = ctypes.windll.user32.GetForegroundWindow()
     assert active_before == yours, "couldn't make the test app active"
     mouse_before = tuple(pyautogui.position())
-    start = time.perf_counter()
-    winbg.borrow_click(pyautogui, click, target, 150, 120, clicks=2, move_time=0.05)
-    took = (time.perf_counter() - start) * 1000
+    took = []
+
+    def borrow():  # from a worker thread, like the real clicker
+        start = time.perf_counter()
+        winbg.borrow_click(pyautogui, click, target, 150, 120, clicks=2, move_time=0.05)
+        took.append((time.perf_counter() - start) * 1000)
+
+    worker = threading.Thread(target=borrow)
+    worker.start()
+    while worker.is_alive():  # the windows keep reading their messages meanwhile
+        root.update()
+        time.sleep(0.002)
     for _ in range(20):
         root.update()
         time.sleep(0.02)
+    took = took[0] if took else -1
     active_after = ctypes.windll.user32.GetForegroundWindow()
     if clicked != [(150, 120)] * 2:
         u = ctypes.windll.user32
