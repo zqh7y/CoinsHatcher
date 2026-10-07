@@ -16,14 +16,6 @@ that picture on your screen and clicks its center whenever it shows up.
    which is why it glides.
 4. Press **P** to stop. Pushing the mouse into a screen corner also stops it.
 
-**Keep using your PC while it clicks:** in step 2, set **Click in** to your
-game's window instead of "Whole screen". The clicker then watches only that
-window, even when it's behind other windows (just not minimized). When the
-picture shows up it borrows the mouse for a split second: the game comes to
-the front, the mouse glides there and clicks, then your mouse and the window
-you were using come right back. Games like Roblox only accept real mouse
-clicks, which is why it can't click without the mouse at all.
-
 By default it matches the picture's shape, not its colors, so a button
 that changes color (pink, white, on a grey or purple background...) is
 still found. Untick "Find it in any color" in **Settings** to match colors
