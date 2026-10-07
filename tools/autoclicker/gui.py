@@ -800,13 +800,15 @@ def background_selftest(root, finder):
     # click a bare window hidden under another one, like a covered game
     clicked = []
     target, keep = winbg.make_test_window("Click test", clicked)
-    cover.geometry("300x250+150+150")  # right over the spot we click
-    cover.lift()
-    cover.focus_force()
+    cover.destroy()
+    # the app "you" are using, on top of the game and active
+    yours, keep2 = winbg.make_test_window("Your app", [], (50, 50, 500, 400))
+    winbg.bring_to_front(yours)
     for _ in range(10):
         root.update()
         time.sleep(0.02)
     active_before = ctypes.windll.user32.GetForegroundWindow()
+    assert active_before == yours, "couldn't make the test app active"
     mouse_before = tuple(pyautogui.position())
     start = time.perf_counter()
     winbg.borrow_click(pyautogui, click, target, 150, 120, clicks=2, move_time=0.05)
@@ -816,7 +818,7 @@ def background_selftest(root, finder):
         time.sleep(0.02)
     active_after = ctypes.windll.user32.GetForegroundWindow()
     ctypes.windll.user32.DestroyWindow(ctypes.c_void_p(target))
-    cover.destroy()
+    ctypes.windll.user32.DestroyWindow(ctypes.c_void_p(yours))
     assert clicked == [(150, 120)] * 2, f"window got clicks {clicked}, expected 2 at 150,120"
     assert tuple(pyautogui.position()) == mouse_before, "the mouse didn't come back"
     assert active_after == active_before, (
