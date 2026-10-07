@@ -114,3 +114,23 @@ def test_big_template_find_all_and_sizes():
     assert len(matches) == 2
     for x, y, _ in matches:
         assert min(abs(x - 393) + abs(y - 146), abs(x - 1261) + abs(y - 645)) <= 3
+
+
+def test_shape_mode_finds_recolored_and_darker_copies():
+    screen, patch = make_scene()
+    hsv = cv2.cvtColor(patch, cv2.COLOR_BGR2HSV)
+    hsv[:, :, 0] = (hsv[:, :, 0].astype(int) + 70) % 180
+    screen[300:330, 500:540] = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)  # other color
+    screen[200:230, 50:90] = (patch * 0.6).astype(np.uint8)  # darker
+
+    by_color = find_matches(screen, patch, 0.9, find_all=True)
+    assert (520, 315) not in [(x, y) for x, y, _ in by_color]
+
+    by_shape = find_matches(screen, patch, 0.8, find_all=True, shape=True)
+    assert sorted((x, y) for x, y, _ in by_shape) == [(70, 215), (220, 115), (520, 315)]
+
+
+def test_shape_mode_ignores_plain_areas():
+    flat = np.full((300, 300, 3), 90, np.uint8)
+    _, patch = make_scene()
+    assert find_matches(flat, patch, 0.5, find_all=True, shape=True) == []

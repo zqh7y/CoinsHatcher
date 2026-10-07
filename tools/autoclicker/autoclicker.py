@@ -20,6 +20,7 @@ COARSE_MIN_SIDE = 40  # templates this big get the fast half-size search
 COARSE_SLACK = 0.15   # the rough pass accepts slightly worse scores
 REFINE_MARGIN = 6     # pixels around a rough hit to search again at full size
 MAX_REFINE = 50
+MIN_EDGE_RATIO = 0.3  # shape mode: skip spots with far fewer edges than the picture
 
 
 # ---------------------------------------------------------------------------
@@ -46,8 +47,18 @@ def load_template(path, grayscale=False):
     return image, mask
 
 
+def shape_map(image):
+    """Edge strength of an image. A white, pink or purple version of the same
+    icon gives (almost) the same map, so matching it ignores colors."""
+    gray = image if image.ndim == 2 else cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (3, 3), 0)
+    gx = cv2.Sobel(gray, cv2.CV_32F, 1, 0)
+    gy = cv2.Sobel(gray, cv2.CV_32F, 0, 1)
+    return cv2.magnitude(gx, gy)
+
+
 def find_matches(screen, template, confidence, scales=(1.0,), mask=None,
-                 find_all=False):
+                 find_all=False, shape=False):
     """Return [(x, y, score), ...] centers of matches in `screen`, best first
     (only the single best one unless `find_all`).
 
@@ -55,9 +66,17 @@ def find_matches(screen, template, confidence, scales=(1.0,), mask=None,
     resizes the template, so the image still matches when the game is shown
     a bit bigger or smaller than when you took the screenshot.
 
+    With `shape`, outlines are compared instead of colors, so the picture is
+    still found when the game shows it in another color.
+
     Big templates are first searched on a half-size copy of the screen (about
     4x faster), and each rough hit is then checked again at full size.
     """
+    prep = shape_map if shape else (lambda image: image)
+    if shape and mask is not None and mask.ndim == 3:
+        mask = mask[:, :, 0]
+    screen_f = prep(screen)
+
     matches = []
     half_screen = None
     for scale in scales:
@@ -65,24 +84,25 @@ def find_matches(screen, template, confidence, scales=(1.0,), mask=None,
         th, tw = tpl.shape[:2]
         if th < 4 or tw < 4 or th > screen.shape[0] or tw > screen.shape[1]:
             continue
+        tpl_f = prep(tpl)
 
         if min(th, tw) < COARSE_MIN_SIDE:
-            matches += _match(screen, tpl, tpl_mask, confidence, find_all)
+            matches += _match(screen_f, tpl_f, tpl_mask, confidence, find_all, shape)
             continue
 
         if half_screen is None:
-            half_screen = cv2.resize(screen, None, fx=0.5, fy=0.5,
-                                     interpolation=cv2.INTER_AREA)
+            half_screen = prep(cv2.resize(screen, None, fx=0.5, fy=0.5,
+                                          interpolation=cv2.INTER_AREA))
         half_tpl, half_mask = _resize(tpl, tpl_mask, 0.5)
-        rough = _suppress_overlaps(
-            _match(half_screen, half_tpl, half_mask, confidence - COARSE_SLACK, True))
+        rough = _suppress_overlaps(_match(half_screen, prep(half_tpl), half_mask,
+                                          confidence - COARSE_SLACK, True, shape))
         for cx, cy, _, _, _ in rough[:MAX_REFINE if find_all else 5]:
             x0 = max(0, cx * 2 - tw // 2 - REFINE_MARGIN)
             y0 = max(0, cy * 2 - th // 2 - REFINE_MARGIN)
-            window = screen[y0:y0 + th + 2 * REFINE_MARGIN, x0:x0 + tw + 2 * REFINE_MARGIN]
+            window = screen_f[y0:y0 + th + 2 * REFINE_MARGIN, x0:x0 + tw + 2 * REFINE_MARGIN]
             if window.shape[0] < th or window.shape[1] < tw:
                 continue
-            for x, y, score, _, _ in _match(window, tpl, tpl_mask, confidence, False):
+            for x, y, score, _, _ in _match(window, tpl_f, tpl_mask, confidence, False, shape):
                 matches.append((x + x0, y + y0, score, tw, th))
 
     matches.sort(key=lambda m: m[2], reverse=True)
@@ -102,11 +122,18 @@ def _resize(template, mask, scale):
     return tpl, mask
 
 
-def _match(screen, tpl, mask, threshold, find_all):
+def _match(screen, tpl, mask, threshold, find_all, shape=False):
     """Raw matches [(cx, cy, score, tw, th), ...] of one template size."""
     th, tw = tpl.shape[:2]
     result = cv2.matchTemplate(screen, tpl, cv2.TM_CCOEFF_NORMED, mask=mask)
     result = np.nan_to_num(result, nan=0.0, posinf=0.0, neginf=0.0)
+    result[result > 1.001] = 0  # flat spots can give nonsense scores
+    if shape:
+        # A plain area has almost no edges; its score means nothing.
+        rh, rw = result.shape
+        local = cv2.boxFilter(screen, -1, (tw, th), anchor=(0, 0),
+                              borderType=cv2.BORDER_CONSTANT)[:rh, :rw]
+        result[local < MIN_EDGE_RATIO * float(tpl.mean())] = 0
 
     if not find_all:
         _, score, _, (x, y) = cv2.minMaxLoc(result)
@@ -259,7 +286,7 @@ def run(args):
             clicked = False
             for name, tpl, mask in templates:
                 matches = find_matches(screen, tpl, args.confidence, args.scales,
-                                       mask=mask, find_all=args.all)
+                                       mask=mask, find_all=args.all, shape=args.any_color)
                 if not args.all:
                     matches = matches[:1]
                 for cx, cy, score in matches:
@@ -305,6 +332,8 @@ def build_parser():
                    help="with several images, stop at the first one found each round")
     p.add_argument("--scales", type=parse_scales, default=(1.0,),
                    help="template sizes to try, e.g. 0.8,0.9,1,1.1,1.25 (default 1)")
+    p.add_argument("--any-color", action="store_true",
+                   help="match the outline, so it is found in any color")
     p.add_argument("--grayscale", action="store_true",
                    help="ignore colors (faster, but can confuse similar shapes)")
     p.add_argument("--region", type=parse_region,

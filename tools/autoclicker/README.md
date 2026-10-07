@@ -13,8 +13,11 @@ that picture on your screen and clicks its center whenever it shows up.
    hides itself and clicks the picture every time it shows up.
 4. Press **F8** to stop. Pushing the mouse into a screen corner also stops it.
 
-If it clicks wrong things or misses the picture, open **Settings** and move
-"How exact must it match?". Pictures and settings are kept for next time
+By default it matches the picture's shape, not its colors, so a button
+that changes color (pink, white, on a grey or purple background...) is
+still found. Untick "Find it in any color" in **Settings** to match colors
+exactly. If it clicks wrong things or misses the picture, move "How exact
+must it match?" there too. Pictures and settings are kept for next time
 (in `%APPDATA%\ImageAutoClicker`).
 
 The .exe is built by the "Build Auto Clicker .exe" GitHub Action on every
@@ -71,6 +74,7 @@ Each line shows the match score. If it clicks the wrong things, raise
 | `--stop-key` / `--pause-key` | f8 / f7 | Hotkeys (e.g. `f6`, `esc`, `q`) |
 | `--all` | off | Click every copy on screen, not just the best one |
 | `--scales` | 1 | Template sizes to try, e.g. `0.8,0.9,1,1.1,1.25` if the window size changes |
+| `--any-color` | off | Match the outline, so the picture is found in any color |
 | `--grayscale` | off | Ignore colors (faster) |
 | `--region` | whole screen | Only search `x,y,width,height` (faster) |
 | `--monitor` | 1 | 1 = main screen, 2 = second, 0 = all screens |

@@ -110,8 +110,10 @@ def read_bgr(path):
 class ClickerThread(threading.Thread):
     """Watches the screen and clicks. Talks to the window through `events`."""
 
-    def __init__(self, images, confidence, interval, click_all, any_size, events):
+    def __init__(self, images, confidence, interval, click_all, any_size, any_color,
+                 events):
         super().__init__(daemon=True)
+        self.any_color = any_color
         self.images = images
         self.confidence = confidence
         self.interval = interval
@@ -154,7 +156,8 @@ class ClickerThread(threading.Thread):
                 for tpl, mask in templates:
                     for cx, cy, _ in find_matches(screen, tpl, self.confidence,
                                                   self.scales, mask=mask,
-                                                  find_all=self.click_all):
+                                                  find_all=self.click_all,
+                                                  shape=self.any_color):
                         if self.stop_event.is_set():
                             return
                         click(pyautogui, area["left"] + round(cx * factor),
@@ -303,6 +306,7 @@ class App:
         self.interval = tk.DoubleVar(value=0.5)
         self.click_all = tk.BooleanVar(value=False)
         self.any_size = tk.BooleanVar(value=True)
+        self.any_color = tk.BooleanVar(value=True)
 
         self.build()
         self.load_settings()
@@ -393,7 +397,8 @@ class App:
                  bg=BG, fg=MUTED, font=(FONT, 9)).pack(anchor="w")
         slider_row("How often to look", "Fast", "Slow", self.interval, 0.1, 3.0, 0.1,
                    lambda v: f"every {float(v):.1f} s")
-        for text, var in (("Click every copy on the screen, not just one", self.click_all),
+        for text, var in (("Find it in any color (matches the shape)", self.any_color),
+                          ("Click every copy on the screen, not just one", self.click_all),
                           ("Also find it a bit bigger or smaller", self.any_size)):
             tk.Checkbutton(frame, text=text, variable=var, bg=BG, fg=TEXT,
                            activebackground=BG, selectcolor=CARD, font=(FONT, 10),
@@ -503,7 +508,7 @@ class App:
         self.save_settings()
         self.worker = ClickerThread(list(self.pictures), self.confidence.get() / 100,
                                     max(0.05, self.interval.get()), self.click_all.get(),
-                                    self.any_size.get(), self.events)
+                                    self.any_size.get(), self.any_color.get(), self.events)
         self.worker.start()
         self.clicks = 0
         self.start_btn.configure(text="STOP")
@@ -570,18 +575,21 @@ class App:
             data = json.loads(self.settings_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             data = None
+        example = resource("assets/example.png")
+        example_copy = self.data / "pictures" / "example.png"
         if data is None:  # first run: start with the example picture
-            example = resource("assets/example.png")
             if example.exists():
-                target = self.data / "pictures" / "example.png"
-                shutil.copyfile(example, target)
-                self.pictures = [str(target)]
+                shutil.copyfile(example, example_copy)
+                self.pictures = [str(example_copy)]
             return
         self.pictures = [p for p in data.get("pictures", []) if Path(p).exists()]
+        if str(example_copy) in self.pictures and example.exists():
+            shutil.copyfile(example, example_copy)  # keep the example up to date
         self.confidence.set(data.get("confidence", 80))
         self.interval.set(data.get("interval", 0.5))
         self.click_all.set(data.get("click_all", False))
         self.any_size.set(data.get("any_size", True))
+        self.any_color.set(data.get("any_color", True))
 
     def save_settings(self):
         data = {
@@ -590,6 +598,7 @@ class App:
             "interval": round(self.interval.get(), 2),
             "click_all": self.click_all.get(),
             "any_size": self.any_size.get(),
+            "any_color": self.any_color.get(),
         }
         try:
             self.settings_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
@@ -614,7 +623,7 @@ def selftest():
         with open_screen() as sct:
             shot, _ = grab(sct, sct.monitors[0])
         tpl, mask = load_template(resource("assets/example.png"))
-        find_matches(shot, tpl, 0.8, SIZE_SCALES, mask=mask)
+        find_matches(shot, tpl, 0.8, SIZE_SCALES, mask=mask, shape=True)
         root = tk.Tk()
         App(root)
         root.update()
