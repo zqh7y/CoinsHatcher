@@ -19,11 +19,13 @@ from tkinter import filedialog, messagebox
 import cv2
 import numpy as np
 
-from autoclicker import click, find_matches, grab, load_template, open_screen
+from autoclicker import Finder, click, grab, load_template, open_screen
 
 APP_NAME = "Auto Clicker"
 HOTKEY = "f8"
 SIZE_SCALES = (0.9, 1.0, 1.1)
+SETTINGS_VERSION = 2
+SAME_SPOT_COOLDOWN = 0.35  # don't click the same spot again right away
 START_DELAY = 3
 THUMB = 88
 
@@ -141,7 +143,8 @@ class ClickerThread(threading.Thread):
         pyautogui.PAUSE = 0.02
         pyautogui.FAILSAFE = True  # mouse into a screen corner = emergency stop
 
-        templates = [load_template(path) for path in self.images]
+        finders = [Finder(*load_template(path), scales=self.scales, shape=self.any_color)
+                   for path in self.images]
 
         for left in range(START_DELAY, 0, -1):
             self.events.put(("status", (f"Starting in {left}...", "Open your game now")))
@@ -151,20 +154,23 @@ class ClickerThread(threading.Thread):
                                     f"Press {HOTKEY.upper()} to stop")))
 
         clicks = 0
+        recent = []  # (x, y, time) of the last clicks
         with open_screen() as sct:
             area = sct.monitors[0]  # every screen together
             while not self.stop_event.is_set():
                 screen, factor = grab(sct, area)
-                for tpl, mask in templates:
-                    for cx, cy, _ in find_matches(screen, tpl, self.confidence,
-                                                  self.scales, mask=mask,
-                                                  find_all=self.click_all,
-                                                  shape=self.any_color):
+                for finder in finders:
+                    for cx, cy, _ in finder.find(screen, self.confidence, self.click_all):
                         if self.stop_event.is_set():
                             return
-                        click(pyautogui, area["left"] + round(cx * factor),
-                              area["top"] + round(cy * factor), "left",
-                              self.clicks, self.move_time)
+                        x = area["left"] + round(cx * factor)
+                        y = area["top"] + round(cy * factor)
+                        now = time.monotonic()
+                        recent = [r for r in recent if now - r[2] < SAME_SPOT_COOLDOWN]
+                        if any(abs(x - rx) < 20 and abs(y - ry) < 20 for rx, ry, _ in recent):
+                            continue
+                        click(pyautogui, x, y, "left", self.clicks, self.move_time)
+                        recent.append((x, y, time.monotonic()))
                         clicks += 1
                         self.events.put(("click", clicks))
                 self.stop_event.wait(self.interval)
@@ -305,12 +311,12 @@ class App:
         except tk.TclError:
             pass
 
-        self.confidence = tk.IntVar(value=80)
-        self.interval = tk.DoubleVar(value=0.5)
+        self.confidence = tk.IntVar(value=70)
+        self.interval = tk.DoubleVar(value=0.0)
         self.click_all = tk.BooleanVar(value=False)
         self.any_size = tk.BooleanVar(value=True)
         self.any_color = tk.BooleanVar(value=True)
-        self.move_time = tk.DoubleVar(value=0.4)
+        self.move_time = tk.DoubleVar(value=0.12)
         self.clicks_each = tk.IntVar(value=2)
 
         self.build()
@@ -400,8 +406,8 @@ class App:
         tk.Label(frame, text="If it clicks wrong things, go more exact. "
                  "If it misses the picture, go looser.",
                  bg=BG, fg=MUTED, font=(FONT, 9)).pack(anchor="w")
-        slider_row("How often to look", "Fast", "Slow", self.interval, 0.1, 3.0, 0.1,
-                   lambda v: f"every {float(v):.1f} s")
+        slider_row("Pause between looks", "None", "Long", self.interval, 0.0, 1.0, 0.05,
+                   lambda v: "none (fastest)" if float(v) == 0 else f"{float(v):.2f} s")
         slider_row("Mouse travel time", "Instant", "Slow", self.move_time, 0.0, 1.0, 0.05,
                    lambda v: f"{float(v):.2f} s")
         slider_row("Clicks each time", "1", "5", self.clicks_each, 1, 5, 1,
@@ -516,7 +522,7 @@ class App:
             return
         self.save_settings()
         self.worker = ClickerThread(list(self.pictures), self.confidence.get() / 100,
-                                    max(0.05, self.interval.get()), self.click_all.get(),
+                                    max(0.0, self.interval.get()), self.click_all.get(),
                                     self.any_size.get(), self.any_color.get(),
                                     self.move_time.get(), self.clicks_each.get(), self.events)
         self.worker.start()
@@ -595,16 +601,18 @@ class App:
         self.pictures = [p for p in data.get("pictures", []) if Path(p).exists()]
         if str(example_copy) in self.pictures and example.exists():
             shutil.copyfile(example, example_copy)  # keep the example up to date
-        self.confidence.set(data.get("confidence", 80))
-        self.interval.set(data.get("interval", 0.5))
+        if data.get("version", 1) >= SETTINGS_VERSION:  # older saves keep new defaults
+            self.confidence.set(data.get("confidence", 70))
+            self.interval.set(data.get("interval", 0.0))
+            self.move_time.set(data.get("move_time", 0.12))
         self.click_all.set(data.get("click_all", False))
         self.any_size.set(data.get("any_size", True))
         self.any_color.set(data.get("any_color", True))
-        self.move_time.set(data.get("move_time", 0.4))
         self.clicks_each.set(data.get("clicks", 2))
 
     def save_settings(self):
         data = {
+            "version": SETTINGS_VERSION,
             "pictures": self.pictures,
             "confidence": self.confidence.get(),
             "interval": round(self.interval.get(), 2),
@@ -636,16 +644,20 @@ def selftest():
         from pynput import keyboard  # noqa: F401
         click(pyautogui, 200, 150, clicks=0, move_time=0.2)  # glide only
         mouse_at = tuple(pyautogui.position())
+        finder = Finder(*load_template(resource("assets/example.png")),
+                        scales=SIZE_SCALES, shape=True)
         with open_screen() as sct:
-            shot, _ = grab(sct, sct.monitors[0])
-        tpl, mask = load_template(resource("assets/example.png"))
-        find_matches(shot, tpl, 0.8, SIZE_SCALES, mask=mask, shape=True)
+            start = time.perf_counter()
+            for _ in range(10):
+                shot, _ = grab(sct, sct.monitors[0])
+                finder.find(shot, 0.7)
+            per_look = (time.perf_counter() - start) * 100  # ms per look
         root = tk.Tk()
         App(root)
         root.update()
         root.destroy()
-        out.write_text(f"OK screen {shot.shape[1]}x{shot.shape[0]}, mouse glided to "
-                       f"{mouse_at} (asked 200,150)", encoding="utf-8")
+        out.write_text(f"OK screen {shot.shape[1]}x{shot.shape[0]}, one look {per_look:.0f} ms, "
+                       f"mouse glided to {mouse_at} (asked 200,150)", encoding="utf-8")
         return 0
     except Exception:
         out.write_text(traceback.format_exc(), encoding="utf-8")

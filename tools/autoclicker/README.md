@@ -10,9 +10,10 @@ that picture on your screen and clicks its center whenever it shows up.
 2. **Step 1:** press **Take from screen**, then drag a box around the button
    you want clicked. You can add more than one picture.
 3. **Step 2:** press **START** (or **F8**) and open your game. The window
-   hides itself and, every time the picture shows up, glides the mouse to it
-   (0.4 s) and clicks it twice. Games like Roblox ignore a mouse that just
-   teleports, which is why it glides.
+   hides itself and watches the screen nonstop. When the picture shows up it
+   glides the mouse there (0.12 s) and clicks it twice, about 0.15-0.25 s
+   after it appeared. Games like Roblox ignore a mouse that just teleports,
+   which is why it glides.
 4. Press **F8** to stop. Pushing the mouse into a screen corner also stops it.
 
 By default it matches the picture's shape, not its colors, so a button
@@ -72,7 +73,7 @@ Each line shows the match score. If it clicks the wrong things, raise
 | Option | Default | What it does |
 |---|---|---|
 | `-c`, `--confidence` | 0.85 | Match threshold 0–1, higher is stricter |
-| `-i`, `--interval` | 0.5 | Seconds between screen checks |
+| `-i`, `--interval` | 0 | Pause between screen checks (0 = nonstop) |
 | `--stop-key` / `--pause-key` | f8 / f7 | Hotkeys (e.g. `f6`, `esc`, `q`) |
 | `--all` | off | Click every copy on screen, not just the best one |
 | `--scales` | 1 | Template sizes to try, e.g. `0.8,0.9,1,1.1,1.25` if the window size changes |
@@ -81,7 +82,7 @@ Each line shows the match score. If it clicks the wrong things, raise
 | `--region` | whole screen | Only search `x,y,width,height` (faster) |
 | `--monitor` | 1 | 1 = main screen, 2 = second, 0 = all screens |
 | `--button` / `--clicks` | left / 2 | Mouse button, and clicks per hit |
-| `--move-time` | 0.4 | Seconds the mouse takes to glide to the target |
+| `--move-time` | 0.12 | Seconds the mouse takes to glide to the target |
 | `--max-clicks` | 0 (never) | Stop after this many clicks |
 | `--timeout` | 0 (never) | Stop when nothing was found for this many seconds |
 | `--start-delay` | 3 | Seconds before it starts |

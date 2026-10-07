@@ -160,6 +160,95 @@ def _suppress_overlaps(matches):
     return kept
 
 
+class Finder:
+    """Fast repeated search for one picture, for the live click loop.
+
+    Everything about the picture is prepared once. Each screen is then
+    searched in two steps: a quick pass on a half-size copy finds the few
+    places that could be it, and only those spots are checked at full size,
+    at every size in `scales`. A full-HD screen takes about 10-20 ms.
+    """
+
+    def __init__(self, template, mask=None, scales=(1.0,), shape=False, coarse_shape=None):
+        self.shape = shape
+        self.prep = shape_map if shape else (lambda image: image)
+        if shape and mask is not None and mask.ndim == 3:
+            mask = mask[:, :, 0]
+        self.levels = []  # (template features, mask, w, h) for each size
+        for scale in sorted(set(scales)):
+            tpl, tpl_mask = _resize(template, mask, scale)
+            if min(tpl.shape[:2]) >= 4:
+                self.levels.append((self.prep(tpl), tpl_mask, tpl.shape[1], tpl.shape[0]))
+        if not self.levels:
+            raise ValueError("picture is too small")
+        self.max_w = max(level[2] for level in self.levels)
+        self.max_h = max(level[3] for level in self.levels)
+
+        # The quick pass: one size, half resolution, no mask (masks are slow).
+        self.half = min(template.shape[:2]) >= 24
+        f = 0.5 if self.half else 1.0
+        coarse, coarse_mask = _resize(template, mask, f)
+        coarse = self.prep(coarse)
+        if coarse_mask is not None:  # blank out what the mask hides
+            m = coarse_mask if coarse_mask.ndim == coarse.ndim else coarse_mask[..., None]
+            coarse = (coarse * (m > 0)).astype(coarse.dtype)
+        self.coarse = coarse
+        self.factor = f
+
+    def find(self, screen, confidence, find_all=False, max_spots=None):
+        """[(x, y, score), ...] like find_matches, best first."""
+        f = self.factor
+        small = screen if f == 1.0 else cv2.resize(screen, None, fx=f, fy=f,
+                                                   interpolation=cv2.INTER_AREA)
+        small = self.prep(small)
+        ch, cw = self.coarse.shape[:2]
+        if ch > small.shape[0] or cw > small.shape[1]:
+            return []
+        rough = cv2.matchTemplate(small, self.coarse, cv2.TM_CCOEFF_NORMED)
+        rough = np.nan_to_num(rough, nan=0.0, posinf=0.0, neginf=0.0)
+        rough[rough > 1.001] = 0
+        if self.shape:
+            rh, rw = rough.shape
+            local = cv2.boxFilter(small, -1, (cw, ch), anchor=(0, 0),
+                                  borderType=cv2.BORDER_CONSTANT)[:rh, :rw]
+            rough[local < MIN_EDGE_RATIO * float(self.coarse.mean())] = 0
+
+        spots = max_spots or (20 if find_all else 4)
+        floor = max(0.2, confidence - 0.4)  # the quick pass is only a hint
+        matches = []
+        for _ in range(spots):
+            _, score, _, (x, y) = cv2.minMaxLoc(rough)
+            if score < floor:
+                break
+            # blank this spot so the next round finds the next one
+            rough[max(0, y - ch // 2):y + ch // 2 + 1, max(0, x - cw // 2):x + cw // 2 + 1] = 0
+            cx, cy = (x + cw / 2) / f, (y + ch / 2) / f
+            best = self._refine(screen, cx, cy)
+            if best and best[2] >= confidence:
+                matches.append(best)
+                if not find_all:
+                    break
+        matches.sort(key=lambda m: m[2], reverse=True)
+        return [(cx, cy, score) for cx, cy, score, _, _ in _suppress_overlaps(matches)]
+
+    def _refine(self, screen, cx, cy):
+        """Best full-size match near (cx, cy), trying every size."""
+        pad = REFINE_MARGIN + int(4 / self.factor)
+        x0 = max(0, int(cx - self.max_w / 2) - pad)
+        y0 = max(0, int(cy - self.max_h / 2) - pad)
+        x1 = min(screen.shape[1], int(cx + self.max_w / 2) + pad + 1)
+        y1 = min(screen.shape[0], int(cy + self.max_h / 2) + pad + 1)
+        window = self.prep(screen[y0:y1, x0:x1])
+        best = None
+        for tpl, mask, w, h in self.levels:
+            if h > window.shape[0] or w > window.shape[1]:
+                continue
+            for x, y, score, _, _ in _match(window, tpl, mask, -1.0, False, self.shape):
+                if best is None or score > best[2]:
+                    best = (x + x0, y + y0, score, w, h)
+        return best
+
+
 def parse_scales(text):
     """'0.8,1,1.25' -> (0.8, 1.0, 1.25)"""
     scales = tuple(float(s) for s in text.split(",") if s.strip())
@@ -230,15 +319,15 @@ def grab(sct, area):
     return bgr, factor
 
 
-CLICK_GAP = 0.12   # seconds between the clicks of one hit
-CLICK_HOLD = 0.04  # how long the button stays down per click
+CLICK_GAP = 0.05   # seconds between the clicks of one hit
+CLICK_HOLD = 0.03  # how long the button stays down per click
 
 
 def _ease(t):
     return 1 - (1 - t) ** 3  # fast start, gentle stop, like a hand
 
 
-def click(pyautogui, x, y, button="left", clicks=2, move_time=0.4):
+def click(pyautogui, x, y, button="left", clicks=2, move_time=0.12):
     """Glide the mouse to (x, y) over `move_time` seconds, then click.
 
     Games such as Roblox ignore a cursor that teleports, so the mouse travels
@@ -264,10 +353,10 @@ def click(pyautogui, x, y, button="left", clicks=2, move_time=0.4):
         mouse.move(round(sx + (x - sx) * k), round(sy + (y - sy) * k))
         time.sleep(0.008)
     mouse.move(x, y)
-    time.sleep(0.03)
+    time.sleep(0.01)
     mouse.move(x + 1, y)  # tiny wiggle so the game registers the hover
     mouse.move(x, y)
-    time.sleep(0.03)
+    time.sleep(0.01)
 
     for i in range(clicks):
         if i:
@@ -351,7 +440,8 @@ def run(args):
     templates = []
     for path in args.images:
         tpl, mask = load_template(path, grayscale=args.grayscale)
-        templates.append((Path(path).name, tpl, mask))
+        finder = Finder(tpl, mask, args.scales, shape=args.any_color)
+        templates.append((Path(path).name, finder))
 
     controls = Controls(args.stop_key.lower(), args.pause_key.lower())
 
@@ -364,7 +454,7 @@ def run(args):
                          f"(found {len(sct.monitors) - 1}).")
             area = sct.monitors[args.monitor]
 
-        names = ", ".join(name for name, _, _ in templates)
+        names = ", ".join(name for name, _ in templates)
         print(f"Looking for {names} (confidence {args.confidence}, "
               f"every {args.interval}s).")
         print(f"Press {args.stop_key.upper()} to stop, "
@@ -387,9 +477,8 @@ def run(args):
                 screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
 
             clicked = False
-            for name, tpl, mask in templates:
-                matches = find_matches(screen, tpl, args.confidence, args.scales,
-                                       mask=mask, find_all=args.all, shape=args.any_color)
+            for name, finder in templates:
+                matches = finder.find(screen, args.confidence, args.all)
                 if not args.all:
                     matches = matches[:1]
                 for cx, cy, score in matches:
@@ -423,8 +512,8 @@ def build_parser():
                    help="reference image(s) to look for (PNG/JPG, cropped tightly)")
     p.add_argument("-c", "--confidence", type=float, default=0.85,
                    help="match threshold 0..1, higher is stricter (default 0.85)")
-    p.add_argument("-i", "--interval", type=float, default=0.5,
-                   help="seconds between screen checks (default 0.5)")
+    p.add_argument("-i", "--interval", type=float, default=0.0,
+                   help="pause between screen checks in seconds (default 0 = nonstop)")
     p.add_argument("--stop-key", default="f8",
                    help="hotkey that stops the clicker (default F8)")
     p.add_argument("--pause-key", default="f7",
@@ -446,8 +535,8 @@ def build_parser():
     p.add_argument("--button", choices=("left", "right", "middle"), default="left")
     p.add_argument("--clicks", type=int, default=2,
                    help="clicks per hit (default 2)")
-    p.add_argument("--move-time", type=float, default=0.4,
-                   help="seconds the mouse takes to glide to the target (default 0.4)")
+    p.add_argument("--move-time", type=float, default=0.12,
+                   help="seconds the mouse takes to glide to the target (default 0.12)")
     p.add_argument("--max-clicks", type=int, default=0,
                    help="stop after this many clicks (default 0 = never)")
     p.add_argument("--timeout", type=float, default=0,

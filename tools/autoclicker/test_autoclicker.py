@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pytest
 
-from autoclicker import find_matches, load_template, parse_region, parse_scales
+from autoclicker import Finder, find_matches, load_template, parse_region, parse_scales
 
 
 def make_scene():
@@ -134,3 +134,34 @@ def test_shape_mode_ignores_plain_areas():
     flat = np.full((300, 300, 3), 90, np.uint8)
     _, patch = make_scene()
     assert find_matches(flat, patch, 0.5, find_all=True, shape=True) == []
+
+
+def test_finder_matches_find_matches():
+    screen, big = make_big_scene()
+    finder = Finder(big, scales=(0.9, 1.0, 1.1))
+    best = finder.find(screen, 0.9)
+    assert len(best) == 1 and best[0][:2] in [(393, 146), (1261, 645)]
+    found = finder.find(screen, 0.9, find_all=True)
+    assert sorted((x, y) for x, y, _ in found) == [(393, 146), (1261, 645)]
+
+
+def test_finder_any_color_and_size():
+    screen, big = make_big_scene()
+    hsv = cv2.cvtColor(big, cv2.COLOR_BGR2HSV)
+    hsv[:, :, 0] = (hsv[:, :, 0].astype(int) + 70) % 180
+    other = cv2.resize(cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR), None, fx=1.1, fy=1.1)
+    screen[101:191, 333:453] = screen[0:90, 0:120]  # remove the first copy
+    screen[300:300 + other.shape[0], 700:700 + other.shape[1]] = other
+
+    finder = Finder(big, scales=(0.9, 1.0, 1.1), shape=True)
+    found = finder.find(screen, 0.75, find_all=True)
+    centers = sorted((round(x), round(y)) for x, y, _ in found)
+    assert len(centers) == 2
+    assert abs(centers[0][0] - (700 + other.shape[1] // 2)) <= 3
+    assert abs(centers[1][0] - 1261) <= 3
+
+
+def test_finder_ignores_plain_screen():
+    _, big = make_big_scene()
+    flat = np.full((600, 800, 3), 90, np.uint8)
+    assert Finder(big, shape=True).find(flat, 0.5, find_all=True) == []
