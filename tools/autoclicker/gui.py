@@ -111,8 +111,10 @@ class ClickerThread(threading.Thread):
     """Watches the screen and clicks. Talks to the window through `events`."""
 
     def __init__(self, images, confidence, interval, click_all, any_size, any_color,
-                 events):
+                 move_time, clicks, events):
         super().__init__(daemon=True)
+        self.move_time = move_time
+        self.clicks = clicks
         self.any_color = any_color
         self.images = images
         self.confidence = confidence
@@ -161,7 +163,8 @@ class ClickerThread(threading.Thread):
                         if self.stop_event.is_set():
                             return
                         click(pyautogui, area["left"] + round(cx * factor),
-                              area["top"] + round(cy * factor), "left", 1)
+                              area["top"] + round(cy * factor), "left",
+                              self.clicks, self.move_time)
                         clicks += 1
                         self.events.put(("click", clicks))
                 self.stop_event.wait(self.interval)
@@ -307,6 +310,8 @@ class App:
         self.click_all = tk.BooleanVar(value=False)
         self.any_size = tk.BooleanVar(value=True)
         self.any_color = tk.BooleanVar(value=True)
+        self.move_time = tk.DoubleVar(value=0.4)
+        self.clicks_each = tk.IntVar(value=2)
 
         self.build()
         self.load_settings()
@@ -397,6 +402,10 @@ class App:
                  bg=BG, fg=MUTED, font=(FONT, 9)).pack(anchor="w")
         slider_row("How often to look", "Fast", "Slow", self.interval, 0.1, 3.0, 0.1,
                    lambda v: f"every {float(v):.1f} s")
+        slider_row("Mouse travel time", "Instant", "Slow", self.move_time, 0.0, 1.0, 0.05,
+                   lambda v: f"{float(v):.2f} s")
+        slider_row("Clicks each time", "1", "5", self.clicks_each, 1, 5, 1,
+                   lambda v: f"{int(float(v))}x")
         for text, var in (("Find it in any color (matches the shape)", self.any_color),
                           ("Click every copy on the screen, not just one", self.click_all),
                           ("Also find it a bit bigger or smaller", self.any_size)):
@@ -508,7 +517,8 @@ class App:
         self.save_settings()
         self.worker = ClickerThread(list(self.pictures), self.confidence.get() / 100,
                                     max(0.05, self.interval.get()), self.click_all.get(),
-                                    self.any_size.get(), self.any_color.get(), self.events)
+                                    self.any_size.get(), self.any_color.get(),
+                                    self.move_time.get(), self.clicks_each.get(), self.events)
         self.worker.start()
         self.clicks = 0
         self.start_btn.configure(text="STOP")
@@ -590,6 +600,8 @@ class App:
         self.click_all.set(data.get("click_all", False))
         self.any_size.set(data.get("any_size", True))
         self.any_color.set(data.get("any_color", True))
+        self.move_time.set(data.get("move_time", 0.4))
+        self.clicks_each.set(data.get("clicks", 2))
 
     def save_settings(self):
         data = {
@@ -599,6 +611,8 @@ class App:
             "click_all": self.click_all.get(),
             "any_size": self.any_size.get(),
             "any_color": self.any_color.get(),
+            "move_time": round(self.move_time.get(), 2),
+            "clicks": self.clicks_each.get(),
         }
         try:
             self.settings_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
@@ -618,8 +632,10 @@ def selftest():
     import traceback
     out = Path(os.environ.get("SELFTEST_OUT", "selftest.txt"))
     try:
-        import pyautogui  # noqa: F401
+        import pyautogui
         from pynput import keyboard  # noqa: F401
+        click(pyautogui, 200, 150, clicks=0, move_time=0.2)  # glide only
+        mouse_at = tuple(pyautogui.position())
         with open_screen() as sct:
             shot, _ = grab(sct, sct.monitors[0])
         tpl, mask = load_template(resource("assets/example.png"))
@@ -628,7 +644,8 @@ def selftest():
         App(root)
         root.update()
         root.destroy()
-        out.write_text(f"OK screen {shot.shape[1]}x{shot.shape[0]}", encoding="utf-8")
+        out.write_text(f"OK screen {shot.shape[1]}x{shot.shape[0]}, mouse glided to "
+                       f"{mouse_at} (asked 200,150)", encoding="utf-8")
         return 0
     except Exception:
         out.write_text(traceback.format_exc(), encoding="utf-8")

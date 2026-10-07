@@ -10,7 +10,9 @@ that picture on your screen and clicks its center whenever it shows up.
 2. **Step 1:** press **Take from screen**, then drag a box around the button
    you want clicked. You can add more than one picture.
 3. **Step 2:** press **START** (or **F8**) and open your game. The window
-   hides itself and clicks the picture every time it shows up.
+   hides itself and, every time the picture shows up, glides the mouse to it
+   (0.4 s) and clicks it twice. Games like Roblox ignore a mouse that just
+   teleports, which is why it glides.
 4. Press **F8** to stop. Pushing the mouse into a screen corner also stops it.
 
 By default it matches the picture's shape, not its colors, so a button
@@ -78,7 +80,8 @@ Each line shows the match score. If it clicks the wrong things, raise
 | `--grayscale` | off | Ignore colors (faster) |
 | `--region` | whole screen | Only search `x,y,width,height` (faster) |
 | `--monitor` | 1 | 1 = main screen, 2 = second, 0 = all screens |
-| `--button` / `--clicks` | left / 1 | Mouse button, and 2 for a double click |
+| `--button` / `--clicks` | left / 2 | Mouse button, and clicks per hit |
+| `--move-time` | 0.4 | Seconds the mouse takes to glide to the target |
 | `--max-clicks` | 0 (never) | Stop after this many clicks |
 | `--timeout` | 0 (never) | Stop when nothing was found for this many seconds |
 | `--start-delay` | 3 | Seconds before it starts |

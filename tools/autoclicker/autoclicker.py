@@ -230,13 +230,116 @@ def grab(sct, area):
     return bgr, factor
 
 
-def click(pyautogui, x, y, button, clicks):
-    # Games such as Roblox often ignore a click unless the mouse moved onto
-    # the spot first, so move, nudge one pixel, then click.
-    pyautogui.moveTo(x, y)
-    pyautogui.moveRel(1, 0)
-    pyautogui.moveRel(-1, 0)
-    pyautogui.click(x=x, y=y, clicks=clicks, button=button)
+CLICK_GAP = 0.12   # seconds between the clicks of one hit
+CLICK_HOLD = 0.04  # how long the button stays down per click
+
+
+def _ease(t):
+    return 1 - (1 - t) ** 3  # fast start, gentle stop, like a hand
+
+
+def click(pyautogui, x, y, button="left", clicks=2, move_time=0.4):
+    """Glide the mouse to (x, y) over `move_time` seconds, then click.
+
+    Games such as Roblox ignore a cursor that teleports, so the mouse travels
+    there in many small steps first, then each click holds the button for a
+    moment.
+    """
+    check = getattr(pyautogui, "failSafeCheck", None)
+    if check and pyautogui.FAILSAFE:
+        check()  # mouse pushed into a screen corner = emergency stop
+
+    if sys.platform == "win32":
+        mouse = _WinMouse()
+    else:
+        mouse = _PyAutoGuiMouse(pyautogui)
+
+    sx, sy = mouse.position()
+    start = time.perf_counter()
+    while move_time > 0:
+        t = (time.perf_counter() - start) / move_time
+        if t >= 1:
+            break
+        k = _ease(t)
+        mouse.move(round(sx + (x - sx) * k), round(sy + (y - sy) * k))
+        time.sleep(0.008)
+    mouse.move(x, y)
+    time.sleep(0.03)
+    mouse.move(x + 1, y)  # tiny wiggle so the game registers the hover
+    mouse.move(x, y)
+    time.sleep(0.03)
+
+    for i in range(clicks):
+        if i:
+            time.sleep(CLICK_GAP)
+        mouse.down(button)
+        time.sleep(CLICK_HOLD)
+        mouse.up(button)
+
+
+class _PyAutoGuiMouse:
+    def __init__(self, pyautogui):
+        self.p = pyautogui
+
+    def position(self):
+        return tuple(self.p.position())
+
+    def move(self, x, y):
+        self.p.moveTo(x, y, _pause=False)
+
+    def down(self, button):
+        self.p.mouseDown(button=button, _pause=False)
+
+    def up(self, button):
+        self.p.mouseUp(button=button, _pause=False)
+
+
+class _WinMouse:
+    """Real mouse input through SendInput, which games read like a physical
+    mouse (SetCursorPos-style jumps are often ignored)."""
+
+    MOVE, ABSOLUTE, VIRTUALDESK = 0x0001, 0x8000, 0x4000
+    BUTTONS = {"left": (0x0002, 0x0004), "right": (0x0008, 0x0010),
+               "middle": (0x0020, 0x0040)}
+
+    def __init__(self):
+        import ctypes
+        from ctypes import wintypes
+
+        class MOUSEINPUT(ctypes.Structure):
+            _fields_ = [("dx", wintypes.LONG), ("dy", wintypes.LONG),
+                        ("mouseData", wintypes.DWORD), ("dwFlags", wintypes.DWORD),
+                        ("time", wintypes.DWORD), ("dwExtraInfo", ctypes.c_size_t)]
+
+        class INPUT(ctypes.Structure):
+            _fields_ = [("type", wintypes.DWORD), ("mi", MOUSEINPUT)]
+
+        self.ctypes, self.wintypes = ctypes, wintypes
+        self.MOUSEINPUT, self.INPUT = MOUSEINPUT, INPUT
+        self.user32 = ctypes.windll.user32
+        metric = self.user32.GetSystemMetrics
+        self.vx, self.vy = metric(76), metric(77)  # virtual desktop origin
+        self.vw, self.vh = max(2, metric(78)), max(2, metric(79))
+
+    def _send(self, flags, dx=0, dy=0):
+        inp = self.INPUT(0, self.MOUSEINPUT(dx, dy, 0, flags, 0, 0))
+        self.user32.SendInput(1, self.ctypes.byref(inp), self.ctypes.sizeof(inp))
+
+    def position(self):
+        pt = self.wintypes.POINT()
+        self.user32.GetCursorPos(self.ctypes.byref(pt))
+        return pt.x, pt.y
+
+    def move(self, x, y):
+        nx = round((x - self.vx) * 65535 / (self.vw - 1))
+        ny = round((y - self.vy) * 65535 / (self.vh - 1))
+        self._send(self.MOVE | self.ABSOLUTE | self.VIRTUALDESK, nx, ny)
+
+    def down(self, button):
+        self._send(self.BUTTONS[button][0])
+
+    def up(self, button):
+        self._send(self.BUTTONS[button][1])
 
 
 def run(args):
@@ -296,7 +399,7 @@ def run(args):
                     action = "found" if args.dry_run else "click"
                     print(f"{action} #{total}: {name} at ({x}, {y}) score {score:.2f}")
                     if not args.dry_run:
-                        click(pyautogui, x, y, args.button, args.clicks)
+                        click(pyautogui, x, y, args.button, args.clicks, args.move_time)
                     clicked = True
                     if args.max_clicks and total >= args.max_clicks:
                         print(f"Reached {args.max_clicks} clicks, stopping.")
@@ -341,8 +444,10 @@ def build_parser():
     p.add_argument("--monitor", type=int, default=1,
                    help="monitor to search: 1 = main, 2 = second..., 0 = all (default 1)")
     p.add_argument("--button", choices=("left", "right", "middle"), default="left")
-    p.add_argument("--clicks", type=int, default=1,
-                   help="clicks per hit, 2 = double click (default 1)")
+    p.add_argument("--clicks", type=int, default=2,
+                   help="clicks per hit (default 2)")
+    p.add_argument("--move-time", type=float, default=0.4,
+                   help="seconds the mouse takes to glide to the target (default 0.4)")
     p.add_argument("--max-clicks", type=int, default=0,
                    help="stop after this many clicks (default 0 = never)")
     p.add_argument("--timeout", type=float, default=0,
