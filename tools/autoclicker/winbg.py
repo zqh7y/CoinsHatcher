@@ -139,7 +139,10 @@ def capture(hwnd):
     bmp = gdi32.CreateCompatibleBitmap(hdc, w, h)
     old = gdi32.SelectObject(mem, bmp)
     try:
-        if not user32.PrintWindow(hwnd, mem, PW_CLIENTONLY | PW_RENDERFULLCONTENT):
+        ok = user32.PrintWindow(hwnd, mem, PW_CLIENTONLY | PW_RENDERFULLCONTENT)
+        gdi32.SelectObject(mem, old)  # GetDIBits needs the bitmap unselected
+        old = None
+        if not ok:
             return None
         info = BITMAPINFOHEADER(ctypes.sizeof(BITMAPINFOHEADER), w, -h, 1, 32, 0, 0, 0, 0, 0, 0)
         pixels = np.empty((h, w, 4), np.uint8)
@@ -147,7 +150,8 @@ def capture(hwnd):
             return None
         return np.ascontiguousarray(pixels[:, :, :3])
     finally:
-        gdi32.SelectObject(mem, old)
+        if old is not None:
+            gdi32.SelectObject(mem, old)
         gdi32.DeleteObject(bmp)
         gdi32.DeleteDC(mem)
         user32.ReleaseDC(hwnd, hdc)

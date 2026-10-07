@@ -780,7 +780,15 @@ def background_selftest(root, finder):
     view = winbg.capture(hwnd)
     assert view is not None and view.max() > 8, "window capture is empty"
     found = finder.find(view, 0.7)
-    assert found, "picture not found in the covered window"
+    if not found:
+        with open_screen() as sct:
+            seen, _ = grab(sct, winbg.client_area(hwnd))
+        cv2.imwrite(str(Path(os.environ.get("SELFTEST_OUT", ".")).with_name("capture.png")), view)
+        raise AssertionError(
+            f"picture not found in the covered window: capture {view.shape} "
+            f"mean {view.mean():.0f} min {view.min()} max {view.max()}, "
+            f"best score {finder.find(view, 0.0)[:1]}; screen grab {seen.shape} "
+            f"score {finder.find(seen, 0.0)[:1]}; area {winbg.client_area(hwnd)}")
     cx, cy, _ = found[0]
     mouse_before = tuple(pyautogui.position())
     winbg.click(hwnd, round(cx), round(cy), clicks=2, move_time=0.05)
