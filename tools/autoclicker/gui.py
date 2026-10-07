@@ -771,8 +771,6 @@ def background_selftest(root, finder):
     on_dark = image[:, :, :3] * alpha + np.array([70, 60, 60], np.float32) * (1 - alpha)
     photo = to_photo(on_dark.astype(np.uint8))
     canvas.create_image(300, 220, image=photo)
-    clicked = []
-    canvas.bind("<Button-1>", lambda e: clicked.append((e.x, e.y)))
     cover = tk.Toplevel(root)
     cover.geometry("300x250+400+300")  # on top of the picture
     for _ in range(20):
@@ -793,16 +791,25 @@ def background_selftest(root, finder):
             f"best score {finder.find(view, 0.0)[:1]}; screen grab {seen.shape} "
             f"score {finder.find(seen, 0.0)[:1]}; area {winbg.client_area(hwnd)}")
     cx, cy, _ = found[0]
+    win.destroy()
+
+    # Tk itself checks the real mouse button, so clicks go to a bare window
+    clicked = []
+    target, keep = winbg.make_test_window("Click test", clicked)
+    cover.lift()  # cover it too
+    for _ in range(10):
+        root.update()
+        time.sleep(0.02)
     mouse_before = tuple(pyautogui.position())
-    winbg.click(hwnd, round(cx), round(cy), clicks=2, move_time=0.05)
+    winbg.click(target, 150, 120, clicks=2, move_time=0.05)
     for _ in range(20):
         root.update()
         time.sleep(0.02)
-    assert len(clicked) == 2, f"window got {len(clicked)} clicks, expected 2"
-    assert tuple(pyautogui.position()) == mouse_before, "the real mouse moved"
-    win.destroy()
+    ctypes.windll.user32.DestroyWindow(ctypes.c_void_p(target))
     cover.destroy()
-    return f"found at {round(cx)},{round(cy)} under another window, clicked {clicked}, mouse untouched"
+    assert clicked == [(150, 120)] * 2, f"window got clicks {clicked}, expected 2 at 150,120"
+    assert tuple(pyautogui.position()) == mouse_before, "the real mouse moved"
+    return f"found at {round(cx)},{round(cy)} under another window, 2 clicks landed, mouse untouched"
 
 
 def main():
