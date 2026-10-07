@@ -817,9 +817,19 @@ def background_selftest(root, finder):
         root.update()
         time.sleep(0.02)
     active_after = ctypes.windll.user32.GetForegroundWindow()
+    if clicked != [(150, 120)] * 2:
+        u = ctypes.windll.user32
+        sx, sy = winbg.to_screen(target, 150, 120)
+        winbg.bring_to_front(target)
+        root.update()
+        fg = u.GetForegroundWindow()
+        from ctypes import wintypes
+        under = u.WindowFromPoint(wintypes.POINT(sx, sy))
+        raise AssertionError(f"window got clicks {clicked}, expected 2 at 150,120; "
+                             f"game {target} yours {yours} active-after-switch {fg} "
+                             f"under-point {under} at {sx},{sy}")
     ctypes.windll.user32.DestroyWindow(ctypes.c_void_p(target))
     ctypes.windll.user32.DestroyWindow(ctypes.c_void_p(yours))
-    assert clicked == [(150, 120)] * 2, f"window got clicks {clicked}, expected 2 at 150,120"
     assert tuple(pyautogui.position()) == mouse_before, "the mouse didn't come back"
     assert active_after == active_before, (
         f"the window you used didn't come back to the front: before "
