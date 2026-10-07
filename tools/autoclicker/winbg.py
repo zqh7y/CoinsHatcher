@@ -165,11 +165,13 @@ def _target(hwnd, x, y):
     """The (child) window under client point (x, y) and the point in its
     coordinates; most games have no children, then it is hwnd itself."""
     pt = wintypes.POINT(int(x), int(y))
-    child = user32.ChildWindowFromPointEx(hwnd, pt, 0x1 | 0x2 | 0x4)  # skip hidden/disabled/clear
-    if child and child != hwnd:
+    for _ in range(10):  # walk down to the deepest window at that point
+        child = user32.ChildWindowFromPointEx(hwnd, pt, 0x1 | 0x2 | 0x4)  # skip hidden/disabled/clear
+        if not child or child == hwnd:
+            break
         user32.MapWindowPoints(hwnd, child, ctypes.byref(pt), 1)
-        return child, pt.x, pt.y
-    return hwnd, x, y
+        hwnd = child
+    return hwnd, pt.x, pt.y
 
 
 def click(hwnd, x, y, clicks=2, move_time=0.12, hold=0.03, gap=0.05):
