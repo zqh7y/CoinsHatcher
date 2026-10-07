@@ -819,7 +819,10 @@ def background_selftest(root, finder):
     cover.destroy()
     assert clicked == [(150, 120)] * 2, f"window got clicks {clicked}, expected 2 at 150,120"
     assert tuple(pyautogui.position()) == mouse_before, "the mouse didn't come back"
-    assert active_after == active_before, "the window you used didn't come back to the front"
+    assert active_after == active_before, (
+        f"the window you used didn't come back to the front: before "
+        f"{winbg.window_title(active_before)!r} ({active_before}), after "
+        f"{winbg.window_title(active_after)!r} ({active_after}), test window {target}")
     return (f"found at {round(cx)},{round(cy)} under another window, 2 clicks landed in "
             f"{took:.0f} ms, mouse and active window restored")
 

@@ -185,6 +185,11 @@ def bring_to_front(hwnd):
     finally:
         if attached:
             user32.AttachThreadInput(me, front, False)
+    if user32.GetForegroundWindow() != hwnd:
+        # a key press makes Windows allow the switch (Alt alone does nothing)
+        user32.keybd_event(0x12, 0, 0, 0)
+        user32.keybd_event(0x12, 0, 0x2, 0)
+        user32.SetForegroundWindow(hwnd)
 
 
 def borrow_click(pyautogui, click, hwnd, x, y, clicks=2, move_time=0.05):
