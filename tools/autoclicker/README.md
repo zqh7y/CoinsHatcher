@@ -3,7 +3,24 @@
 Give it a picture of a button (or anything else), and it keeps looking for
 that picture on your screen and clicks its center whenever it shows up.
 
-## Setup
+## Easy way: the app (Windows)
+
+1. Install Python from https://www.python.org/downloads/ (tick **Add
+   python.exe to PATH** in the installer).
+2. Double-click **Start Auto Clicker.bat**. The first time it sets itself up,
+   which takes a minute.
+3. In the window, press **Add picture...** and pick your screenshot of the
+   thing to click. If the screenshot has a lot of background around it, press
+   **Crop selected**, drag a box around just the button and press Enter.
+4. Press **Start** (or **F8**), switch to the game within 3 seconds. It now
+   clicks the picture whenever it shows up. **F8** stops it again, and so does
+   moving the mouse into a screen corner.
+
+If it clicks wrong things, move **Match strictness** up; if it doesn't find
+the picture, move it down a bit. Your pictures and settings are remembered
+for next time.
+
+## Command line
 
 Needs Python 3.9+.
 
@@ -15,14 +32,14 @@ pip install -r requirements.txt
 macOS: allow your terminal under System Settings → Privacy & Security →
 **Screen Recording** and **Accessibility**, or it can't see the screen or click.
 
-## 1. Make the reference image
+### 1. Make the reference image
 
 Take a screenshot (Windows: `Win+Shift+S`, macOS: `Cmd+Shift+4`) and crop it
 tightly around the thing to click, for example `hatch.png`. Take it at the
 same window size / zoom you'll play at. A PNG with a transparent background
 is fine: transparent pixels are ignored while matching.
 
-## 2. Run it
+### 2. Run it
 
 ```bash
 python autoclicker.py hatch.png
@@ -35,7 +52,7 @@ You get 3 seconds to switch to the game, then it checks the screen every
 - Emergency stop: move the mouse into any screen corner (or Ctrl+C in the
   terminal).
 
-## Tuning
+### Tuning
 
 First check what it sees without clicking:
 

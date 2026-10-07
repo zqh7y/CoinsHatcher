@@ -10,3 +10,6 @@ sourcemap.json
 # Python
 __pycache__/
 .pytest_cache/
+tools/autoclicker/.venv/
+tools/autoclicker/settings.json
+tools/autoclicker/images/

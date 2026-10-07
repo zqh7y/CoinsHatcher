@@ -16,6 +16,10 @@ import cv2
 import numpy as np
 
 MAX_CANDIDATES = 2000
+COARSE_MIN_SIDE = 40  # templates this big get the fast half-size search
+COARSE_SLACK = 0.15   # the rough pass accepts slightly worse scores
+REFINE_MARGIN = 6     # pixels around a rough hit to search again at full size
+MAX_REFINE = 50
 
 
 # ---------------------------------------------------------------------------
@@ -44,53 +48,89 @@ def load_template(path, grayscale=False):
 
 def find_matches(screen, template, confidence, scales=(1.0,), mask=None,
                  find_all=False):
-    """Return [(x, y, score), ...] centers of matches in `screen`, best first.
+    """Return [(x, y, score), ...] centers of matches in `screen`, best first
+    (only the single best one unless `find_all`).
 
     `screen` and `template` must both be BGR or both grayscale. Each scale
     resizes the template, so the image still matches when the game is shown
     a bit bigger or smaller than when you took the screenshot.
+
+    Big templates are first searched on a half-size copy of the screen (about
+    4x faster), and each rough hit is then checked again at full size.
     """
     matches = []
+    half_screen = None
     for scale in scales:
-        tpl = template
-        tpl_mask = mask
-        if scale != 1.0:
-            tpl = cv2.resize(template, None, fx=scale, fy=scale,
-                             interpolation=cv2.INTER_AREA if scale < 1 else cv2.INTER_LINEAR)
-            if mask is not None:
-                tpl_mask = cv2.resize(mask, (tpl.shape[1], tpl.shape[0]),
-                                      interpolation=cv2.INTER_NEAREST)
+        tpl, tpl_mask = _resize(template, mask, scale)
         th, tw = tpl.shape[:2]
         if th < 4 or tw < 4 or th > screen.shape[0] or tw > screen.shape[1]:
             continue
 
-        result = cv2.matchTemplate(screen, tpl, cv2.TM_CCOEFF_NORMED, mask=tpl_mask)
-        result = np.nan_to_num(result, nan=0.0, posinf=0.0, neginf=0.0)
+        if min(th, tw) < COARSE_MIN_SIDE:
+            matches += _match(screen, tpl, tpl_mask, confidence, find_all)
+            continue
 
-        if find_all:
-            ys, xs = np.where(result >= confidence)
-            if len(xs) > MAX_CANDIDATES:  # threshold far too low, keep the best
-                best = np.argsort(result[ys, xs])[-MAX_CANDIDATES:]
-                ys, xs = ys[best], xs[best]
-            for x, y in zip(xs, ys):
-                matches.append((x + tw // 2, y + th // 2, float(result[y, x]), tw, th))
-        else:
-            _, score, _, (x, y) = cv2.minMaxLoc(result)
-            if score >= confidence:
-                matches.append((x + tw // 2, y + th // 2, float(score), tw, th))
+        if half_screen is None:
+            half_screen = cv2.resize(screen, None, fx=0.5, fy=0.5,
+                                     interpolation=cv2.INTER_AREA)
+        half_tpl, half_mask = _resize(tpl, tpl_mask, 0.5)
+        rough = _suppress_overlaps(
+            _match(half_screen, half_tpl, half_mask, confidence - COARSE_SLACK, True))
+        for cx, cy, _, _, _ in rough[:MAX_REFINE if find_all else 5]:
+            x0 = max(0, cx * 2 - tw // 2 - REFINE_MARGIN)
+            y0 = max(0, cy * 2 - th // 2 - REFINE_MARGIN)
+            window = screen[y0:y0 + th + 2 * REFINE_MARGIN, x0:x0 + tw + 2 * REFINE_MARGIN]
+            if window.shape[0] < th or window.shape[1] < tw:
+                continue
+            for x, y, score, _, _ in _match(window, tpl, tpl_mask, confidence, False):
+                matches.append((x + x0, y + y0, score, tw, th))
 
     matches.sort(key=lambda m: m[2], reverse=True)
-    return _suppress_overlaps(matches)
+    if not find_all:
+        matches = matches[:1]
+    return [(cx, cy, score) for cx, cy, score, _, _ in _suppress_overlaps(matches)]
+
+
+def _resize(template, mask, scale):
+    if scale == 1.0:
+        return template, mask
+    tpl = cv2.resize(template, None, fx=scale, fy=scale,
+                     interpolation=cv2.INTER_AREA if scale < 1 else cv2.INTER_LINEAR)
+    if mask is not None:
+        mask = cv2.resize(mask, (tpl.shape[1], tpl.shape[0]),
+                          interpolation=cv2.INTER_NEAREST)
+    return tpl, mask
+
+
+def _match(screen, tpl, mask, threshold, find_all):
+    """Raw matches [(cx, cy, score, tw, th), ...] of one template size."""
+    th, tw = tpl.shape[:2]
+    result = cv2.matchTemplate(screen, tpl, cv2.TM_CCOEFF_NORMED, mask=mask)
+    result = np.nan_to_num(result, nan=0.0, posinf=0.0, neginf=0.0)
+
+    if not find_all:
+        _, score, _, (x, y) = cv2.minMaxLoc(result)
+        return [(x + tw // 2, y + th // 2, float(score), tw, th)] if score >= threshold else []
+
+    ys, xs = np.where(result >= threshold)
+    if len(xs) > MAX_CANDIDATES:  # threshold far too low, keep the best
+        best = np.argsort(result[ys, xs])[-MAX_CANDIDATES:]
+        ys, xs = ys[best], xs[best]
+    found = [(int(x) + tw // 2, int(y) + th // 2, float(result[y, x]), tw, th)
+             for x, y in zip(xs, ys)]
+    found.sort(key=lambda m: m[2], reverse=True)
+    return found
 
 
 def _suppress_overlaps(matches):
-    """Keep the best match in each spot, drop the near-duplicates around it."""
+    """Keep the best match in each spot, drop the near-duplicates around it.
+    `matches` must be sorted best first."""
     kept = []
     for cx, cy, score, tw, th in matches:
         if all(abs(cx - kx) > max(tw, kw) / 2 or abs(cy - ky) > max(th, kh) / 2
                for kx, ky, _, kw, kh in kept):
             kept.append((cx, cy, score, tw, th))
-    return [(cx, cy, score) for cx, cy, score, _, _ in kept]
+    return kept
 
 
 def parse_scales(text):

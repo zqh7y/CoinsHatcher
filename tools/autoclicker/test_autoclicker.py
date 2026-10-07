@@ -84,3 +84,33 @@ def test_missing_image_raises(tmp_path):
 def test_parsers():
     assert parse_scales("0.8, 1,1.25") == (0.8, 1.0, 1.25)
     assert parse_region("10,20,300,400") == {"left": 10, "top": 20, "width": 300, "height": 400}
+
+
+def make_big_scene():
+    """A full-HD-ish screen with two copies of a 120x90 button."""
+    screen, patch = make_scene()
+    big_patch = cv2.resize(patch, None, fx=3, fy=3, interpolation=cv2.INTER_NEAREST)
+    screen = cv2.resize(screen, (1600, 900), interpolation=cv2.INTER_NEAREST)
+    screen[101:191, 333:453] = big_patch
+    screen[600:690, 1201:1321] = big_patch
+    return screen, big_patch
+
+
+def test_big_template_uses_fast_search_and_exact_center():
+    screen, big = make_big_scene()
+    matches = find_matches(screen, big, 0.9)
+    assert len(matches) == 1
+    assert matches[0][:2] in [(393, 146), (1261, 645)]
+    assert matches[0][2] > 0.99
+
+
+def test_big_template_find_all_and_sizes():
+    screen, big = make_big_scene()
+    matches = find_matches(screen, big, 0.9, find_all=True)
+    assert sorted((x, y) for x, y, _ in matches) == [(393, 146), (1261, 645)]
+
+    smaller = cv2.resize(big, None, fx=0.9, fy=0.9, interpolation=cv2.INTER_AREA)
+    matches = find_matches(screen, smaller, 0.85, scales=(0.9, 1.0, 1.1, 1.25), find_all=True)
+    assert len(matches) == 2
+    for x, y, _ in matches:
+        assert min(abs(x - 393) + abs(y - 146), abs(x - 1261) + abs(y - 645)) <= 3
