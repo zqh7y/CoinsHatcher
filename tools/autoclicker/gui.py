@@ -764,9 +764,12 @@ def background_selftest(root, finder):
     win = tk.Toplevel(root)
     win.title("Background test")
     win.geometry("500x400+300+200")
-    canvas = tk.Canvas(win, bg="white", highlightthickness=0)
+    canvas = tk.Canvas(win, bg="#3c3c46", highlightthickness=0)  # like a game
     canvas.pack(fill="both", expand=True)
-    photo = to_photo(read_bgr(resource("assets/example.png")))
+    image = cv2.imread(str(resource("assets/example.png")), cv2.IMREAD_UNCHANGED)
+    alpha = image[:, :, 3:4].astype(np.float32) / 255
+    on_dark = image[:, :, :3] * alpha + np.array([70, 60, 60], np.float32) * (1 - alpha)
+    photo = to_photo(on_dark.astype(np.uint8))
     canvas.create_image(300, 220, image=photo)
     clicked = []
     canvas.bind("<Button-1>", lambda e: clicked.append((e.x, e.y)))
@@ -779,7 +782,7 @@ def background_selftest(root, finder):
     assert hwnd, "test window not found"
     view = winbg.capture(hwnd)
     assert view is not None and view.max() > 8, "window capture is empty"
-    found = finder.find(view, 0.7)
+    found = finder.find(view, 0.6)  # this tests capture and clicks, not matching
     if not found:
         with open_screen() as sct:
             seen, _ = grab(sct, winbg.client_area(hwnd))
