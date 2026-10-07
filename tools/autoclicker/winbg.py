@@ -1,9 +1,11 @@
-"""Background mode (Windows): watch and click one window without touching
-the real mouse, so you can keep using your PC while the clicker works.
+"""Window mode (Windows): watch one window and click it while you use your
+PC for other things.
 
 The window is captured with PrintWindow, which still sees it when other
-windows are on top (not when it is minimized). Clicks are sent to it as
-mouse messages, so the real cursor never moves and focus stays where it is.
+windows are on top (not when it is minimized). Games like Roblox only accept
+real mouse input, so to click, the mouse is borrowed for a split second:
+the game comes to the front, the mouse glides there and clicks, then the
+mouse and the window you were using go back to how they were.
 """
 
 import ctypes
@@ -36,6 +38,12 @@ if sys.platform == "win32":
     user32.ChildWindowFromPointEx.argtypes = [HWND, wintypes.POINT, wintypes.UINT]
     user32.ChildWindowFromPointEx.restype = HWND
     user32.ClientToScreen.argtypes = [HWND, ctypes.POINTER(wintypes.POINT)]
+    user32.GetForegroundWindow.restype = HWND
+    user32.SetForegroundWindow.argtypes = [HWND]
+    user32.BringWindowToTop.argtypes = [HWND]
+    user32.GetWindowThreadProcessId.argtypes = [HWND, ctypes.c_void_p]
+    user32.AttachThreadInput.argtypes = [wintypes.DWORD, wintypes.DWORD, wintypes.BOOL]
+    user32.GetCursorPos.argtypes = [ctypes.POINTER(wintypes.POINT)]
     user32.MapWindowPoints.argtypes = [HWND, HWND, ctypes.POINTER(wintypes.POINT), wintypes.UINT]
     gdi32.CreateCompatibleDC.argtypes = [HDC]
     gdi32.CreateCompatibleDC.restype = HDC
@@ -155,6 +163,45 @@ def capture(hwnd):
         gdi32.DeleteObject(bmp)
         gdi32.DeleteDC(mem)
         user32.ReleaseDC(hwnd, hdc)
+
+
+def to_screen(hwnd, x, y):
+    pt = wintypes.POINT(int(x), int(y))
+    user32.ClientToScreen(hwnd, ctypes.byref(pt))
+    return pt.x, pt.y
+
+
+def bring_to_front(hwnd):
+    """Make hwnd the active window. Windows only lets the active app do that,
+    so borrow its input queue for a moment."""
+    if not hwnd or user32.GetForegroundWindow() == hwnd:
+        return
+    me = ctypes.windll.kernel32.GetCurrentThreadId()
+    front = user32.GetWindowThreadProcessId(user32.GetForegroundWindow(), None)
+    attached = front and front != me and user32.AttachThreadInput(me, front, True)
+    try:
+        user32.BringWindowToTop(hwnd)
+        user32.SetForegroundWindow(hwnd)
+    finally:
+        if attached:
+            user32.AttachThreadInput(me, front, False)
+
+
+def borrow_click(pyautogui, click, hwnd, x, y, clicks=2, move_time=0.05):
+    """Click client point (x, y) of the game with the real mouse, then put the
+    mouse and the active window back where the user had them."""
+    before = user32.GetForegroundWindow()
+    pt = wintypes.POINT()
+    user32.GetCursorPos(ctypes.byref(pt))
+    try:
+        bring_to_front(hwnd)
+        sx, sy = to_screen(hwnd, x, y)
+        click(pyautogui, sx, sy, "left", clicks, move_time)
+    finally:
+        if before and before != hwnd:
+            bring_to_front(before)
+        user32.SetCursorPos(pt.x, pt.y)
+    return before != hwnd
 
 
 def _lparam(x, y):

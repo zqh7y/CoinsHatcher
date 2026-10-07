@@ -319,7 +319,7 @@ def grab(sct, area):
     return bgr, factor
 
 
-CLICK_GAP = 0.05   # seconds between the clicks of one hit
+CLICK_GAP = 0.04   # seconds between the clicks of one hit
 CLICK_HOLD = 0.03  # how long the button stays down per click
 
 
@@ -327,7 +327,7 @@ def _ease(t):
     return 1 - (1 - t) ** 3  # fast start, gentle stop, like a hand
 
 
-def click(pyautogui, x, y, button="left", clicks=2, move_time=0.12):
+def click(pyautogui, x, y, button="left", clicks=2, move_time=0.05):
     """Glide the mouse to (x, y) over `move_time` seconds, then click.
 
     Games such as Roblox ignore a cursor that teleports, so the mouse travels
@@ -535,8 +535,8 @@ def build_parser():
     p.add_argument("--button", choices=("left", "right", "middle"), default="left")
     p.add_argument("--clicks", type=int, default=2,
                    help="clicks per hit (default 2)")
-    p.add_argument("--move-time", type=float, default=0.12,
-                   help="seconds the mouse takes to glide to the target (default 0.12)")
+    p.add_argument("--move-time", type=float, default=0.05,
+                   help="seconds the mouse takes to glide to the target (default 0.05)")
     p.add_argument("--max-clicks", type=int, default=0,
                    help="stop after this many clicks (default 0 = never)")
     p.add_argument("--timeout", type=float, default=0,

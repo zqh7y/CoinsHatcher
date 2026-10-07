@@ -27,7 +27,7 @@ HOTKEY = "p"
 HOTKEY_VK = 0x50  # the P key on every keyboard layout
 WHOLE_SCREEN = "Whole screen (uses your mouse)"
 SIZE_SCALES = (0.9, 1.0, 1.1)
-SETTINGS_VERSION = 2
+SETTINGS_VERSION = 3
 SAME_SPOT_COOLDOWN = 0.35  # don't click the same spot again right away
 START_DELAY = 3
 THUMB = 88
@@ -158,7 +158,8 @@ class ClickerThread(threading.Thread):
                                     f"Press {HOTKEY.upper()} to stop")))
 
         if self.window:
-            return self._run_window(finders)
+            pyautogui.FAILSAFE = False  # your own mouse may sit in a corner meanwhile
+            return self._run_window(pyautogui, finders)
 
         clicks = 0
         recent = []  # (x, y, time) of the last clicks
@@ -182,7 +183,7 @@ class ClickerThread(threading.Thread):
                         self.events.put(("click", clicks))
                 self.stop_event.wait(self.interval)
 
-    def _run_window(self, finders):
+    def _run_window(self, pyautogui, finders):
         """Background mode: look inside one window and click it with window
         messages, so the real mouse stays free for the user."""
         hwnd = winbg.find_window(self.window)
@@ -190,7 +191,8 @@ class ClickerThread(threading.Thread):
             raise RuntimeError(f'Can\'t find the window "{self.window}".\n'
                                "Open it, then pick it again in \"Click in\".")
         looking = ("Looking for your picture...",
-                   f"Background mode: use your PC freely. Press {HOTKEY.upper()} to stop")
+                   f"Window mode: use your PC, the mouse is borrowed only to click. "
+               f"Press {HOTKEY.upper()} to stop")
         self.events.put(("status", looking))
         clicks = 0
         recent = []
@@ -222,7 +224,8 @@ class ClickerThread(threading.Thread):
                         recent = [r for r in recent if now - r[2] < SAME_SPOT_COOLDOWN]
                         if any(abs(x - rx) < 20 and abs(y - ry) < 20 for rx, ry, _ in recent):
                             continue
-                        winbg.click(hwnd, x, y, self.clicks, self.move_time)
+                        winbg.borrow_click(pyautogui, click, hwnd, x, y,
+                                           self.clicks, self.move_time)
                         recent.append((x, y, time.monotonic()))
                         clicks += 1
                         self.events.put(("click", clicks))
@@ -369,7 +372,7 @@ class App:
         self.click_all = tk.BooleanVar(value=False)
         self.any_size = tk.BooleanVar(value=True)
         self.any_color = tk.BooleanVar(value=True)
-        self.move_time = tk.DoubleVar(value=0.12)
+        self.move_time = tk.DoubleVar(value=0.05)
         self.clicks_each = tk.IntVar(value=2)
         self.target = tk.StringVar(value=WHOLE_SCREEN)
 
@@ -426,8 +429,9 @@ class App:
                                        width=30, anchor="w")
             self.target_menu.pack(side="left", padx=8)
             self.target_menu.bind("<Button-1>", lambda e: self.fill_targets(), add="+")
-            tk.Label(step2, text="Pick your game window to keep using your mouse "
-                     "while it clicks (the game can be behind other windows).",
+            tk.Label(step2, text="Pick your game window to keep using your PC while it "
+                     "clicks. The mouse jumps to the game only for a split second "
+                     "to click, then comes back.",
                      bg=CARD, fg=MUTED, font=(FONT, 9), wraplength=380,
                      justify="left").pack(anchor="w", pady=(0, 10))
         self.start_btn = flat_button(step2, "START", self.toggle, GREEN, GREEN_HOVER,
@@ -477,7 +481,7 @@ class App:
                  bg=BG, fg=MUTED, font=(FONT, 9)).pack(anchor="w")
         slider_row("Pause between looks", "None", "Long", self.interval, 0.0, 1.0, 0.05,
                    lambda v: "none (fastest)" if float(v) == 0 else f"{float(v):.2f} s")
-        slider_row("Mouse travel time", "Instant", "Slow", self.move_time, 0.0, 1.0, 0.05,
+        slider_row("Mouse travel time", "Instant", "Slow", self.move_time, 0.0, 0.5, 0.01,
                    lambda v: f"{float(v):.2f} s")
         slider_row("Clicks each time", "1", "5", self.clicks_each, 1, 5, 1,
                    lambda v: f"{int(float(v))}x")
@@ -693,7 +697,7 @@ class App:
         if data.get("version", 1) >= SETTINGS_VERSION:  # older saves keep new defaults
             self.confidence.set(data.get("confidence", 70))
             self.interval.set(data.get("interval", 0.0))
-            self.move_time.set(data.get("move_time", 0.12))
+            self.move_time.set(data.get("move_time", 0.05))
         self.click_all.set(data.get("click_all", False))
         self.any_size.set(data.get("any_size", True))
         self.any_color.set(data.get("any_color", True))
@@ -793,23 +797,31 @@ def background_selftest(root, finder):
     cx, cy, _ = found[0]
     win.destroy()
 
-    # Tk itself checks the real mouse button, so clicks go to a bare window
+    # click a bare window hidden under another one, like a covered game
     clicked = []
     target, keep = winbg.make_test_window("Click test", clicked)
-    cover.lift()  # cover it too
+    cover.geometry("300x250+150+150")  # right over the spot we click
+    cover.lift()
+    cover.focus_force()
     for _ in range(10):
         root.update()
         time.sleep(0.02)
+    active_before = ctypes.windll.user32.GetForegroundWindow()
     mouse_before = tuple(pyautogui.position())
-    winbg.click(target, 150, 120, clicks=2, move_time=0.05)
+    start = time.perf_counter()
+    winbg.borrow_click(pyautogui, click, target, 150, 120, clicks=2, move_time=0.05)
+    took = (time.perf_counter() - start) * 1000
     for _ in range(20):
         root.update()
         time.sleep(0.02)
+    active_after = ctypes.windll.user32.GetForegroundWindow()
     ctypes.windll.user32.DestroyWindow(ctypes.c_void_p(target))
     cover.destroy()
     assert clicked == [(150, 120)] * 2, f"window got clicks {clicked}, expected 2 at 150,120"
-    assert tuple(pyautogui.position()) == mouse_before, "the real mouse moved"
-    return f"found at {round(cx)},{round(cy)} under another window, 2 clicks landed, mouse untouched"
+    assert tuple(pyautogui.position()) == mouse_before, "the mouse didn't come back"
+    assert active_after == active_before, "the window you used didn't come back to the front"
+    return (f"found at {round(cx)},{round(cy)} under another window, 2 clicks landed in "
+            f"{took:.0f} ms, mouse and active window restored")
 
 
 def main():
